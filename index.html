@@ -13,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="DB Form">
+<meta name="apple-mobile-web-app-title" content="Localized Database Form">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljsLightTheme">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljsDarkTheme" disabled>
@@ -89,22 +89,39 @@ body.dark{
 
 body{
     font-family:Arial,sans-serif;
+    font-size:14px;
     max-width:700px;
-    margin:30px auto;
-    padding:20px;
+    margin:16px auto;
+    padding:16px;
     background:var(--bg);
     color:var(--text);
     transition:background 0.2s ease, color 0.2s ease;
 }
 
+h2{
+    font-size:1.3em;
+    margin:4px 0 12px;
+}
+
+h3{
+    font-size:1.05em;
+    margin:16px 0 6px;
+}
+
+h4{
+    font-size:0.95em;
+    margin:14px 0 4px;
+}
+
 input, textarea, select{
     width:100%;
-    padding:10px;
-    margin:8px 0;
+    padding:7px 8px;
+    margin:5px 0;
     box-sizing:border-box;
     border:1px solid var(--border);
     border-radius:4px;
     font-family:inherit;
+    font-size:13px;
     background:var(--input-bg);
     color:var(--text);
 }
@@ -114,9 +131,10 @@ textarea{
 }
 
 button{
-    padding:8px 14px;
-    margin:4px 4px 4px 0;
+    padding:6px 10px;
+    margin:3px 3px 3px 0;
     cursor:pointer;
+    font-size:13px;
     background:var(--btn-bg);
     color:var(--text);
     border:1px solid var(--border);
@@ -126,8 +144,8 @@ button{
 .record{
     border:1px solid var(--card-border);
     background:var(--card-bg);
-    padding:10px;
-    margin-top:10px;
+    padding:8px;
+    margin-top:8px;
     border-radius:6px;
 }
 
@@ -139,9 +157,9 @@ button{
 .toolbar{
     display:flex;
     flex-wrap:wrap;
-    gap:6px;
+    gap:5px;
     align-items:center;
-    margin:16px 0;
+    margin:10px 0;
 }
 
 .toolbar input[type="text"]{
@@ -174,7 +192,7 @@ button{
 }
 
 .section-label{
-    margin-top:24px;
+    margin-top:14px;
 }
 
 .empty-msg{
@@ -188,9 +206,9 @@ button{
 
 .custom-field-row{
     display:flex;
-    gap:8px;
+    gap:6px;
     align-items:center;
-    margin:8px 0;
+    margin:5px 0;
 }
 
 .custom-field-row input{
@@ -216,29 +234,7 @@ button{
     border:1px solid var(--field-btn-border);
 }
 
-.wysiwyg-toolbar{
-    display:flex;
-    flex-wrap:wrap;
-    gap:4px;
-    margin:8px 0 0;
-}
-
-.wysiwyg-toolbar button{
-    padding:6px 10px;
-    margin:0;
-    min-width:36px;
-    background:var(--btn-bg);
-    border:1px solid var(--border);
-    border-radius:4px;
-    font-size:14px;
-    color:var(--text);
-}
-
-.wysiwyg-toolbar button:hover{
-    background:var(--hover-bg);
-}
-
-.wysiwyg-editor{
+.html-editor{
     width:100%;
     min-height:120px;
     padding:10px;
@@ -248,22 +244,15 @@ button{
     box-sizing:border-box;
     background:var(--input-bg);
     color:var(--text);
-    overflow-y:auto;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:13px;
+    line-height:1.5;
+    resize:vertical;
 }
 
-.wysiwyg-editor:focus{
+.html-editor:focus{
     outline:2px solid var(--accent);
     outline-offset:-1px;
-}
-
-.wysiwyg-editor:empty::before{
-    content:attr(data-placeholder);
-    color:var(--text-faint);
-}
-
-.wysiwyg-editor ul, .wysiwyg-editor ol{
-    margin:4px 0;
-    padding-left:24px;
 }
 
 /* Rendered message box on each saved record: bordered so it reads as a
@@ -288,21 +277,19 @@ button{
     font-style:italic;
 }
 
-/* ---- Markdown-rendered content (editor + saved records) ---- */
+/* ---- Markdown-rendered content (saved records display) ---- */
 
-.wysiwyg-editor h1, .wysiwyg-editor h2, .wysiwyg-editor h3,
-.wysiwyg-editor h4, .wysiwyg-editor h5, .wysiwyg-editor h6,
 .message-content h1, .message-content h2, .message-content h3,
 .message-content h4, .message-content h5, .message-content h6{
     margin:0.6em 0 0.3em;
     line-height:1.25;
 }
 
-.wysiwyg-editor h1, .message-content h1{ font-size:1.6em; }
-.wysiwyg-editor h2, .message-content h2{ font-size:1.35em; }
-.wysiwyg-editor h3, .message-content h3{ font-size:1.15em; }
+.message-content h1{ font-size:1.6em; }
+.message-content h2{ font-size:1.35em; }
+.message-content h3{ font-size:1.15em; }
 
-.wysiwyg-editor blockquote, .message-content blockquote{
+.message-content blockquote{
     border-left:4px solid var(--border);
     margin:8px 0;
     padding:4px 12px;
@@ -310,7 +297,7 @@ button{
     background:var(--blockquote-bg);
 }
 
-.wysiwyg-editor pre, .message-content pre{
+.message-content pre{
     background:var(--pre-bg);
     border:1px solid var(--pre-border);
     border-radius:6px;
@@ -319,7 +306,7 @@ button{
     margin:8px 0;
 }
 
-.wysiwyg-editor code, .message-content code{
+.message-content code{
     font-family:Consolas, Menlo, monospace;
     background:var(--code-bg);
     padding:1px 5px;
@@ -327,33 +314,32 @@ button{
     font-size:0.9em;
 }
 
-.wysiwyg-editor pre code, .message-content pre code{
+.message-content pre code{
     background:none;
     padding:0;
     border-radius:0;
     font-size:0.85em;
 }
 
-.wysiwyg-editor hr, .message-content hr{
+.message-content hr{
     border:none;
     border-top:1px solid var(--border);
     margin:12px 0;
 }
 
-.wysiwyg-editor table, .message-content table{
+.message-content table{
     border-collapse:collapse;
     margin:8px 0;
     width:100%;
 }
 
-.wysiwyg-editor th, .wysiwyg-editor td,
 .message-content th, .message-content td{
     border:1px solid var(--border);
     padding:6px 8px;
     text-align:left;
 }
 
-.wysiwyg-editor th, .message-content th{
+.message-content th{
     background:var(--table-header-bg);
 }
 
@@ -411,24 +397,6 @@ body.dark .admonition-warning .admonition-title{ color:#ffb84d; }
 
 body.dark .admonition-danger{ background:#3a1518; border-color:#ff5252; }
 body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
-
-/* ---- Toolbar extras ---- */
-
-.wysiwyg-toolbar select{
-    padding:5px 6px;
-    border:1px solid var(--border);
-    border-radius:4px;
-    background:var(--input-bg);
-    color:var(--text);
-    font-size:13px;
-}
-
-.wysiwyg-toolbar .sep{
-    width:1px;
-    align-self:stretch;
-    background:var(--border);
-    margin:0 4px;
-}
 
 .markdown-hint{
     font-size:12px;
@@ -625,6 +593,842 @@ body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
     /* no-op outside the mobile breakpoint, so desktop layout is unaffected */
 }
 
+.main-layout{
+    display:block;
+}
+
+.keyword-entry{
+    border:1px solid var(--card-border);
+    background:var(--card-bg);
+    padding:8px;
+    margin-top:8px;
+    border-radius:6px;
+}
+
+.keyword-entry.editing{
+    border-color:var(--accent);
+    background:var(--editing-bg);
+}
+
+.keyword-entry .keyword-term{
+    font-weight:bold;
+}
+
+.keyword-entry .keyword-actions{
+    margin-top:4px;
+}
+
+/* ---- Spreadsheet ---- */
+
+.spreadsheet-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:center;
+    margin:10px 0;
+}
+
+#spreadsheetNameInput{
+    flex:1;
+    min-width:160px;
+    margin:0;
+    font-weight:bold;
+}
+
+.formula-bar{
+    display:flex;
+    gap:0;
+    align-items:stretch;
+    margin:8px 0;
+    border:1px solid var(--border);
+    border-radius:4px;
+    overflow:hidden;
+}
+
+.formula-bar-ref{
+    flex:0 0 64px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--table-header-bg);
+    color:var(--text-muted);
+    font-weight:bold;
+    font-size:12px;
+    border-right:1px solid var(--border);
+}
+
+.formula-bar input{
+    flex:1;
+    margin:0;
+    border:none;
+    border-radius:0;
+    font-family:"Courier New",monospace;
+}
+
+.spreadsheet-grid-wrap{
+    overflow:auto;
+    max-height:65vh;
+    border:1px solid var(--border);
+    border-radius:4px;
+    margin:8px 0;
+}
+
+table.spreadsheet-grid{
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+
+table.spreadsheet-grid th, table.spreadsheet-grid td{
+    border:1px solid var(--border);
+    padding:0;
+    min-width:90px;
+    width:90px;
+}
+
+table.spreadsheet-grid th{
+    background:var(--table-header-bg);
+    color:var(--text-muted);
+    font-size:12px;
+    font-weight:bold;
+    padding:5px 4px;
+    position:sticky;
+    top:0;
+    z-index:2;
+    text-align:center;
+}
+
+table.spreadsheet-grid td.row-head{
+    background:var(--table-header-bg);
+    color:var(--text-muted);
+    font-size:12px;
+    font-weight:bold;
+    padding:5px 4px;
+    position:sticky;
+    left:0;
+    z-index:1;
+    text-align:center;
+    min-width:40px;
+    width:40px;
+}
+
+table.spreadsheet-grid th.corner-head{
+    position:sticky;
+    left:0;
+    top:0;
+    z-index:3;
+    min-width:40px;
+    width:40px;
+}
+
+table.spreadsheet-grid td.cell-wrap{
+    padding:0;
+}
+
+table.spreadsheet-grid input.cell-input{
+    width:100%;
+    box-sizing:border-box;
+    margin:0;
+    border:none;
+    border-radius:0;
+    padding:5px 6px;
+    font-size:13px;
+    background:var(--input-bg);
+    color:var(--text);
+}
+
+table.spreadsheet-grid input.cell-input:focus{
+    outline:2px solid var(--accent);
+    outline-offset:-2px;
+    position:relative;
+    z-index:1;
+}
+
+table.spreadsheet-grid input.cell-input.selected{
+    background:var(--editing-bg);
+}
+
+.spreadsheet-size-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:center;
+    margin:6px 0 2px;
+    color:var(--text-muted);
+    font-size:12px;
+}
+
+/* ---- Math question generator: config controls + locally-rendered
+   question formatting (fractions, exponents, radicals) with no
+   external math-typesetting library or network call required ---- */
+
+.math-config{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    margin:8px 0 4px;
+}
+
+.math-config-group{
+    flex:1 1 200px;
+    min-width:160px;
+}
+
+.math-config-group h4{
+    margin:0 0 6px;
+}
+
+.math-topic-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px 14px;
+}
+
+.math-topic-list label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    font-weight:normal;
+    cursor:pointer;
+}
+
+.math-topic-list input[type="checkbox"]{
+    width:auto;
+    margin:0;
+}
+
+.math-config-group input[type="number"]{
+    max-width:110px;
+}
+
+.math-config-group select{
+    max-width:220px;
+}
+
+.math-custom-range{
+    display:flex;
+    gap:10px;
+}
+
+.math-custom-range > div{
+    flex:1 1 auto;
+}
+
+.math-custom-range input[type="number"]{
+    max-width:none;
+}
+
+.math-var-chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:4px 0 8px;
+}
+
+.math-var-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    background:var(--field-btn-bg);
+    border:1px solid var(--field-btn-border);
+    border-radius:14px;
+    padding:3px 6px 3px 10px;
+    font-size:13px;
+}
+
+.math-var-chip button{
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-size:14px;
+    line-height:1;
+    padding:0 3px;
+    margin:0;
+    color:var(--text-muted);
+}
+
+.math-var-add-row{
+    display:flex;
+    gap:6px;
+    align-items:center;
+}
+
+.math-var-add-row input{
+    margin:0;
+    max-width:70px;
+}
+
+.math-var-add-row button{
+    margin:0;
+}
+
+#mathQuestions{
+    margin-top:14px;
+}
+
+.math-question{
+    border:1px solid var(--card-border);
+    background:var(--card-bg);
+    padding:10px 12px;
+    margin-top:8px;
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.math-q-index{
+    color:var(--text-muted);
+    font-weight:bold;
+    flex:0 0 auto;
+    min-width:22px;
+}
+
+.math-q-expr{
+    font-size:1.15em;
+    flex:1 1 auto;
+}
+
+.math-q-answer{
+    color:var(--accent-dark);
+    font-weight:bold;
+    flex:0 0 auto;
+}
+
+.math-q-answer.hidden-answer{
+    display:none;
+}
+
+/* Locally-rendered fraction: numerator stacked over denominator with a
+   dividing rule, built from plain HTML/CSS -- no image or external font. */
+.math-frac{
+    display:inline-flex;
+    flex-direction:column;
+    align-items:center;
+    vertical-align:middle;
+    margin:0 3px;
+    line-height:1.1;
+}
+
+.math-frac .math-frac-num,
+.math-frac .math-frac-den{
+    padding:0 3px;
+}
+
+.math-frac .math-frac-num{
+    border-bottom:1.5px solid var(--text);
+}
+
+.math-q-expr sup{
+    font-size:0.7em;
+    line-height:0;
+}
+
+.math-q-expr .math-radical{
+    white-space:nowrap;
+}
+
+.math-q-expr .math-radical .math-radicand{
+    border-top:1.5px solid var(--text);
+    padding:0 2px 0 1px;
+}
+
+/* ---- Library: a catalog of standalone entries built entirely out of
+   custom name/value fields (no message body), reusable across records via
+   the "Add to Record" action ---- */
+
+.library-item{
+    border:1px solid var(--card-border);
+    background:var(--card-bg);
+    padding:8px;
+    margin-top:8px;
+    border-radius:6px;
+}
+
+.library-item.editing{
+    border-color:var(--accent);
+    background:var(--editing-bg);
+}
+
+.library-item .library-name{
+    font-weight:bold;
+}
+
+.library-item .library-fields{
+    margin:6px 0;
+    font-size:0.95em;
+}
+
+.library-item .library-field-row{
+    margin:2px 0;
+}
+
+.library-item .library-actions{
+    margin-top:4px;
+}
+
+/* ---- Files: a lightweight file manager view over everything stored in
+   this database (records, dictionary terms, sheets, library entries,
+   drawings, and freestanding text/code files), plus its own "files"
+   object store with a built-in plain-text editor ---- */
+
+.file-overview-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
+    gap:8px;
+    margin:10px 0 14px;
+}
+
+.file-overview-stat{
+    border:1px solid var(--card-border);
+    background:var(--card-bg);
+    border-radius:6px;
+    padding:8px 10px;
+    cursor:pointer;
+    text-align:center;
+}
+
+.file-overview-stat:hover{
+    border-color:var(--accent);
+}
+
+.file-overview-stat .stat-count{
+    font-size:1.4em;
+    font-weight:bold;
+    display:block;
+}
+
+.file-overview-stat .stat-label{
+    color:var(--text-muted);
+    font-size:0.85em;
+}
+
+.file-browser-list{
+    border:1px solid var(--card-border);
+    border-radius:6px;
+    overflow:hidden;
+    margin:10px 0 14px;
+}
+
+.file-browser-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border-top:1px solid var(--card-border);
+    cursor:pointer;
+    background:var(--card-bg);
+}
+
+.file-browser-row:first-child{
+    border-top:none;
+}
+
+.file-browser-row:hover{
+    background:var(--hover-bg);
+}
+
+.file-browser-row .file-browser-icon{
+    flex:0 0 auto;
+}
+
+.file-browser-row .file-browser-name{
+    flex:1;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.file-browser-row .file-browser-meta{
+    flex:0 0 auto;
+    color:var(--text-muted);
+    font-size:0.85em;
+}
+
+.file-item{
+    border:1px solid var(--card-border);
+    background:var(--card-bg);
+    padding:8px;
+    margin-top:8px;
+    border-radius:6px;
+}
+
+.file-item.editing{
+    border-color:var(--accent);
+    background:var(--editing-bg);
+}
+
+.file-item .file-item-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.file-item .file-name{
+    font-weight:bold;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+}
+
+.file-item .file-meta{
+    color:var(--text-muted);
+    font-size:0.85em;
+}
+
+.file-item .file-preview{
+    margin:6px 0;
+    padding:8px;
+    background:var(--pre-bg);
+    border:1px solid var(--pre-border);
+    border-radius:4px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:0.85em;
+    white-space:pre-wrap;
+    word-break:break-word;
+    max-height:120px;
+    overflow:hidden;
+}
+
+.file-item .file-actions{
+    margin-top:4px;
+}
+
+.file-editor-textarea{
+    min-height:260px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    white-space:pre;
+    overflow-wrap:normal;
+    overflow-x:auto;
+}
+
+/* ---- Folders: organize the freestanding Files store into named, colored
+   groups. Folders are their own small object store ({id, name, color,
+   createdAt, updatedAt}); each file optionally carries a folderId pointing
+   at one. Purely organizational -- deleting a folder never deletes the
+   files inside it, it just un-assigns them. ---- */
+
+.folder-swatch{
+    display:inline-block;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    border:1px solid rgba(0,0,0,0.15);
+    vertical-align:middle;
+}
+
+.folder-form-row{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    margin:6px 0;
+}
+
+.folder-form-row .folder-name-input{
+    flex:1;
+    margin:0;
+}
+
+.folder-color-input{
+    flex:0 0 auto;
+    width:44px;
+    height:34px;
+    padding:2px;
+    margin:0;
+    cursor:pointer;
+}
+
+.folder-form-row button{
+    flex:0 0 auto;
+    margin:0;
+}
+
+.folder-form-row select{
+    flex:1;
+    margin:0;
+}
+
+.folder-breadcrumb{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:4px;
+    margin:8px 0 0;
+    font-size:0.9em;
+    color:var(--text-muted);
+}
+
+.folder-breadcrumb:empty{
+    margin:0;
+}
+
+.folder-breadcrumb .breadcrumb-link{
+    cursor:pointer;
+    color:var(--hint-link);
+}
+
+.folder-breadcrumb .breadcrumb-link:hover{
+    text-decoration:underline;
+}
+
+.folder-breadcrumb .breadcrumb-sep{
+    color:var(--text-faint);
+}
+
+.folder-chip-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:8px 0 12px;
+}
+
+.folder-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 10px;
+    border-radius:999px;
+    border:1px solid var(--card-border);
+    background:var(--card-bg);
+    cursor:pointer;
+    font-size:0.9em;
+    user-select:none;
+}
+
+.folder-chip:hover{
+    border-color:var(--border-strong);
+}
+
+.folder-chip.active{
+    border-color:var(--accent);
+    background:var(--editing-bg);
+    font-weight:bold;
+}
+
+.folder-chip .folder-swatch{
+    flex:0 0 auto;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    display:inline-block;
+    border:1px solid rgba(0,0,0,0.15);
+}
+
+.folder-chip .folder-chip-count{
+    color:var(--text-muted);
+    font-size:0.9em;
+}
+
+.folder-manage-list{
+    margin:6px 0 14px;
+}
+
+.folder-manage-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 8px;
+    border:1px solid var(--card-border);
+    background:var(--card-bg);
+    border-radius:6px;
+    margin-top:6px;
+}
+
+.folder-manage-row.editing{
+    border-color:var(--accent);
+    background:var(--editing-bg);
+}
+
+.folder-manage-row .folder-swatch{
+    flex:0 0 auto;
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    border:1px solid rgba(0,0,0,0.15);
+}
+
+.folder-manage-row .folder-manage-name{
+    flex:1;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.folder-manage-row .folder-manage-count{
+    flex:0 0 auto;
+    color:var(--text-muted);
+    font-size:0.85em;
+}
+
+.folder-manage-row .folder-manage-actions{
+    flex:0 0 auto;
+    display:flex;
+    gap:4px;
+}
+
+.folder-manage-row .folder-manage-actions button{
+    margin:0;
+    padding:4px 8px;
+}
+
+.file-folder-select{
+    margin:5px 0;
+}
+
+.file-item .file-folder-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:2px 8px;
+    border-radius:999px;
+    border:1px solid var(--card-border);
+    font-size:0.8em;
+    color:var(--text-muted);
+}
+
+.file-item .file-folder-badge .folder-swatch{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    display:inline-block;
+    border:1px solid rgba(0,0,0,0.15);
+}
+
+/* ---- Drawings: freehand canvas sketches, stored per-database like
+   spreadsheets -- switch between as many as you like, autosaved as you draw ---- */
+
+.drawing-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:center;
+    margin:10px 0;
+}
+
+#drawingNameInput{
+    flex:1;
+    min-width:160px;
+    margin:0;
+    font-weight:bold;
+}
+
+.drawing-tools{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    margin:8px 0;
+    padding:8px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--btn-bg);
+}
+
+.drawing-tools label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    color:var(--text-muted);
+    margin:0;
+}
+
+.drawing-tools input[type="color"]{
+    width:36px;
+    height:30px;
+    padding:0;
+    border:1px solid var(--border);
+    border-radius:4px;
+    background:none;
+    cursor:pointer;
+}
+
+.drawing-tools input[type="range"]{
+    width:100px;
+}
+
+#drawingEraserBtn.active{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent-dark);
+}
+
+.drawing-canvas-wrap{
+    overflow:auto;
+    border:1px solid var(--border);
+    border-radius:4px;
+    margin:8px 0;
+    background:#fff;
+    touch-action:none;
+}
+
+#drawingCanvas{
+    display:block;
+    max-width:100%;
+    height:auto;
+    cursor:crosshair;
+    touch-action:none;
+}
+
+
+@media (min-width: 900px){
+    body{
+        max-width:1180px;
+    }
+
+    .main-layout{
+        display:flex;
+        align-items:flex-start;
+        gap:20px;
+    }
+
+    .layout-left{
+        flex:0 0 400px;
+        min-width:0;
+        position:sticky;
+        top:12px;
+        max-height:calc(100vh - 24px);
+        overflow-y:auto;
+        padding-right:4px;
+    }
+
+    .layout-right{
+        flex:1 1 auto;
+        min-width:0;
+    }
+
+    #dictionaryPanel{
+        margin-top:18px;
+        border-top:1px solid var(--border);
+        padding-top:10px;
+    }
+
+    #spreadsheetPanel{
+        margin-top:18px;
+        border-top:1px solid var(--border);
+        padding-top:10px;
+    }
+
+    #mathPanel{
+        margin-top:18px;
+        border-top:1px solid var(--border);
+        padding-top:10px;
+    }
+
+    #libraryPanel{
+        margin-top:18px;
+        border-top:1px solid var(--border);
+        padding-top:10px;
+    }
+
+    #drawingsPanel{
+        margin-top:18px;
+        border-top:1px solid var(--border);
+        padding-top:10px;
+    }
+}
+
 @media (max-width: 640px){
 
     body{
@@ -669,17 +1473,7 @@ body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
         margin-top:8px;
     }
 
-    .wysiwyg-toolbar{
-        gap:3px;
-    }
-
-    .wysiwyg-toolbar button, .wysiwyg-toolbar select{
-        padding:5px 7px;
-        font-size:12px;
-        min-width:30px;
-    }
-
-    .wysiwyg-editor{
+    .html-editor{
         min-height:100px;
         padding:8px;
     }
@@ -765,7 +1559,8 @@ body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
     /* Editor / Records tabs, in place of one long scrolling page */
 
     .mobile-tabs{
-        display:flex;
+        display:grid;
+        grid-template-columns:repeat(3, 1fr);
         gap:6px;
         margin:2px 0 14px;
         position:sticky;
@@ -777,14 +1572,16 @@ body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
     }
 
     .mobile-tabs button{
-        flex:1;
         margin:0;
-        padding:10px 6px;
+        padding:10px 4px;
         border-radius:6px;
         border:1px solid var(--border);
         background:var(--btn-bg);
         font-weight:bold;
-        font-size:13px;
+        font-size:12px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
     }
 
     .mobile-tabs button.active{
@@ -833,37 +1630,44 @@ body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
     </div>
     <div class="markdown-hint" id="activeDbHint"></div>
 
-    <h4>Backup &amp; Restore</h4>
-    <div class="toolbar" id="dbBackupToolbar">
-        <button type="button" onclick="exportCurrentDatabaseLiteral()" class="btn-success">Export Database (.json)</button>
-        <button type="button" onclick="exportAllDatabasesLiteral()" class="btn-success">Export All Databases (.json)</button>
-        <button type="button" onclick="document.getElementById('importDbInput').click()" class="btn-info">Import Database(s) (.json)</button>
-        <input type="file" id="importDbInput" class="hidden-file-input" accept="application/json,.json">
-    </div>
     <details class="hint-details">
-        <summary>What does export/import do?</summary>
-        <div class="markdown-hint">
-        Database export/import creates a literal, full-fidelity copy of your database(s) &mdash; every field of every record (including formatted messages and custom fields) is preserved exactly, not simplified into plain text. Use "Export Database" to save just the database selected above as a single <code>.json</code> file you can move to another device; use "Export All Databases" to back up everything at once. "Import Database(s)" reads such a file back in &mdash; it always creates brand-new database(s) alongside whatever is already on this device, so nothing existing is ever overwritten.
-        </div>
-    </details>
+        <summary>Backup, Restore &amp; About</summary>
 
-    <h4>About</h4>
-    <details class="hint-details">
-        <summary>Where is my data stored?</summary>
+        <h4 style="margin-top:8px;">Backup &amp; Restore</h4>
+        <div class="toolbar" id="dbBackupToolbar">
+            <button type="button" onclick="exportCurrentDatabaseLiteral()" class="btn-success">Export Database (.json)</button>
+            <button type="button" onclick="exportAllDatabasesLiteral()" class="btn-success">Export All Databases (.json)</button>
+            <button type="button" onclick="document.getElementById('importDbInput').click()" class="btn-info">Import Database(s) (.json)</button>
+            <input type="file" id="importDbInput" class="hidden-file-input" accept="application/json,.json">
+        </div>
+        <div class="markdown-hint">
+        Database export/import creates a literal, full-fidelity copy of your database(s) &mdash; every field of every record (including formatted messages, custom fields, and the dictionary) is preserved exactly, not simplified into plain text. Use "Export Database" to save just the database selected above as a single <code>.json</code> file you can move to another device; use "Export All Databases" to back up everything at once. "Import Database(s)" reads such a file back in &mdash; it always creates brand-new database(s) alongside whatever is already on this device, so nothing existing is ever overwritten.
+        </div>
+
+        <h4>About</h4>
         <div class="markdown-hint">
         The data is stored locally, meaning there is no server involved or someone that will mess with your data, you can download all of your saved data below. If you're not the only one using this device, please delete your data after downloading all the records.
         </div>
-    </details>
 
-    <h4>App</h4>
-    <button type="button" id="installAppBtn" class="btn-success" style="display:none; width:100%;">&#128241; Install App</button>
-    <div class="markdown-hint" id="installAppHint">This app can be installed to your home screen for offline, full-screen use.</div>
+        <h4>App</h4>
+        <button type="button" id="installAppBtn" class="btn-success" style="display:none; width:100%;">&#128241; Install App</button>
+        <div class="markdown-hint" id="installAppHint">This app can be installed to your home screen for offline, full-screen use.</div>
+    </details>
 </div>
 
 <div class="mobile-tabs">
     <button type="button" id="tabEditorBtn" class="active" onclick="showTab('editor')">&#9998; Editor</button>
+    <button type="button" id="tabDictionaryBtn" onclick="showTab('dictionary')">&#128214; Dictionary</button>
     <button type="button" id="tabRecordsBtn" onclick="showTab('records')">&#128203; Records</button>
+    <button type="button" id="tabSpreadsheetBtn" onclick="showTab('spreadsheet')">&#128202; Sheet</button>
+    <button type="button" id="tabMathBtn" onclick="showTab('math')">&#128290; Math</button>
+    <button type="button" id="tabLibraryBtn" onclick="showTab('library')">&#128218; Library</button>
+    <button type="button" id="tabDrawingsBtn" onclick="showTab('drawings')">&#127912; Drawings</button>
+    <button type="button" id="tabFilesBtn" onclick="showTab('files')">&#128193; Files</button>
 </div>
+
+<div class="main-layout">
+<div class="layout-left">
 
 <div id="editorPanel" class="tab-panel">
 <form id="form">
@@ -871,65 +1675,15 @@ body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
 
 <textarea id="characterSheet" placeholder="Character Sheet (Abilities, stats, or biography...)" rows="4"></textarea>
 
-<div class="wysiwyg-toolbar">
-    <button type="button" onclick="execCmd('bold')" title="Bold"><b>B</b></button>
-    <button type="button" onclick="execCmd('italic')" title="Italic"><i>I</i></button>
-    <button type="button" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
-    <button type="button" onclick="execCmd('strikeThrough')" title="Strikethrough"><s>S</s></button>
-    <span class="sep"></span>
-    <button type="button" onclick="formatBlockCmd('h1')" title="Heading 1">H1</button>
-    <button type="button" onclick="formatBlockCmd('h2')" title="Heading 2">H2</button>
-    <button type="button" onclick="formatBlockCmd('h3')" title="Heading 3">H3</button>
-    <button type="button" onclick="formatBlockCmd('p')" title="Paragraph">&#182;</button>
-    <span class="sep"></span>
-    <button type="button" onclick="execCmd('insertUnorderedList')" title="Bullet list">&#8226; List</button>
-    <button type="button" onclick="execCmd('insertOrderedList')" title="Numbered list">1. List</button>
-    <button type="button" onclick="formatBlockCmd('blockquote')" title="Blockquote">&#10077;</button>
-    <span class="sep"></span>
-    <button type="button" onclick="insertInlineCode()" title="Inline code">&lt;/&gt;</button>
-    <select id="codeLangSelect" title="Code block language">
-        <option value="plaintext">Plain</option>
-        <option value="javascript">JS</option>
-        <option value="python">Python</option>
-        <option value="html">HTML</option>
-        <option value="css">CSS</option>
-        <option value="json">JSON</option>
-        <option value="bash">Bash</option>
-        <option value="sql">SQL</option>
-        <option value="java">Java</option>
-        <option value="cpp">C++</option>
-    </select>
-    <button type="button" onclick="insertCodeBlock()" title="Code block">Code Block</button>
-    <span class="sep"></span>
-    <button type="button" onclick="insertLink()" title="Insert link">Link</button>
-    <button type="button" onclick="execCmd('insertHorizontalRule')" title="Horizontal rule">HR</button>
-    <span class="sep"></span>
-    <select id="admonitionSelect" title="Admonition type">
-        <option value="note">Note</option>
-        <option value="tip">Tip</option>
-        <option value="info">Info</option>
-        <option value="warning">Warning</option>
-        <option value="danger">Danger</option>
-    </select>
-    <button type="button" onclick="insertAdmonition()" title="Insert admonition">Callout</button>
-    <span class="sep"></span>
-    <button type="button" onclick="execCmd('removeFormat')" title="Clear formatting">Clear</button>
-    <span class="sep"></span>
-    <label for="highlightColorPicker" title="Highlight color">Highlight:</label>
-    <input type="color" id="highlightColorPicker" value="#FFFF00" style="width:40px; height:32px; padding:2px; cursor:pointer; border:1px solid #ccc; border-radius:4px;">
-    <button type="button" onclick="applyHighlight()" title="Apply highlight">Apply</button>
-    <button type="button" onclick="removeHighlight()" title="Remove highlight">Remove</button>
-</div>
 <details class="hint-details">
-    <summary>Formatting shortcuts</summary>
+    <summary>Formatting help</summary>
     <div class="markdown-hint">
-        Shortcuts while typing: <code># </code> <code>## </code> <code>### </code> for headings,
-        <code>&gt; </code> for a quote, <code>- </code> / <code>1. </code> for lists,
-        <code>```lang</code> for a code block, <code>**bold**</code>, <code>*italic*</code>,
-        <code>~~strike~~</code>, <code>`code`</code> and <code>[text](url)</code>.
+        Type raw HTML directly &mdash; e.g. <code>&lt;b&gt;bold&lt;/b&gt;</code>, <code>&lt;i&gt;italic&lt;/i&gt;</code>,
+        <code>&lt;ul&gt;&lt;li&gt;item&lt;/li&gt;&lt;/ul&gt;</code>, <code>&lt;a href="https://..."&gt;link&lt;/a&gt;</code>,
+        <code>&lt;pre&gt;&lt;code&gt;...&lt;/code&gt;&lt;/pre&gt;</code>. It's sanitized and rendered when the record is saved.
     </div>
 </details>
-<div id="message" class="wysiwyg-editor" contenteditable="true" data-placeholder="Message"></div>
+<textarea id="message" class="html-editor" placeholder="Message (HTML supported, e.g. &lt;b&gt;bold&lt;/b&gt;)" rows="6"></textarea>
 
 <div id="customFieldsContainer"></div>
 <button type="button" id="addFieldBtn">+ Add Field</button>
@@ -940,6 +1694,31 @@ body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
 </form>
 </div>
 
+<div id="dictionaryPanel" class="tab-panel tab-hidden">
+<h3 class="section-label" style="margin-top:0;">Dictionary / Keywords</h3>
+<div class="markdown-hint">
+    Keep reference terms and definitions here for this database. Use <b>Insert</b> on any entry to drop it into the
+    Message field above at your cursor while writing a record.
+</div>
+
+<form id="keywordForm">
+<input id="keywordTerm" placeholder="Term" required>
+<textarea id="keywordDefinition" class="html-editor" placeholder="Definition (HTML supported)" rows="3"></textarea>
+<button type="submit" id="keywordSubmitBtn">Save Term</button>
+<button type="button" id="keywordCancelBtn" style="display:none;">Cancel Edit</button>
+</form>
+
+<div class="toolbar">
+    <input type="text" id="keywordSearchBox" placeholder="Search terms or definitions..." enterkeyhint="search">
+    <button type="button" onclick="renderKeywords()" id="keywordSearchBtn">Search</button>
+</div>
+
+<div id="keywords"></div>
+</div>
+
+</div>
+<div class="layout-right">
+
 <div id="recordsPanel" class="tab-panel tab-hidden">
 <hr>
 
@@ -947,6 +1726,7 @@ body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
     <button onclick="downloadAll()">Download All (Text)</button>
     <button onclick="exportCSV()">Export CSV</button>
     <button onclick="exportExcel()">Export Excel (.xls)</button>
+    <button onclick="exportPDF()">Export PDF</button>
     <button onclick="document.getElementById('importInput').click()">Import Text</button>
     <button onclick="viewCurrentDatabase()" class="btn-success">View Current Database</button>
     <button onclick="deleteAllRecords()" class="btn-danger">Delete All</button>
@@ -968,12 +1748,243 @@ body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
         <option value="name-desc">Name (Z-A)</option>
     </select>
 
-    <button type="button" onclick="clearFilters()" style="margin-left:16px; background:#f0f0f0; border:1px solid #999;">Clear Search</button>
+    <button type="button" onclick="clearFilters()" style="margin-left:16px;">Clear Search</button>
 </div>
 
 <h3 class="section-label">Saved Records</h3>
 
 <div id="records"></div>
+</div>
+
+<div id="spreadsheetPanel" class="tab-panel tab-hidden">
+<hr>
+<h3 class="section-label" style="margin-top:0;">Spreadsheet</h3>
+<div class="markdown-hint">
+    Saved spreadsheets live in this database alongside your records and dictionary &mdash; open, edit, or create as many as you like, and switch between them anytime. Type a formula starting with <code>=</code>, e.g. <code>=A1+B2</code> or <code>=SUM(A1:A5)</code> (also supports <code>AVERAGE</code>, <code>MIN</code>, <code>MAX</code>, <code>COUNT</code>).
+</div>
+
+<div class="spreadsheet-toolbar">
+    <select id="spreadsheetSelect" onchange="switchSpreadsheet(this.value)"></select>
+    <button type="button" onclick="createNewSpreadsheet()" class="btn-success">+ New Sheet</button>
+    <button type="button" onclick="duplicateCurrentSpreadsheet()">Duplicate</button>
+    <button type="button" onclick="exportCurrentSpreadsheetCSV()">Export CSV</button>
+    <button type="button" onclick="deleteCurrentSpreadsheet()" class="btn-danger">Delete Sheet</button>
+</div>
+
+<input type="text" id="spreadsheetNameInput" placeholder="Sheet name" onchange="renameCurrentSpreadsheet(this.value)">
+
+<div class="formula-bar">
+    <div class="formula-bar-ref" id="formulaBarRef">A1</div>
+    <input type="text" id="formulaBarInput" placeholder="Enter a value or formula (e.g. =SUM(A1:A5))" autocomplete="off">
+</div>
+
+<div class="spreadsheet-grid-wrap" id="spreadsheetGridWrap">
+    <table class="spreadsheet-grid" id="spreadsheetGrid"></table>
+</div>
+
+<div class="spreadsheet-size-row">
+    <button type="button" onclick="addSpreadsheetRows(1)">+ Row</button>
+    <button type="button" onclick="addSpreadsheetRows(10)">+10 Rows</button>
+    <button type="button" onclick="addSpreadsheetColumns(1)">+ Column</button>
+    <button type="button" onclick="addSpreadsheetColumns(5)">+5 Columns</button>
+    <button type="button" onclick="clearCurrentSpreadsheet()">Clear All Cells</button>
+    <span id="spreadsheetSizeLabel"></span>
+</div>
+</div>
+
+<div id="mathPanel" class="tab-panel tab-hidden">
+<hr>
+<h3 class="section-label" style="margin-top:0;">Math Question Generator</h3>
+<div class="markdown-hint">
+    Generates practice math questions entirely in-app &mdash; nothing is sent anywhere. Fractions, exponents, and
+    square roots are formatted with plain HTML/CSS locally, so it works fully offline. The chosen difficulty
+    &mdash; including a <b>Custom</b> min/max range &mdash; applies to every question type, with no hidden caps.
+</div>
+
+<div class="math-config">
+    <div class="math-config-group">
+        <h4>Topics</h4>
+        <div class="math-topic-list">
+            <label><input type="checkbox" class="mathTopic" value="add" checked> Addition</label>
+            <label><input type="checkbox" class="mathTopic" value="sub" checked> Subtraction</label>
+            <label><input type="checkbox" class="mathTopic" value="mul"> Multiplication</label>
+            <label><input type="checkbox" class="mathTopic" value="div"> Division</label>
+            <label><input type="checkbox" class="mathTopic" value="frac"> Fractions</label>
+            <label><input type="checkbox" class="mathTopic" value="exp"> Exponents</label>
+            <label><input type="checkbox" class="mathTopic" value="sqrt"> Square Roots</label>
+            <label><input type="checkbox" class="mathTopic" value="alg" id="mathTopicAlg" onchange="toggleMathAlgAdvancedVisibility()"> Simple Equations</label>
+        </div>
+    </div>
+
+    <div class="math-config-group" id="mathAlgAdvancedGroup" style="display:none;">
+        <h4>Simple Equations &mdash; Advanced</h4>
+
+        <label style="font-weight:normal;">Variables</label>
+        <div class="math-var-chip-row" id="mathVarChips"></div>
+        <div class="math-var-add-row">
+            <input type="text" id="mathVarNewInput" maxlength="2" placeholder="e.g. y">
+            <button type="button" onclick="addMathVariable()">+ Add Variable</button>
+        </div>
+
+        <label style="display:flex; align-items:center; gap:6px; font-weight:normal; margin-top:10px;">
+            <input type="checkbox" id="mathAlgComplex" style="width:auto; margin:0;">
+            Use complex equations (two-step, variable on both sides)
+        </label>
+    </div>
+
+    <div class="math-config-group">
+        <h4>Settings</h4>
+        <label for="mathDifficulty" style="font-weight:normal;">Difficulty</label>
+        <select id="mathDifficulty" onchange="updateMathCustomRangeVisibility()">
+            <option value="easy">Easy (1&ndash;10)</option>
+            <option value="medium" selected>Medium (1&ndash;50)</option>
+            <option value="hard">Hard (1&ndash;100)</option>
+            <option value="custom">Custom&hellip;</option>
+        </select>
+
+        <div id="mathCustomRangeRow" class="math-custom-range" style="display:none;">
+            <div>
+                <label for="mathCustomMin" style="font-weight:normal;">Min</label>
+                <input type="number" id="mathCustomMin" value="1">
+            </div>
+            <div>
+                <label for="mathCustomMax" style="font-weight:normal;">Max</label>
+                <input type="number" id="mathCustomMax" value="20">
+            </div>
+        </div>
+
+        <label for="mathCount" style="font-weight:normal;">Number of questions</label>
+        <input type="number" id="mathCount" value="10" min="1" max="50">
+    </div>
+</div>
+
+<div class="toolbar">
+    <button type="button" onclick="generateMathQuestions()" class="btn-success">Generate Questions</button>
+    <button type="button" id="mathToggleAnswersBtn" onclick="toggleMathAnswers()" disabled>Show Answers</button>
+    <button type="button" id="mathDownloadBtn" onclick="downloadMathQuestions()" disabled>Download (Text)</button>
+</div>
+
+<div id="mathQuestions"></div>
+</div>
+
+<div id="libraryPanel" class="tab-panel tab-hidden">
+<hr>
+<h3 class="section-label" style="margin-top:0;">Library</h3>
+<div class="markdown-hint">
+    A local catalog of standalone entries built entirely out of custom fields &mdash; use it for anything you want to
+    define once and reuse: inventory items, spells, NPCs, recipes, whatever fits. Each entry lives in this database
+    alongside your records. Use <b>Add to Record</b> to drop an entry's fields straight into the Editor's custom
+    fields.
+</div>
+
+<form id="libraryForm">
+<input id="libraryName" placeholder="Entry name" required>
+<div id="libraryFieldsContainer"></div>
+<button type="button" id="addLibraryFieldBtn">+ Add Field</button>
+
+<br><br>
+<button type="submit" id="librarySubmitBtn">Save Entry</button>
+<button type="button" id="libraryCancelBtn" style="display:none;">Cancel Edit</button>
+</form>
+
+<div class="toolbar">
+    <input type="text" id="librarySearchBox" placeholder="Search entries or field values..." enterkeyhint="search">
+    <button type="button" onclick="renderLibraryItems()" id="librarySearchBtn">Search</button>
+</div>
+
+<div id="libraryItems"></div>
+</div>
+
+<div id="drawingsPanel" class="tab-panel tab-hidden">
+<hr>
+<h3 class="section-label" style="margin-top:0;">Drawings</h3>
+<div class="markdown-hint">
+    Freehand sketches saved locally in this database, just like your spreadsheets &mdash; keep as many as you like
+    and switch between them anytime. Drawing autosaves a moment after you stop.
+</div>
+
+<div class="drawing-toolbar">
+    <select id="drawingSelect" onchange="switchDrawing(this.value)"></select>
+    <button type="button" onclick="createNewDrawing()" class="btn-success">+ New Drawing</button>
+    <button type="button" onclick="duplicateCurrentDrawing()">Duplicate</button>
+    <button type="button" onclick="downloadCurrentDrawingPNG()">Download PNG</button>
+    <button type="button" onclick="deleteCurrentDrawing()" class="btn-danger">Delete Drawing</button>
+</div>
+
+<input type="text" id="drawingNameInput" placeholder="Drawing name" onchange="renameCurrentDrawing(this.value)">
+
+<div class="drawing-tools">
+    <label>Color <input type="color" id="drawingColor" value="#1a1a1a"></label>
+    <label>Brush size <input type="range" id="drawingBrushSize" min="1" max="40" value="4"></label>
+    <button type="button" id="drawingEraserBtn" onclick="toggleDrawingEraser()">Eraser</button>
+    <button type="button" onclick="clearCurrentDrawing()">Clear Canvas</button>
+</div>
+
+<div class="drawing-canvas-wrap">
+    <canvas id="drawingCanvas" width="800" height="500"></canvas>
+</div>
+</div>
+
+<div id="filesPanel" class="tab-panel tab-hidden">
+<hr>
+<h3 class="section-label" style="margin-top:0;">File Manager</h3>
+<div class="markdown-hint">
+    A browsable view of everything saved in this database, plus your own freestanding text/code files with a
+    built-in editor. Tap any item below to jump to it, or use the editor to create or edit a file directly.
+</div>
+
+<h4>Everything in this database</h4>
+<div class="file-overview-grid" id="fileOverviewGrid"></div>
+<div class="file-browser-list" id="fileBrowserList"></div>
+
+<hr>
+<h4 style="margin-top:0;">Folders</h4>
+<div class="markdown-hint">
+    Organize the files below into colored folders, nested as deep as you like (a folder can live inside
+    another folder). Deleting a folder also deletes any subfolders inside it, but never deletes files &mdash;
+    they just become uncategorized again.
+</div>
+
+<form id="folderForm">
+<div class="folder-form-row">
+    <input id="folderNameInput" class="folder-name-input" placeholder="Folder name (e.g. Notes, Configs)" required>
+    <input type="color" id="folderColorInput" class="folder-color-input" value="#4a90d9" title="Folder color">
+</div>
+<div class="folder-form-row">
+    <select id="folderParentSelect"><option value="">Top level (no parent)</option></select>
+    <button type="submit" id="folderSubmitBtn">Add Folder</button>
+    <button type="button" id="folderCancelBtn" style="display:none;">Cancel Edit</button>
+</div>
+</form>
+
+<div class="folder-manage-list" id="folderManageList"></div>
+
+<hr>
+<h4 style="margin-top:0;">Files</h4>
+<div class="markdown-hint">
+    Plain-text/code files stored right in this database &mdash; notes, snippets, config, whatever you like.
+</div>
+
+<form id="fileForm">
+<input id="fileName" placeholder="File name (e.g. notes.txt, script.js)" required>
+<select id="fileFolderSelect" class="file-folder-select"><option value="">No folder</option></select>
+<textarea id="fileContent" class="html-editor file-editor-textarea" placeholder="File contents..." rows="14"></textarea>
+<button type="submit" id="fileSubmitBtn">Save File</button>
+<button type="button" id="fileCancelBtn" style="display:none;">Cancel Edit</button>
+</form>
+
+<div class="toolbar">
+    <input type="text" id="fileSearchBox" placeholder="Search file names or contents..." enterkeyhint="search">
+    <button type="button" onclick="renderFiles()" id="fileSearchBtn">Search</button>
+</div>
+
+<div class="folder-breadcrumb" id="fileFolderBreadcrumb"></div>
+<div class="folder-chip-list" id="fileFolderChips"></div>
+
+<div id="filesList"></div>
+</div>
+
+</div>
 </div>
 
 <script>
@@ -1029,9 +2040,24 @@ function closeSidebar(){
 
 function showTab(tab){
     document.getElementById("editorPanel").classList.toggle("tab-hidden", tab !== "editor");
+    document.getElementById("dictionaryPanel").classList.toggle("tab-hidden", tab !== "dictionary");
     document.getElementById("recordsPanel").classList.toggle("tab-hidden", tab !== "records");
+    document.getElementById("spreadsheetPanel").classList.toggle("tab-hidden", tab !== "spreadsheet");
+    document.getElementById("mathPanel").classList.toggle("tab-hidden", tab !== "math");
+    document.getElementById("libraryPanel").classList.toggle("tab-hidden", tab !== "library");
+    document.getElementById("drawingsPanel").classList.toggle("tab-hidden", tab !== "drawings");
+    document.getElementById("filesPanel").classList.toggle("tab-hidden", tab !== "files");
     document.getElementById("tabEditorBtn").classList.toggle("active", tab === "editor");
+    document.getElementById("tabDictionaryBtn").classList.toggle("active", tab === "dictionary");
     document.getElementById("tabRecordsBtn").classList.toggle("active", tab === "records");
+    document.getElementById("tabSpreadsheetBtn").classList.toggle("active", tab === "spreadsheet");
+    document.getElementById("tabMathBtn").classList.toggle("active", tab === "math");
+    document.getElementById("tabLibraryBtn").classList.toggle("active", tab === "library");
+    document.getElementById("tabDrawingsBtn").classList.toggle("active", tab === "drawings");
+    document.getElementById("tabFilesBtn").classList.toggle("active", tab === "files");
+
+    if(tab === "drawings") requestAnimationFrame(redrawCurrentDrawingCanvas);
+    if(tab === "files") renderFileOverview();
 }
 
 // ---------- PWA install + offline support ----------
@@ -1140,13 +2166,35 @@ function getCurrentDbEntry(){
 
 function openDatabase(dbName){
     return new Promise((resolve, reject)=>{
-        const req = indexedDB.open(dbName, 1);
+        const req = indexedDB.open(dbName, 6);
 
         req.onupgradeneeded = e=>{
             const upgradeDb = e.target.result;
             if(!upgradeDb.objectStoreNames.contains("records")){
                 upgradeDb.createObjectStore("records", { keyPath:"id", autoIncrement:true });
             }
+            if(!upgradeDb.objectStoreNames.contains("keywords")){
+                upgradeDb.createObjectStore("keywords", { keyPath:"id", autoIncrement:true });
+            }
+            if(!upgradeDb.objectStoreNames.contains("spreadsheets")){
+                upgradeDb.createObjectStore("spreadsheets", { keyPath:"id", autoIncrement:true });
+            }
+            if(!upgradeDb.objectStoreNames.contains("libraryItems")){
+                upgradeDb.createObjectStore("libraryItems", { keyPath:"id", autoIncrement:true });
+            }
+            if(!upgradeDb.objectStoreNames.contains("drawings")){
+                upgradeDb.createObjectStore("drawings", { keyPath:"id", autoIncrement:true });
+            }
+            if(!upgradeDb.objectStoreNames.contains("files")){
+                upgradeDb.createObjectStore("files", { keyPath:"id", autoIncrement:true });
+            }
+            if(!upgradeDb.objectStoreNames.contains("folders")){
+                upgradeDb.createObjectStore("folders", { keyPath:"id", autoIncrement:true });
+            }
+        };
+
+        req.onblocked = ()=>{
+            console.warn("IndexedDB upgrade blocked -- another tab may have this database open with an older version.");
         };
 
         req.onsuccess = e=> resolve(e.target.result);
@@ -1198,10 +2246,17 @@ function initActiveDatabase(){
         db = openedDb;
         updateDatabaseUI();
         exitEditMode();
+        exitKeywordEditMode();
         form.reset();
         setMessageHtml("");
         resetCustomFieldRows();
         loadRecords();
+        loadKeywords();
+        loadSpreadsheets();
+        loadLibraryItems();
+        loadDrawings();
+        loadFolders();
+        loadFiles();
     }).catch(err=>{
         console.error("IndexedDB error opening database:", entry, err);
         recoverFromFailedDatabaseOpen(entry, err);
@@ -1231,10 +2286,17 @@ function recoverFromFailedDatabaseOpen(failedEntry, err){
         db = openedDb;
         updateDatabaseUI();
         exitEditMode();
+        exitKeywordEditMode();
         form.reset();
         setMessageHtml("");
         resetCustomFieldRows();
         loadRecords();
+        loadKeywords();
+        loadSpreadsheets();
+        loadLibraryItems();
+        loadDrawings();
+        loadFolders();
+        loadFiles();
 
         const failedName = failedEntry ? failedEntry.name : "the selected";
         alert(
@@ -1257,6 +2319,7 @@ function switchDatabase(){
     const chosenId = select.value;
 
     localStorage.setItem(DB_CURRENT_KEY, chosenId);
+    flushSpreadsheetSave();
     if(db){ try{ db.close(); }catch(e){} }
     initActiveDatabase();
 }
@@ -1288,6 +2351,7 @@ function createNewDatabase(){
     saveDbRegistry(registry);
     localStorage.setItem(DB_CURRENT_KEY, entry.id);
 
+    flushSpreadsheetSave();
     if(db){ try{ db.close(); }catch(e){} }
     initActiveDatabase();
 }
@@ -1339,6 +2403,7 @@ function deleteCurrentDatabase(){
     const nextEntry = remaining[0];
     localStorage.setItem(DB_CURRENT_KEY, nextEntry.id);
 
+    flushSpreadsheetSave();
     if(db){ try{ db.close(); }catch(e){} }
 
     const deleteRequest = indexedDB.deleteDatabase(entry.dbName);
@@ -1385,11 +2450,113 @@ function recordToPortable(r){
     return rest;
 }
 
+// Pure, list-scoped version of getFolderPath (that function reads the
+// global allFolders/current db) -- used here because export can be pulling
+// folders from a *different* database's list (see exportAllDatabasesLiteral).
+// Returns ancestor names root-first, ending with the folder's own name.
+function folderPathNamesFromList(folder, foldersList){
+    const path = [];
+    const visited = new Set();
+    let current = folder;
+    while(current && !visited.has(current.id)){
+        path.unshift(current.name || "Folder");
+        visited.add(current.id);
+        const parentId = (current.parentId !== null && current.parentId !== undefined
+            && foldersList.some(fo=>fo.id===current.parentId)) ? current.parentId : null;
+        current = parentId !== null ? foldersList.find(fo=>fo.id===parentId) : null;
+    }
+    return path;
+}
+
+// Folders reference their parent by local autoIncrement id, which is
+// meaningless on another device/database, and won't necessarily be
+// re-created in the same order. So for export, replace parentId with the
+// folder's full path (an array of names from root to itself) instead --
+// portable, and enough to rebuild the exact same tree shape on import.
+function folderToPortableWithPath(folder, foldersList){
+    const { id, parentId, ...rest } = folder;
+    return { ...rest, path: folderPathNamesFromList(folder, foldersList) };
+}
+
+// Same idea for files: swap the local folderId for the target folder's
+// full path.
+function fileToPortableWithFolderPath(f, foldersList){
+    const { id, folderId, ...rest } = f;
+    const folder = foldersList.find(fo=>fo.id===folderId);
+    return { ...rest, folderPath: folder ? folderPathNamesFromList(folder, foldersList) : null };
+}
+
 function getAllRecordsFromDbName(dbName){
     return openDatabase(dbName).then(tempDb=>{
         return new Promise((resolve, reject)=>{
             const tx = tempDb.transaction("records","readonly");
             const req = tx.objectStore("records").getAll();
+            req.onsuccess = ()=>{ resolve(req.result); tempDb.close(); };
+            req.onerror = e=>{ tempDb.close(); reject(e.target.error); };
+        });
+    });
+}
+
+function getAllKeywordsFromDbName(dbName){
+    return openDatabase(dbName).then(tempDb=>{
+        return new Promise((resolve, reject)=>{
+            const tx = tempDb.transaction("keywords","readonly");
+            const req = tx.objectStore("keywords").getAll();
+            req.onsuccess = ()=>{ resolve(req.result); tempDb.close(); };
+            req.onerror = e=>{ tempDb.close(); reject(e.target.error); };
+        });
+    });
+}
+
+function getAllSpreadsheetsFromDbName(dbName){
+    return openDatabase(dbName).then(tempDb=>{
+        return new Promise((resolve, reject)=>{
+            const tx = tempDb.transaction("spreadsheets","readonly");
+            const req = tx.objectStore("spreadsheets").getAll();
+            req.onsuccess = ()=>{ resolve(req.result); tempDb.close(); };
+            req.onerror = e=>{ tempDb.close(); reject(e.target.error); };
+        });
+    });
+}
+
+function getAllLibraryItemsFromDbName(dbName){
+    return openDatabase(dbName).then(tempDb=>{
+        return new Promise((resolve, reject)=>{
+            const tx = tempDb.transaction("libraryItems","readonly");
+            const req = tx.objectStore("libraryItems").getAll();
+            req.onsuccess = ()=>{ resolve(req.result); tempDb.close(); };
+            req.onerror = e=>{ tempDb.close(); reject(e.target.error); };
+        });
+    });
+}
+
+function getAllDrawingsFromDbName(dbName){
+    return openDatabase(dbName).then(tempDb=>{
+        return new Promise((resolve, reject)=>{
+            const tx = tempDb.transaction("drawings","readonly");
+            const req = tx.objectStore("drawings").getAll();
+            req.onsuccess = ()=>{ resolve(req.result); tempDb.close(); };
+            req.onerror = e=>{ tempDb.close(); reject(e.target.error); };
+        });
+    });
+}
+
+function getAllFilesFromDbName(dbName){
+    return openDatabase(dbName).then(tempDb=>{
+        return new Promise((resolve, reject)=>{
+            const tx = tempDb.transaction("files","readonly");
+            const req = tx.objectStore("files").getAll();
+            req.onsuccess = ()=>{ resolve(req.result); tempDb.close(); };
+            req.onerror = e=>{ tempDb.close(); reject(e.target.error); };
+        });
+    });
+}
+
+function getAllFoldersFromDbName(dbName){
+    return openDatabase(dbName).then(tempDb=>{
+        return new Promise((resolve, reject)=>{
+            const tx = tempDb.transaction("folders","readonly");
+            const req = tx.objectStore("folders").getAll();
             req.onsuccess = ()=>{ resolve(req.result); tempDb.close(); };
             req.onerror = e=>{ tempDb.close(); reject(e.target.error); };
         });
@@ -1402,12 +2569,24 @@ function exportCurrentDatabaseLiteral(){
     const payload = {
         app: "localized-database-form",
         exportFormat: "single-database",
-        schemaVersion: 1,
+        schemaVersion: 4,
         exportedAt: getCurrentTimestamp(),
         databaseName: entry.name,
         databaseCreatedAt: entry.createdAt || null,
         recordCount: allRecords.length,
-        records: allRecords.map(recordToPortable)
+        records: allRecords.map(recordToPortable),
+        keywordCount: allKeywords.length,
+        keywords: allKeywords.map(recordToPortable),
+        spreadsheetCount: allSpreadsheets.length,
+        spreadsheets: allSpreadsheets.map(recordToPortable),
+        libraryItemCount: allLibraryItems.length,
+        libraryItems: allLibraryItems.map(recordToPortable),
+        drawingCount: allDrawings.length,
+        drawings: allDrawings.map(recordToPortable),
+        fileCount: allFiles.length,
+        files: allFiles.map(f=>fileToPortableWithFolderPath(f, allFolders)),
+        folderCount: allFolders.length,
+        folders: allFolders.map(fo=>folderToPortableWithPath(fo, allFolders))
     };
 
     downloadJson(payload, sanitizeFilename(entry.name) + ".database.json");
@@ -1425,18 +2604,36 @@ async function exportAllDatabasesLiteral(){
         const databases = [];
         for(const entry of registry){
             const records = await getAllRecordsFromDbName(entry.dbName);
+            const keywords = await getAllKeywordsFromDbName(entry.dbName);
+            const spreadsheets = await getAllSpreadsheetsFromDbName(entry.dbName);
+            const libraryItems = await getAllLibraryItemsFromDbName(entry.dbName);
+            const drawings = await getAllDrawingsFromDbName(entry.dbName);
+            const files = await getAllFilesFromDbName(entry.dbName);
+            const folders = await getAllFoldersFromDbName(entry.dbName);
             databases.push({
                 name: entry.name,
                 createdAt: entry.createdAt || null,
                 recordCount: records.length,
-                records: records.map(recordToPortable)
+                records: records.map(recordToPortable),
+                keywordCount: keywords.length,
+                keywords: keywords.map(recordToPortable),
+                spreadsheetCount: spreadsheets.length,
+                spreadsheets: spreadsheets.map(recordToPortable),
+                libraryItemCount: libraryItems.length,
+                libraryItems: libraryItems.map(recordToPortable),
+                drawingCount: drawings.length,
+                drawings: drawings.map(recordToPortable),
+                fileCount: files.length,
+                files: files.map(f=>fileToPortableWithFolderPath(f, folders)),
+                folderCount: folders.length,
+                folders: folders.map(fo=>folderToPortableWithPath(fo, folders))
             });
         }
 
         const payload = {
             app: "localized-database-form",
             exportFormat: "all-databases",
-            schemaVersion: 1,
+            schemaVersion: 4,
             exportedAt: getCurrentTimestamp(),
             databaseCount: databases.length,
             databases
@@ -1460,7 +2657,7 @@ function uniqueDbDisplayName(baseName){
     return `${base} (${n})`;
 }
 
-async function importRecordsIntoNewDatabase(displayName, createdAt, records){
+async function importRecordsIntoNewDatabase(displayName, createdAt, records, keywords, spreadsheets, libraryItems, drawings, files, folders){
     const registry = loadDbRegistry();
 
     const entry = {
@@ -1496,6 +2693,141 @@ async function importRecordsIntoNewDatabase(displayName, createdAt, records){
         tx.onerror = e=>reject(e.target.error);
     });
 
+    await new Promise((resolve, reject)=>{
+        const tx = newDb.transaction("keywords","readwrite");
+        const store = tx.objectStore("keywords");
+
+        (keywords || []).forEach(k=>{
+            const createdAt = k.createdAt || getCurrentTimestamp();
+            store.add({
+                term: k.term ?? "",
+                definition: sanitizeHtml(k.definition ?? ""),
+                createdAt: createdAt,
+                updatedAt: k.updatedAt || createdAt
+            });
+        });
+
+        tx.oncomplete = resolve;
+        tx.onerror = e=>reject(e.target.error);
+    });
+
+    await new Promise((resolve, reject)=>{
+        const tx = newDb.transaction("spreadsheets","readwrite");
+        const store = tx.objectStore("spreadsheets");
+
+        (spreadsheets || []).forEach(s=>{
+            const createdAt = s.createdAt || getCurrentTimestamp();
+            store.add({
+                name: s.name ?? "Sheet",
+                rows: (typeof s.rows === "number" && s.rows > 0) ? s.rows : DEFAULT_SHEET_ROWS,
+                cols: (typeof s.cols === "number" && s.cols > 0) ? s.cols : DEFAULT_SHEET_COLS,
+                cells: (s.cells && typeof s.cells === "object") ? s.cells : {},
+                createdAt: createdAt,
+                updatedAt: s.updatedAt || createdAt
+            });
+        });
+
+        tx.oncomplete = resolve;
+        tx.onerror = e=>reject(e.target.error);
+    });
+
+    await new Promise((resolve, reject)=>{
+        const tx = newDb.transaction("libraryItems","readwrite");
+        const store = tx.objectStore("libraryItems");
+
+        (libraryItems || []).forEach(l=>{
+            const createdAt = l.createdAt || getCurrentTimestamp();
+            store.add({
+                name: l.name ?? "",
+                customFields: (l.customFields && typeof l.customFields === "object") ? l.customFields : {},
+                createdAt: createdAt,
+                updatedAt: l.updatedAt || createdAt
+            });
+        });
+
+        tx.oncomplete = resolve;
+        tx.onerror = e=>reject(e.target.error);
+    });
+
+    await new Promise((resolve, reject)=>{
+        const tx = newDb.transaction("drawings","readwrite");
+        const store = tx.objectStore("drawings");
+
+        (drawings || []).forEach(d=>{
+            const createdAt = d.createdAt || getCurrentTimestamp();
+            store.add({
+                name: d.name ?? "Drawing",
+                dataUrl: (typeof d.dataUrl === "string") ? d.dataUrl : "",
+                width: (typeof d.width === "number" && d.width > 0) ? d.width : DRAWING_CANVAS_WIDTH,
+                height: (typeof d.height === "number" && d.height > 0) ? d.height : DRAWING_CANVAS_HEIGHT,
+                createdAt: createdAt,
+                updatedAt: d.updatedAt || createdAt
+            });
+        });
+
+        tx.oncomplete = resolve;
+        tx.onerror = e=>reject(e.target.error);
+    });
+
+    // Folders need to be recreated in parent-before-child order (shallowest
+    // path first) so each one's parent already has a freshly-assigned id by
+    // the time it's linked up. pathKeyToNewId maps a JSON-stringified path
+    // (array of names root..self) to that folder's new id; "[]" maps to
+    // null, meaning "top level" / "no folder".
+    const pathKeyToNewId = new Map();
+    pathKeyToNewId.set(JSON.stringify([]), null);
+
+    const sortedFolders = (folders || []).slice().sort((a,b)=>{
+        const aPath = Array.isArray(a.path) && a.path.length ? a.path : [a.name || "Folder"];
+        const bPath = Array.isArray(b.path) && b.path.length ? b.path : [b.name || "Folder"];
+        return aPath.length - bPath.length;
+    });
+
+    for(const fo of sortedFolders){
+        const path = Array.isArray(fo.path) && fo.path.length ? fo.path : [fo.name || "Folder"];
+        const parentKey = JSON.stringify(path.slice(0, -1));
+        const parentNewId = pathKeyToNewId.has(parentKey) ? pathKeyToNewId.get(parentKey) : null;
+        const createdAt = fo.createdAt || getCurrentTimestamp();
+
+        const newId = await new Promise((resolve, reject)=>{
+            const tx = newDb.transaction("folders","readwrite");
+            const req = tx.objectStore("folders").add({
+                name: path[path.length - 1] || fo.name || "Folder",
+                color: (typeof fo.color === "string" && fo.color) ? fo.color : DEFAULT_FOLDER_COLOR,
+                parentId: parentNewId,
+                createdAt: createdAt,
+                updatedAt: fo.updatedAt || createdAt
+            });
+            req.onsuccess = ()=> resolve(req.result);
+            req.onerror = e=>reject(e.target.error);
+        });
+
+        pathKeyToNewId.set(JSON.stringify(path), newId);
+    }
+
+    await new Promise((resolve, reject)=>{
+        const tx = newDb.transaction("files","readwrite");
+        const store = tx.objectStore("files");
+
+        (files || []).forEach(f=>{
+            const createdAt = f.createdAt || getCurrentTimestamp();
+            const path = Array.isArray(f.folderPath) ? f.folderPath
+                : (f.folderName ? [f.folderName] : []); // back-compat with the flat (non-nested) export format
+            const pathKey = JSON.stringify(path);
+            const resolvedFolderId = pathKeyToNewId.has(pathKey) ? pathKeyToNewId.get(pathKey) : null;
+            store.add({
+                name: f.name ?? "untitled.txt",
+                content: (typeof f.content === "string") ? f.content : "",
+                folderId: resolvedFolderId,
+                createdAt: createdAt,
+                updatedAt: f.updatedAt || createdAt
+            });
+        });
+
+        tx.oncomplete = resolve;
+        tx.onerror = e=>reject(e.target.error);
+    });
+
     newDb.close();
     return entry;
 }
@@ -1514,7 +2846,13 @@ document.getElementById("importDbInput").addEventListener("change", async (e)=>{
                 const entry = await importRecordsIntoNewDatabase(
                     dbData.name || "Imported Database",
                     dbData.createdAt,
-                    dbData.records
+                    dbData.records,
+                    dbData.keywords,
+                    dbData.spreadsheets,
+                    dbData.libraryItems,
+                    dbData.drawings,
+                    dbData.files,
+                    dbData.folders
                 );
                 importedEntries.push(entry);
             }
@@ -1523,7 +2861,13 @@ document.getElementById("importDbInput").addEventListener("change", async (e)=>{
             const entry = await importRecordsIntoNewDatabase(
                 data.databaseName || fallbackName || "Imported Database",
                 data.databaseCreatedAt || data.exportedAt,
-                data.records
+                data.records,
+                data.keywords,
+                data.spreadsheets,
+                data.libraryItems,
+                data.drawings,
+                data.files,
+                data.folders
             );
             importedEntries.push(entry);
         }else{
@@ -1534,6 +2878,7 @@ document.getElementById("importDbInput").addEventListener("change", async (e)=>{
 
         if(importedEntries.length > 0){
             localStorage.setItem(DB_CURRENT_KEY, importedEntries[0].id);
+            flushSpreadsheetSave();
             if(db){ try{ db.close(); }catch(err){} }
             initActiveDatabase();
         }
@@ -1548,34 +2893,57 @@ document.getElementById("importDbInput").addEventListener("change", async (e)=>{
 });
 
 function addRecord(data){
-    const tx=db.transaction("records","readwrite");
-    tx.objectStore("records").add(data);
-    tx.oncomplete=loadRecords;
-    tx.onerror=e=>alert("Failed to save record: "+e.target.error);
+    if(!db){
+        alert("The database isn't ready yet. Please wait a moment and try Save again (or reload the page if this keeps happening).");
+        return;
+    }
+    try{
+        const tx=db.transaction("records","readwrite");
+        tx.objectStore("records").add(data);
+        tx.oncomplete=loadRecords;
+        tx.onerror=e=>alert("Failed to save record: "+e.target.error);
+    }catch(err){
+        console.error("addRecord failed:", err);
+        alert("Failed to save record: "+err.message+"\n\nTry reloading the page. If this keeps happening, your browser may be blocking local storage for this site.");
+    }
 }
 
 function updateRecord(id, data){
-    const tx=db.transaction("records","readonly");
-    const getRequest=tx.objectStore("records").get(id);
-    
-    getRequest.onsuccess=()=>{
-        const existingRecord=getRequest.result;
-        const tx2=db.transaction("records","readwrite");
-        tx2.objectStore("records").put({
-            ...data,
-            id,
-            uuid: existingRecord.uuid,
-            createdAt: existingRecord.createdAt,
-            updatedAt: getCurrentTimestamp()
-        });
-        tx2.oncomplete=()=>{
-            exitEditMode();
-            loadRecords();
+    if(!db){
+        alert("The database isn't ready yet. Please wait a moment and try Update again (or reload the page if this keeps happening).");
+        return;
+    }
+    try{
+        const tx=db.transaction("records","readonly");
+        const getRequest=tx.objectStore("records").get(id);
+
+        getRequest.onsuccess=()=>{
+            const existingRecord=getRequest.result;
+            try{
+                const tx2=db.transaction("records","readwrite");
+                tx2.objectStore("records").put({
+                    ...data,
+                    id,
+                    uuid: existingRecord.uuid,
+                    createdAt: existingRecord.createdAt,
+                    updatedAt: getCurrentTimestamp()
+                });
+                tx2.oncomplete=()=>{
+                    exitEditMode();
+                    loadRecords();
+                };
+                tx2.onerror=e=>alert("Failed to update record: "+e.target.error);
+            }catch(err){
+                console.error("updateRecord (write) failed:", err);
+                alert("Failed to update record: "+err.message);
+            }
         };
-        tx2.onerror=e=>alert("Failed to update record: "+e.target.error);
-    };
-    
-    getRequest.onerror=e=>alert("Failed to retrieve record: "+e.target.error);
+
+        getRequest.onerror=e=>alert("Failed to retrieve record: "+e.target.error);
+    }catch(err){
+        console.error("updateRecord (read) failed:", err);
+        alert("Failed to update record: "+err.message+"\n\nTry reloading the page.");
+    }
 }
 
 const form = document.getElementById("form");
@@ -1585,7 +2953,7 @@ const customFieldsContainer = document.getElementById("customFieldsContainer");
 const addFieldBtn = document.getElementById("addFieldBtn");
 const messageEditor = document.getElementById("message");
 
-// ---------- WYSIWYG message editor ----------
+// ---------- HTML message sanitizer ----------
 //
 // Only a small allow-list of formatting tags is kept; everything else
 // (scripts, styles, images, iframes, event-handler attributes, etc.)
@@ -1665,127 +3033,7 @@ function stripHtml(html){
     return (div.textContent || div.innerText || "").trim();
 }
 
-function execCmd(command){
-    messageEditor.focus();
-    document.execCommand(command, false, null);
-}
-
-function formatBlockCmd(tag){
-    messageEditor.focus();
-    document.execCommand("formatBlock", false, "<" + tag + ">");
-}
-
-function selectNodeContentsCollapsed(el, atStart){
-    const sel = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    range.collapse(!!atStart);
-    sel.removeAllRanges();
-    sel.addRange(range);
-}
-
-function insertInlineCode(){
-    messageEditor.focus();
-    const sel = window.getSelection();
-    if(!sel || sel.rangeCount === 0) return;
-
-    const range = sel.getRangeAt(0);
-    const codeEl = document.createElement("code");
-
-    if(range.collapsed){
-        codeEl.textContent = "code";
-        range.insertNode(codeEl);
-        selectNodeContentsCollapsed(codeEl, false);
-        sel.getRangeAt(0).selectNodeContents(codeEl);
-    }else{
-        codeEl.appendChild(range.extractContents());
-        range.insertNode(codeEl);
-        range.setStartAfter(codeEl);
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
-}
-
-function insertCodeBlock(){
-    messageEditor.focus();
-    const lang = document.getElementById("codeLangSelect").value;
-
-    const pre = document.createElement("pre");
-    const code = document.createElement("code");
-    code.className = "language-" + lang;
-    code.textContent = "your code here";
-    pre.appendChild(code);
-
-    const sel = window.getSelection();
-    if(sel && sel.rangeCount > 0){
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-        range.insertNode(pre);
-    }else{
-        messageEditor.appendChild(pre);
-    }
-
-    selectNodeContentsCollapsed(code, false);
-    document.getSelection().getRangeAt(0).selectNodeContents(code);
-    highlightEditorCode();
-}
-
-function insertLink(){
-    messageEditor.focus();
-    const url = prompt("Enter URL (https://, http://, or mailto:):");
-    if(!url) return;
-
-    if(!/^(https?:|mailto:)/i.test(url.trim())){
-        alert("Only http(s):// or mailto: links are allowed.");
-        return;
-    }
-
-    document.execCommand("createLink", false, url.trim());
-}
-
-function insertAdmonition(){
-    messageEditor.focus();
-    const type = document.getElementById("admonitionSelect").value;
-    const titles = { note:"Note", tip:"Tip", info:"Info", warning:"Warning", danger:"Danger" };
-
-    const div = document.createElement("div");
-    div.className = "admonition admonition-" + type;
-
-    const title = document.createElement("p");
-    title.className = "admonition-title";
-    title.textContent = titles[type] || type;
-
-    const content = document.createElement("div");
-    content.className = "admonition-content";
-    const p = document.createElement("p");
-    p.textContent = "Type your callout content here...";
-    content.appendChild(p);
-
-    div.appendChild(title);
-    div.appendChild(content);
-
-    const sel = window.getSelection();
-    if(sel && sel.rangeCount > 0){
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-        range.insertNode(div);
-    }else{
-        messageEditor.appendChild(div);
-    }
-
-    selectNodeContentsCollapsed(p, false);
-    document.getSelection().getRangeAt(0).selectNodeContents(p);
-}
-
 // ---------- Syntax highlighting (highlight.js) ----------
-
-function highlightEditorCode(){
-    if(typeof hljs === "undefined") return;
-    messageEditor.querySelectorAll("pre code").forEach(block=>{
-        hljs.highlightElement(block);
-    });
-}
 
 function highlightRenderedCode(container){
     if(typeof hljs === "undefined") return;
@@ -1794,338 +3042,16 @@ function highlightRenderedCode(container){
     });
 }
 
-// Re-highlight whenever the editor loses focus, rather than on every
-// keystroke, so highlight.js doesn't fight the caret while typing.
-messageEditor.addEventListener("blur", highlightEditorCode);
-
 function getMessageHtml(){
-    return sanitizeHtml(messageEditor.innerHTML.trim());
+    return sanitizeHtml(messageEditor.value.trim());
 }
 
 function setMessageHtml(html){
-    messageEditor.innerHTML = sanitizeHtml(html || "");
-    highlightEditorCode();
+    messageEditor.value = html || "";
 }
-
-// ---------- Text Highlighting ----------
-
-function applyHighlight(){
-    messageEditor.focus();
-    const color = document.getElementById("highlightColorPicker").value;
-    const sel = window.getSelection();
-    
-    if(!sel || sel.rangeCount === 0 || sel.isCollapsed){
-        alert("Please select text to highlight.");
-        return;
-    }
-    
-    const range = sel.getRangeAt(0);
-    const span = document.createElement("span");
-    span.style.backgroundColor = color;
-    span.style.padding = "2px 4px";
-    span.style.borderRadius = "3px";
-    
-    try{
-        range.surroundContents(span);
-    }catch(e){
-        // If surroundContents fails (complex selection), use insertNode
-        const contents = range.extractContents();
-        span.appendChild(contents);
-        range.insertNode(span);
-    }
-}
-
-function removeHighlight(){
-    messageEditor.focus();
-    const sel = window.getSelection();
-    
-    if(!sel || sel.rangeCount === 0 || sel.isCollapsed){
-        alert("Please select highlighted text to remove the highlight.");
-        return;
-    }
-    
-    const range = sel.getRangeAt(0);
-    const container = document.createElement("div");
-    container.appendChild(range.extractContents());
-    
-    // Remove all span elements with background color
-    const spans = container.querySelectorAll("span[style*='background']");
-    spans.forEach(span=>{
-        while(span.firstChild){
-            span.parentNode.insertBefore(span.firstChild, span);
-        }
-        span.parentNode.removeChild(span);
-    });
-    
-    range.insertNode(container.firstChild);
-}
-
-// ---------- Markdown-as-you-type shortcuts ----------
-//
-// Small, best-effort autoformatter: recognizes common markdown syntax at
-// the point the trigger character is typed and converts it into the
-// equivalent rich-text formatting. Toolbar buttons remain the reliable
-// way to reach every feature; these shortcuts are a convenience layer.
-
-function placeCaretAtStart(el){
-    const sel = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
-}
-
-function tryLineStartShortcut(){
-    const sel = window.getSelection();
-    if(!sel || sel.rangeCount === 0) return false;
-
-    const range = sel.getRangeAt(0);
-    if(!range.collapsed) return false;
-
-    const node = range.startContainer;
-    if(node.nodeType !== Node.TEXT_NODE) return false;
-
-    const textBefore = node.textContent.slice(0, range.startOffset);
-
-    const headingMatch = textBefore.match(/^(#{1,6})$/);
-    if(headingMatch){
-        node.textContent = node.textContent.slice(range.startOffset);
-        formatBlockCmd("h" + Math.min(headingMatch[1].length, 6));
-        return true;
-    }
-
-    if(/^>$/.test(textBefore)){
-        node.textContent = node.textContent.slice(range.startOffset);
-        formatBlockCmd("blockquote");
-        return true;
-    }
-
-    if(/^[-*]$/.test(textBefore)){
-        node.textContent = node.textContent.slice(range.startOffset);
-        messageEditor.focus();
-        document.execCommand("insertUnorderedList");
-        return true;
-    }
-
-    if(/^\d+\.$/.test(textBefore)){
-        node.textContent = node.textContent.slice(range.startOffset);
-        messageEditor.focus();
-        document.execCommand("insertOrderedList");
-        return true;
-    }
-
-    const fenceMatch = textBefore.match(/^```([\w+-]*)$/);
-    if(fenceMatch){
-        const beforeFence = node.textContent.slice(0, range.startOffset - fenceMatch[0].length);
-        const afterFence = node.textContent.slice(range.startOffset);
-        node.textContent = beforeFence + afterFence;
-        
-        const langSelect = document.getElementById("codeLangSelect");
-        const wanted = fenceMatch[1].toLowerCase();
-        const hasOption = Array.from(langSelect.options).some(o=>o.value === wanted);
-        langSelect.value = hasOption ? wanted : "plaintext";
-        
-        const pre = document.createElement("pre");
-        const code = document.createElement("code");
-        code.className = "language-" + langSelect.value;
-        code.textContent = "your code here";
-        pre.appendChild(code);
-        
-        node.parentNode.insertBefore(pre, node.nextSibling);
-        
-        const sel = window.getSelection();
-        const newRange = document.createRange();
-        newRange.selectNodeContents(code);
-        newRange.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(newRange);
-        
-        highlightEditorCode();
-        return true;
-    }
-
-    return false;
-}
-
-function wrapInlineMatch(node, range, matchLength, groupText, tagName){
-    const start = range.startOffset - matchLength;
-    const before = node.textContent.slice(0, start);
-    const after = node.textContent.slice(range.startOffset);
-
-    const wrapper = document.createElement(tagName);
-    wrapper.textContent = groupText;
-
-    const parent = node.parentNode;
-    const afterTextNode = document.createTextNode(after);
-    node.textContent = before;
-    parent.insertBefore(wrapper, node.nextSibling);
-    parent.insertBefore(afterTextNode, wrapper.nextSibling);
-
-    const sel = window.getSelection();
-    const newRange = document.createRange();
-    newRange.setStart(afterTextNode, 0);
-    newRange.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(newRange);
-}
-
-function tryInlineShortcut(){
-    const sel = window.getSelection();
-    if(!sel || sel.rangeCount === 0) return;
-
-    const range = sel.getRangeAt(0);
-    if(!range.collapsed) return;
-
-    const node = range.startContainer;
-    if(node.nodeType !== Node.TEXT_NODE) return;
-
-    const text = node.textContent.slice(0, range.startOffset);
-
-    const inlinePatterns = [
-        { re:/\*\*([^*\n]+)\*\*$/, tag:"strong" },
-        { re:/~~([^~\n]+)~~$/, tag:"del" },
-        { re:/(?<!`)(`(?!`))([^`\n]+)\1(?!`)$/, tag:"code", groupIdx: 2 },
-        { re:/(?:^|[^*])\*([^*\n]+)\*$/, tag:"em" }
-    ];
-
-    for(const p of inlinePatterns){
-        const m = text.match(p.re);
-        if(m){
-            const groupIdx = p.groupIdx !== undefined ? p.groupIdx : 1;
-            wrapInlineMatch(node, range, m[0].length, m[groupIdx], p.tag);
-            return;
-        }
-    }
-
-    const linkMatch = text.match(/\[([^\]\n]+)\]\(([^)\n]+)\)$/);
-    if(linkMatch && /^(https?:|mailto:)/i.test(linkMatch[2].trim())){
-        const start = range.startOffset - linkMatch[0].length;
-        const before = node.textContent.slice(0, start);
-        const after = node.textContent.slice(range.startOffset);
-
-        const a = document.createElement("a");
-        a.href = linkMatch[2].trim();
-        a.textContent = linkMatch[1];
-
-        const parent = node.parentNode;
-        const afterTextNode = document.createTextNode(after);
-        node.textContent = before;
-        parent.insertBefore(a, node.nextSibling);
-        parent.insertBefore(afterTextNode, a.nextSibling);
-
-        const newRange = document.createRange();
-        newRange.setStart(afterTextNode, 0);
-        newRange.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(newRange);
-    }
-}
-
-// Finds the closest ancestor of `node` (inclusive) inside the editor that
-// matches `predicate`, or null if none is found before reaching the editor.
-function closestInEditor(node, predicate){
-    let cur = node && node.nodeType === Node.ELEMENT_NODE ? node : (node ? node.parentNode : null);
-    while(cur && cur !== messageEditor){
-        if(predicate(cur)) return cur;
-        cur = cur.parentNode;
-    }
-    return null;
-}
-
-// True when the collapsed selection in `range` sits at the very first
-// caret position inside `el`.
-function isCaretAtElementStart(range, el){
-    const testRange = document.createRange();
-    testRange.selectNodeContents(el);
-    testRange.collapse(true);
-    return range.compareBoundaryPoints(Range.START_TO_START, testRange) === 0;
-}
-
-messageEditor.addEventListener("keydown", (e)=>{
-    if(e.key === " "){
-        if(tryLineStartShortcut()){
-            e.preventDefault();
-        }
-        return;
-    }
-
-    const sel = window.getSelection();
-    if(!sel || sel.rangeCount === 0) return;
-    const range = sel.getRangeAt(0);
-
-    if(e.key === "Enter"){
-        // Default contenteditable Enter handling tends to break OUT of a
-        // <pre><code> block or an admonition callout entirely, instead of
-        // adding a line inside it. Handle both cases manually.
-
-        const codeEl = closestInEditor(range.startContainer, n=>n.tagName === "CODE" && n.parentNode && n.parentNode.tagName === "PRE");
-        if(codeEl){
-            e.preventDefault();
-            range.deleteContents();
-            const nl = document.createTextNode("\n");
-            range.insertNode(nl);
-            range.setStartAfter(nl);
-            range.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(range);
-            return;
-        }
-
-        const admonitionContent = closestInEditor(range.startContainer, n=>n.classList && n.classList.contains("admonition-content"));
-        if(admonitionContent){
-            e.preventDefault();
-            range.deleteContents();
-            const p = document.createElement("p");
-            p.appendChild(document.createElement("br"));
-            range.insertNode(p);
-            const newRange = document.createRange();
-            newRange.setStart(p, 0);
-            newRange.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(newRange);
-            return;
-        }
-    }
-
-    if((e.key === "Backspace") && range.collapsed){
-        // Let an empty code block or empty admonition be deleted entirely
-        // when the caret sits at its very start, instead of getting stuck.
-
-        const pre = closestInEditor(range.startContainer, n=>n.tagName === "PRE");
-        if(pre){
-            const codeEl = pre.querySelector("code");
-            const isEmpty = !codeEl || codeEl.textContent.length === 0;
-            if(isEmpty && isCaretAtElementStart(range, codeEl || pre)){
-                e.preventDefault();
-                pre.remove();
-                return;
-            }
-        }
-
-        const admonition = closestInEditor(range.startContainer, n=>n.classList && n.classList.contains("admonition"));
-        if(admonition){
-            const content = admonition.querySelector(".admonition-content");
-            const isEmpty = !content || stripHtml(content.innerHTML).length === 0;
-            if(isEmpty && isCaretAtElementStart(range, content || admonition)){
-                e.preventDefault();
-                admonition.remove();
-                return;
-            }
-        }
-    }
-});
-
-messageEditor.addEventListener("input", (e)=>{
-    if(e.inputType && e.inputType.startsWith("insert")){
-        tryInlineShortcut();
-    }
-});
-
 // ---------- Markdown <-> HTML conversion ----------
 //
-// The editor itself works with sanitized HTML (so the rich-text toolbar
-// and shortcuts above can manipulate it directly via the DOM), but
+// The editor is a plain textarea holding raw (sanitized) HTML directly, but
 // records are exported/imported as real Markdown text, including fenced
 // code blocks and ':::type' admonitions, so files stay portable and
 // human-editable outside this app.
@@ -2571,13 +3497,14 @@ function renderRecords(){
         div.innerHTML=`
         <b>Name: ${escapeHtml(r.name)}</b><br>
         ${charSheetHtml}
+        ${customFieldsHtml}
         Message:
         <div class="${messageClass}">${messageHtml}</div>
-        ${customFieldsHtml}
         <small>ID: ${r.id} | UUID: ${escapeHtml(r.uuid || "N/A")} | Created: ${createdAtFormatted} | Modified: ${updatedAtFormatted}</small><br><br>
 
         <button onclick="editRecordById(${r.id})">Edit</button>
         <button onclick="downloadRecord(${r.id})">Download</button>
+        <button onclick="exportRecordPDF(${r.id})">Export PDF</button>
         <button onclick="deleteRecord(${r.id})">Delete</button>
         `;
 
@@ -2619,6 +3546,721 @@ function deleteRecord(id){
         loadRecords();
     };
     tx.onerror=e=>alert("Failed to delete record: "+e.target.error);
+}
+
+// ---------- Dictionary / Keywords ----------
+//
+// A second, simpler store per database: a glossary of term/definition
+// entries that can be added, edited, and deleted independently of records,
+// and quickly inserted into the record Message field while writing.
+
+let allKeywords = [];
+let editingKeywordId = null;
+
+const keywordForm = document.getElementById("keywordForm");
+const keywordSubmitBtn = document.getElementById("keywordSubmitBtn");
+const keywordCancelBtn = document.getElementById("keywordCancelBtn");
+const keywordTermInput = document.getElementById("keywordTerm");
+const keywordDefinitionInput = document.getElementById("keywordDefinition");
+
+function loadKeywords(){
+    const tx = db.transaction("keywords","readonly");
+    const store = tx.objectStore("keywords");
+    const results = [];
+
+    store.openCursor().onsuccess = e=>{
+        const cursor = e.target.result;
+        if(cursor){
+            results.push(cursor.value);
+            cursor.continue();
+        }else{
+            allKeywords = results;
+            renderKeywords();
+        }
+    };
+}
+
+function getKeywordDefinitionHtml(){
+    return sanitizeHtml(keywordDefinitionInput.value.trim());
+}
+
+keywordForm.onsubmit = (e)=>{
+    e.preventDefault();
+
+    const term = keywordTermInput.value.trim();
+    if(!term) return;
+
+    if(!db){
+        alert("The database isn't ready yet. Please wait a moment and try Save Term again (or reload the page if this keeps happening).");
+        return;
+    }
+
+    const data = {
+        term,
+        definition: getKeywordDefinitionHtml(),
+        updatedAt: getCurrentTimestamp()
+    };
+
+    try{
+        if(editingKeywordId !== null){
+            const tx = db.transaction("keywords","readwrite");
+            tx.objectStore("keywords").put({ ...data, id: editingKeywordId });
+            tx.oncomplete = ()=>{ exitKeywordEditMode(); loadKeywords(); };
+            tx.onerror = e=>alert("Failed to update term: "+e.target.error);
+        }else{
+            data.createdAt = data.updatedAt;
+            const tx = db.transaction("keywords","readwrite");
+            tx.objectStore("keywords").add(data);
+            tx.oncomplete = loadKeywords;
+            tx.onerror = e=>alert("Failed to save term: "+e.target.error);
+        }
+    }catch(err){
+        console.error("keyword save failed:", err);
+        alert("Failed to save term: "+err.message+"\n\nTry reloading the page.");
+        return;
+    }
+
+    keywordForm.reset();
+};
+
+keywordCancelBtn.onclick = ()=>{
+    exitKeywordEditMode();
+    keywordForm.reset();
+};
+
+function enterKeywordEditMode(entry){
+    editingKeywordId = entry.id;
+    keywordTermInput.value = entry.term;
+    keywordDefinitionInput.value = entry.definition || "";
+    keywordSubmitBtn.textContent = "Update Term";
+    keywordCancelBtn.style.display = "inline-block";
+    showTab("dictionary");
+    window.scrollTo({top:0, behavior:"smooth"});
+    renderKeywords();
+}
+
+function exitKeywordEditMode(){
+    editingKeywordId = null;
+    keywordSubmitBtn.textContent = "Save Term";
+    keywordCancelBtn.style.display = "none";
+}
+
+function editKeywordById(id){
+    const entry = allKeywords.find(k=>k.id===id);
+    if(entry) enterKeywordEditMode(entry);
+}
+
+function deleteKeyword(id){
+    if(!confirm("Delete this dictionary term?")) return;
+
+    const tx = db.transaction("keywords","readwrite");
+    tx.objectStore("keywords").delete(id);
+    tx.oncomplete = ()=>{
+        if(id === editingKeywordId){
+            exitKeywordEditMode();
+            keywordForm.reset();
+        }
+        loadKeywords();
+    };
+    tx.onerror = e=>alert("Failed to delete term: "+e.target.error);
+}
+
+// Inserts a keyword's term (and definition, if present) into the record
+// Message textarea at the current cursor position, so the dictionary can be
+// used as a quick reference while writing a record.
+function insertKeywordIntoMessage(id){
+    const entry = allKeywords.find(k=>k.id===id);
+    if(!entry) return;
+
+    const definitionText = stripHtml(entry.definition || "");
+    const snippet = definitionText ? `<b>${entry.term}</b>: ${definitionText}` : entry.term;
+
+    const el = messageEditor;
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    el.value = el.value.slice(0, start) + snippet + el.value.slice(end);
+
+    const newPos = start + snippet.length;
+    el.focus();
+    el.setSelectionRange(newPos, newPos);
+
+    showTab("editor");
+}
+
+function renderKeywords(){
+    const container = document.getElementById("keywords");
+    const query = document.getElementById("keywordSearchBox").value.trim().toLowerCase();
+
+    const filtered = allKeywords.filter(k=>{
+        if(!query) return true;
+        return (k.term || "").toLowerCase().includes(query)
+            || stripHtml(k.definition || "").toLowerCase().includes(query);
+    });
+
+    filtered.sort((a,b)=> (a.term || "").localeCompare(b.term || "", undefined, {sensitivity:"base"}));
+
+    container.innerHTML = "";
+
+    if(filtered.length === 0){
+        container.innerHTML = `<p class="empty-msg">No dictionary terms yet.</p>`;
+        return;
+    }
+
+    filtered.forEach(k=>{
+        const div = document.createElement("div");
+        div.className = "keyword-entry" + (k.id === editingKeywordId ? " editing" : "");
+
+        const definitionHtml = sanitizeHtml(k.definition || "");
+        const definitionBlock = definitionHtml.trim() !== ""
+            ? `<div class="message-content">${definitionHtml}</div>`
+            : "";
+
+        div.innerHTML = `
+        <div class="keyword-term">${escapeHtml(k.term)}</div>
+        ${definitionBlock}
+        <div class="keyword-actions">
+            <button onclick="insertKeywordIntoMessage(${k.id})" class="btn-info">Insert</button>
+            <button onclick="editKeywordById(${k.id})">Edit</button>
+            <button onclick="deleteKeyword(${k.id})" class="btn-danger">Delete</button>
+        </div>
+        `;
+
+        container.appendChild(div);
+        highlightRenderedCode(div);
+    });
+}
+
+const keywordSearchBox = document.getElementById("keywordSearchBox");
+keywordSearchBox.addEventListener("input", renderKeywords);
+keywordSearchBox.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.keyCode === 13){
+        e.preventDefault();
+        renderKeywords();
+    }
+});
+
+// ==========================================================================
+// ---------- Spreadsheet ----------
+// Spreadsheets are stored in this database's "spreadsheets" object store,
+// exactly like records and dictionary terms -- they persist locally, switch
+// with the active database, and can hold as many sheets as you like. Each
+// sheet is { id, name, rows, cols, cells: { "A1": "raw text or =formula" },
+// createdAt, updatedAt }. Only non-empty cells are stored (sparse), and
+// formulas are recalculated on the fly whenever the grid renders.
+// ==========================================================================
+
+let allSpreadsheets = [];          // in-memory cache of this database's spreadsheets
+let currentSpreadsheet = null;     // the spreadsheet object currently open in the grid
+let selectedCellRef = "A1";        // currently selected cell reference, e.g. "B3"
+let spreadsheetSaveTimer = null;   // debounce handle for autosave
+
+const DEFAULT_SHEET_ROWS = 30;
+const DEFAULT_SHEET_COLS = 12;
+
+function colIndexToLetter(index){
+    let n = index + 1;
+    let s = "";
+    while(n > 0){
+        const rem = (n - 1) % 26;
+        s = String.fromCharCode(65 + rem) + s;
+        n = Math.floor((n - 1) / 26);
+    }
+    return s;
+}
+
+function colLetterToIndex(letters){
+    let n = 0;
+    for(let i = 0; i < letters.length; i++){
+        n = n * 26 + (letters.charCodeAt(i) - 64);
+    }
+    return n - 1;
+}
+
+function cellRefAt(rowIndex, colIndex){
+    return colIndexToLetter(colIndex) + (rowIndex + 1);
+}
+
+function parseCellRef(ref){
+    const m = /^([A-Za-z]+)(\d+)$/.exec(ref.trim());
+    if(!m) return null;
+    return { col: colLetterToIndex(m[1].toUpperCase()), row: parseInt(m[2], 10) - 1 };
+}
+
+function loadSpreadsheets(){
+    if(!db) return;
+    const tx = db.transaction("spreadsheets", "readonly");
+    const req = tx.objectStore("spreadsheets").getAll();
+
+    req.onsuccess = ()=>{
+        allSpreadsheets = req.result.sort((a,b)=> (a.name||"").localeCompare(b.name||""));
+
+        if(allSpreadsheets.length === 0){
+            createNewSpreadsheet("Sheet 1");
+            return;
+        }
+
+        renderSpreadsheetSelect();
+
+        const stillExists = currentSpreadsheet && allSpreadsheets.some(s=>s.id === currentSpreadsheet.id);
+        openSpreadsheet(stillExists ? currentSpreadsheet.id : allSpreadsheets[0].id);
+    };
+
+    req.onerror = e=>{
+        console.error("Failed to load spreadsheets:", e.target.error);
+    };
+}
+
+function renderSpreadsheetSelect(){
+    const select = document.getElementById("spreadsheetSelect");
+    const currentId = currentSpreadsheet ? currentSpreadsheet.id : null;
+    select.innerHTML = "";
+    allSpreadsheets.forEach(s=>{
+        const option = document.createElement("option");
+        option.value = s.id;
+        option.textContent = s.name;
+        if(s.id === currentId) option.selected = true;
+        select.appendChild(option);
+    });
+}
+
+function openSpreadsheet(id){
+    const found = allSpreadsheets.find(s=>s.id === id);
+    if(!found) return;
+
+    if(currentSpreadsheet && currentSpreadsheet.id !== id) flushSpreadsheetSave();
+
+    currentSpreadsheet = found;
+    selectedCellRef = "A1";
+    document.getElementById("spreadsheetNameInput").value = currentSpreadsheet.name;
+    renderSpreadsheetSelect();
+    renderSpreadsheetGrid();
+    updateFormulaBar();
+}
+
+function switchSpreadsheet(idStr){
+    openSpreadsheet(parseInt(idStr, 10));
+}
+
+function createNewSpreadsheet(presetName){
+    if(!db){
+        alert("The database isn't ready yet. Please wait a moment and try again.");
+        return;
+    }
+
+    const name = presetName || (()=>{
+        let n = allSpreadsheets.length + 1;
+        let candidate = `Sheet ${n}`;
+        while(allSpreadsheets.some(s=>s.name === candidate)){
+            n++;
+            candidate = `Sheet ${n}`;
+        }
+        return candidate;
+    })();
+
+    const now = getCurrentTimestamp();
+    const sheet = {
+        name,
+        rows: DEFAULT_SHEET_ROWS,
+        cols: DEFAULT_SHEET_COLS,
+        cells: {},
+        createdAt: now,
+        updatedAt: now
+    };
+
+    try{
+        const tx = db.transaction("spreadsheets", "readwrite");
+        const req = tx.objectStore("spreadsheets").add(sheet);
+        tx.oncomplete = ()=>{
+            sheet.id = req.result;
+            allSpreadsheets.push(sheet);
+            openSpreadsheet(sheet.id);
+        };
+        tx.onerror = e=>alert("Failed to create new sheet: " + e.target.error);
+    }catch(err){
+        console.error("createNewSpreadsheet failed:", err);
+        alert("Failed to create new sheet: " + err.message);
+    }
+}
+
+function duplicateCurrentSpreadsheet(){
+    if(!currentSpreadsheet) return;
+    if(!db){
+        alert("The database isn't ready yet. Please wait a moment and try again.");
+        return;
+    }
+
+    let n = 2;
+    let candidate = `${currentSpreadsheet.name} (copy)`;
+    while(allSpreadsheets.some(s=>s.name === candidate)){
+        candidate = `${currentSpreadsheet.name} (copy ${n})`;
+        n++;
+    }
+
+    const now = getCurrentTimestamp();
+    const sheet = {
+        name: candidate,
+        rows: currentSpreadsheet.rows,
+        cols: currentSpreadsheet.cols,
+        cells: { ...currentSpreadsheet.cells },
+        createdAt: now,
+        updatedAt: now
+    };
+
+    try{
+        const tx = db.transaction("spreadsheets", "readwrite");
+        const req = tx.objectStore("spreadsheets").add(sheet);
+        tx.oncomplete = ()=>{
+            sheet.id = req.result;
+            allSpreadsheets.push(sheet);
+            openSpreadsheet(sheet.id);
+        };
+        tx.onerror = e=>alert("Failed to duplicate sheet: " + e.target.error);
+    }catch(err){
+        console.error("duplicateCurrentSpreadsheet failed:", err);
+        alert("Failed to duplicate sheet: " + err.message);
+    }
+}
+
+function renameCurrentSpreadsheet(newName){
+    if(!currentSpreadsheet) return;
+    const trimmed = (newName || "").trim();
+    if(!trimmed){
+        document.getElementById("spreadsheetNameInput").value = currentSpreadsheet.name;
+        return;
+    }
+    currentSpreadsheet.name = trimmed;
+    saveCurrentSpreadsheet(()=>renderSpreadsheetSelect());
+}
+
+function deleteCurrentSpreadsheet(){
+    if(!currentSpreadsheet) return;
+    if(!db) return;
+
+    if(!confirm(`Delete the sheet "${currentSpreadsheet.name}"? This cannot be undone.`)){
+        return;
+    }
+
+    const idToDelete = currentSpreadsheet.id;
+    const tx = db.transaction("spreadsheets", "readwrite");
+    tx.objectStore("spreadsheets").delete(idToDelete);
+    tx.oncomplete = ()=>{
+        allSpreadsheets = allSpreadsheets.filter(s=>s.id !== idToDelete);
+        currentSpreadsheet = null;
+        if(allSpreadsheets.length === 0){
+            createNewSpreadsheet("Sheet 1");
+        }else{
+            openSpreadsheet(allSpreadsheets[0].id);
+        }
+    };
+    tx.onerror = e=>alert("Failed to delete sheet: " + e.target.error);
+}
+
+function saveCurrentSpreadsheet(onComplete){
+    if(!currentSpreadsheet || !db) return;
+    currentSpreadsheet.updatedAt = getCurrentTimestamp();
+
+    try{
+        const tx = db.transaction("spreadsheets", "readwrite");
+        tx.objectStore("spreadsheets").put(currentSpreadsheet);
+        tx.oncomplete = ()=>{ if(onComplete) onComplete(); };
+        tx.onerror = e=>console.error("Failed to save sheet:", e.target.error);
+    }catch(err){
+        console.error("saveCurrentSpreadsheet failed:", err);
+    }
+}
+
+function scheduleSpreadsheetSave(){
+    if(spreadsheetSaveTimer) clearTimeout(spreadsheetSaveTimer);
+    spreadsheetSaveTimer = setTimeout(()=>{
+        spreadsheetSaveTimer = null;
+        saveCurrentSpreadsheet();
+    }, 400);
+}
+
+// Immediately writes any pending debounced change instead of waiting for the
+// timer, so switching sheets, switching databases, or closing the tab right
+// after an edit can't silently lose that last change.
+function flushSpreadsheetSave(){
+    if(spreadsheetSaveTimer){
+        clearTimeout(spreadsheetSaveTimer);
+        spreadsheetSaveTimer = null;
+        saveCurrentSpreadsheet();
+    }
+}
+
+window.addEventListener("beforeunload", flushSpreadsheetSave);
+document.addEventListener("visibilitychange", ()=>{
+    if(document.visibilityState === "hidden") flushSpreadsheetSave();
+});
+
+function clearCurrentSpreadsheet(){
+    if(!currentSpreadsheet) return;
+    if(!confirm("Clear every cell in this sheet? This cannot be undone.")) return;
+    currentSpreadsheet.cells = {};
+    saveCurrentSpreadsheet();
+    renderSpreadsheetGrid();
+    updateFormulaBar();
+}
+
+function addSpreadsheetRows(count){
+    if(!currentSpreadsheet) return;
+    currentSpreadsheet.rows += count;
+    saveCurrentSpreadsheet();
+    renderSpreadsheetGrid();
+}
+
+function addSpreadsheetColumns(count){
+    if(!currentSpreadsheet) return;
+    currentSpreadsheet.cols += count;
+    saveCurrentSpreadsheet();
+    renderSpreadsheetGrid();
+}
+
+// ---- Formula evaluation ----
+// Cells are plain text unless they start with "=", in which case the rest is
+// evaluated as a formula. Supports +, -, *, /, parentheses, other cell
+// references (e.g. =A1+B2*2), and SUM/AVERAGE/MIN/MAX/COUNT over a range
+// (e.g. =SUM(A1:A5)). The expression is sanitized to arithmetic characters
+// only before being evaluated, so it can't execute arbitrary code.
+
+function getCellRaw(ref){
+    return (currentSpreadsheet.cells[ref] || "");
+}
+
+function getCellDisplayValue(ref, visited){
+    visited = visited || new Set();
+    const raw = getCellRaw(ref).trim();
+    if(raw === "") return "";
+    if(raw[0] !== "="){
+        return raw;
+    }
+
+    if(visited.has(ref)) return "#CYCLE!";
+    visited.add(ref);
+    let result;
+    try{
+        result = evaluateFormula(raw.slice(1), visited);
+    }catch(err){
+        result = "#ERR!";
+    }
+    visited.delete(ref);
+    return result;
+}
+
+function getRangeValues(startRef, endRef, visited){
+    const s = parseCellRef(startRef);
+    const e = parseCellRef(endRef);
+    if(!s || !e) return [];
+
+    const r1 = Math.min(s.row, e.row), r2 = Math.max(s.row, e.row);
+    const c1 = Math.min(s.col, e.col), c2 = Math.max(s.col, e.col);
+    const values = [];
+
+    for(let r = r1; r <= r2; r++){
+        for(let c = c1; c <= c2; c++){
+            const v = getCellDisplayValue(cellRefAt(r, c), visited);
+            const num = parseFloat(v);
+            if(v !== "" && !isNaN(num)) values.push(num);
+        }
+    }
+    return values;
+}
+
+function evaluateFormula(formula, visited){
+    let expr = formula.toUpperCase();
+
+    const funcRangeRe = /\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT)\(\s*([A-Z]+\d+)\s*:\s*([A-Z]+\d+)\s*\)/;
+    let guard = 0;
+    let match;
+    while((match = funcRangeRe.exec(expr)) && guard < 100){
+        guard++;
+        const [full, fn, startRef, endRef] = match;
+        const values = getRangeValues(startRef, endRef, visited);
+        let result;
+        switch(fn){
+            case "SUM": result = values.reduce((a,b)=>a+b, 0); break;
+            case "AVERAGE": case "AVG": result = values.length ? values.reduce((a,b)=>a+b,0)/values.length : 0; break;
+            case "MIN": result = values.length ? Math.min(...values) : 0; break;
+            case "MAX": result = values.length ? Math.max(...values) : 0; break;
+            case "COUNT": result = values.length; break;
+            default: result = 0;
+        }
+        expr = expr.slice(0, match.index) + "(" + result + ")" + expr.slice(match.index + full.length);
+    }
+
+    expr = expr.replace(/\b([A-Z]+\d+)\b/g, (m, ref)=>{
+        const v = getCellDisplayValue(ref, visited);
+        const num = parseFloat(v);
+        return "(" + (isNaN(num) ? 0 : num) + ")";
+    });
+
+    if(expr.trim() === "") return "";
+    if(!/^[0-9+\-*/().\s]*$/.test(expr)) return "#ERR!";
+
+    let result;
+    try{
+        result = Function('"use strict"; return (' + expr + ');')();
+    }catch(err){
+        return "#ERR!";
+    }
+
+    if(typeof result !== "number" || !isFinite(result)) return "#ERR!";
+    return Math.round(result * 1e10) / 1e10;
+}
+
+// ---- Grid rendering + interaction ----
+
+function renderSpreadsheetGrid(){
+    if(!currentSpreadsheet) return;
+    const table = document.getElementById("spreadsheetGrid");
+    const rows = currentSpreadsheet.rows;
+    const cols = currentSpreadsheet.cols;
+
+    let html = "<thead><tr><th class=\"corner-head\"></th>";
+    for(let c = 0; c < cols; c++){
+        html += `<th>${colIndexToLetter(c)}</th>`;
+    }
+    html += "</tr></thead><tbody>";
+
+    for(let r = 0; r < rows; r++){
+        html += `<tr><td class="row-head">${r+1}</td>`;
+        for(let c = 0; c < cols; c++){
+            const ref = cellRefAt(r, c);
+            const display = escapeHtml(String(getCellDisplayValue(ref)));
+            html += `<td class="cell-wrap"><input type="text" class="cell-input" data-ref="${ref}" value="${display}"></td>`;
+        }
+        html += "</tr>";
+    }
+    html += "</tbody>";
+
+    table.innerHTML = html;
+    document.getElementById("spreadsheetSizeLabel").textContent = `${rows} rows x ${cols} columns`;
+
+    table.querySelectorAll("input.cell-input").forEach(input=>{
+        input.addEventListener("focus", onCellFocus);
+        input.addEventListener("blur", onCellBlur);
+        input.addEventListener("keydown", onCellKeydown);
+    });
+
+    highlightSelectedCell();
+}
+
+function onCellFocus(e){
+    const ref = e.target.dataset.ref;
+    selectedCellRef = ref;
+    e.target.value = getCellRaw(ref);
+    updateFormulaBar();
+    highlightSelectedCell();
+}
+
+function onCellBlur(e){
+    commitCell(e.target.dataset.ref, e.target.value);
+}
+
+function commitCell(ref, value){
+    if(!currentSpreadsheet) return;
+    if(value.trim() === ""){
+        delete currentSpreadsheet.cells[ref];
+    }else{
+        currentSpreadsheet.cells[ref] = value;
+    }
+    scheduleSpreadsheetSave();
+    // Update displayed values in place rather than rebuilding the whole
+    // table: rebuilding here would destroy/recreate the DOM node the browser
+    // is in the middle of focusing (e.g. right after a click on another
+    // cell), which silently cancels that focus change.
+    refreshSpreadsheetGridValues();
+}
+
+function refreshSpreadsheetGridValues(){
+    if(!currentSpreadsheet) return;
+    const active = document.activeElement;
+    const activeRef = (active && active.classList && active.classList.contains("cell-input")) ? active.dataset.ref : null;
+
+    document.querySelectorAll("#spreadsheetGrid input.cell-input").forEach(input=>{
+        if(input.dataset.ref === activeRef) return; // leave the cell being edited alone
+        input.value = String(getCellDisplayValue(input.dataset.ref));
+    });
+}
+
+function onCellKeydown(e){
+    const ref = e.target.dataset.ref;
+    const pos = parseCellRef(ref);
+    if(!pos) return;
+
+    const moveTo = (row, col)=>{
+        if(row < 0 || col < 0) return;
+        if(row >= currentSpreadsheet.rows) addSpreadsheetRows(1);
+        if(col >= currentSpreadsheet.cols) addSpreadsheetColumns(1);
+        commitCell(ref, e.target.value);
+        focusCell(cellRefAt(row, col));
+    };
+
+    if(e.key === "Enter"){
+        e.preventDefault();
+        moveTo(pos.row + 1, pos.col);
+    }else if(e.key === "ArrowUp" && e.altKey === false && e.ctrlKey === false){
+        // allow normal text cursor movement inside the value; only jump
+        // cell when the field has no selection to move within
+    }else if(e.key === "Escape"){
+        e.target.value = getCellDisplayValue(ref);
+        e.target.blur();
+    }
+}
+
+function focusCell(ref){
+    const input = document.querySelector(`#spreadsheetGrid input[data-ref="${ref}"]`);
+    if(input){
+        input.focus();
+        input.select();
+    }
+}
+
+function highlightSelectedCell(){
+    document.querySelectorAll("#spreadsheetGrid input.cell-input").forEach(i=>{
+        i.classList.toggle("selected", i.dataset.ref === selectedCellRef);
+    });
+}
+
+function updateFormulaBar(){
+    document.getElementById("formulaBarRef").textContent = selectedCellRef;
+    document.getElementById("formulaBarInput").value = currentSpreadsheet ? getCellRaw(selectedCellRef) : "";
+}
+
+document.getElementById("formulaBarInput").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+        e.preventDefault();
+        commitCell(selectedCellRef, e.target.value);
+        focusCell(selectedCellRef);
+    }
+});
+
+document.getElementById("formulaBarInput").addEventListener("blur", (e)=>{
+    if(currentSpreadsheet) commitCell(selectedCellRef, e.target.value);
+});
+
+function exportCurrentSpreadsheetCSV(){
+    if(!currentSpreadsheet) return;
+
+    const rows = currentSpreadsheet.rows;
+    const cols = currentSpreadsheet.cols;
+    const lines = [];
+
+    for(let r = 0; r < rows; r++){
+        const cells = [];
+        for(let c = 0; c < cols; c++){
+            const v = String(getCellDisplayValue(cellRefAt(r, c)));
+            cells.push(escapeCsvValue(v));
+        }
+        lines.push(cells.join(","));
+    }
+
+    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = sanitizeFilename(currentSpreadsheet.name) + ".csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
 }
 
 // Plain-text record format:
@@ -2688,6 +4330,1197 @@ function downloadAll(){
 
     URL.revokeObjectURL(a.href);
 }
+
+// ---------- Library ----------
+// A catalog of standalone entries stored in this database's "libraryItems"
+// object store, alongside records/keywords/spreadsheets. Each entry is
+// { id, name, customFields: {key:value,...}, createdAt, updatedAt } -- no
+// message body or character sheet, just whatever fields you define. Reuses
+// the same custom-field-row markup/CSS as the record editor for a familiar
+// feel, but keeps its own separate container/state.
+
+let allLibraryItems = [];
+let editingLibraryId = null;
+
+const libraryForm = document.getElementById("libraryForm");
+const librarySubmitBtn = document.getElementById("librarySubmitBtn");
+const libraryCancelBtn = document.getElementById("libraryCancelBtn");
+const libraryNameInput = document.getElementById("libraryName");
+const libraryFieldsContainer = document.getElementById("libraryFieldsContainer");
+const addLibraryFieldBtn = document.getElementById("addLibraryFieldBtn");
+
+function addLibraryFieldRow(name = "", value = ""){
+    const row = document.createElement("div");
+    row.className = "custom-field-row";
+
+    row.innerHTML = `
+        <input type="text" class="field-name" placeholder="Field name" value="${escapeHtml(name)}">
+        <input type="text" class="field-value" placeholder="Value" value="${escapeHtml(value)}">
+        <button type="button" class="remove-field-btn" title="Remove field">&times;</button>
+    `;
+
+    row.querySelector(".remove-field-btn").onclick = () => row.remove();
+
+    libraryFieldsContainer.appendChild(row);
+}
+
+addLibraryFieldBtn.onclick = () => addLibraryFieldRow();
+
+function getLibraryFieldsFromForm(){
+    const fields = {};
+
+    libraryFieldsContainer.querySelectorAll(".custom-field-row").forEach(row=>{
+        const name = row.querySelector(".field-name").value.trim();
+        const value = row.querySelector(".field-value").value;
+        if(name) fields[name] = value;
+    });
+
+    return fields;
+}
+
+function clearLibraryFieldRows(){
+    libraryFieldsContainer.innerHTML = "";
+}
+
+function loadLibraryItems(){
+    if(!db) return;
+    const tx = db.transaction("libraryItems", "readonly");
+    const req = tx.objectStore("libraryItems").getAll();
+
+    req.onsuccess = ()=>{
+        allLibraryItems = req.result;
+        renderLibraryItems();
+    };
+
+    req.onerror = e=>{
+        console.error("Failed to load library items:", e.target.error);
+    };
+}
+
+libraryForm.onsubmit = (e)=>{
+    e.preventDefault();
+
+    const name = libraryNameInput.value.trim();
+    if(!name) return;
+
+    if(!db){
+        alert("The database isn't ready yet. Please wait a moment and try Save Entry again.");
+        return;
+    }
+
+    const data = {
+        name,
+        customFields: getLibraryFieldsFromForm(),
+        updatedAt: getCurrentTimestamp()
+    };
+
+    try{
+        if(editingLibraryId !== null){
+            const tx = db.transaction("libraryItems","readwrite");
+            tx.objectStore("libraryItems").put({ ...data, id: editingLibraryId });
+            tx.oncomplete = ()=>{ exitLibraryEditMode(); loadLibraryItems(); };
+            tx.onerror = e=>alert("Failed to update entry: "+e.target.error);
+        }else{
+            data.createdAt = data.updatedAt;
+            const tx = db.transaction("libraryItems","readwrite");
+            tx.objectStore("libraryItems").add(data);
+            tx.oncomplete = loadLibraryItems;
+            tx.onerror = e=>alert("Failed to save entry: "+e.target.error);
+        }
+    }catch(err){
+        console.error("library save failed:", err);
+        alert("Failed to save entry: "+err.message+"\n\nTry reloading the page.");
+        return;
+    }
+
+    libraryForm.reset();
+    clearLibraryFieldRows();
+};
+
+libraryCancelBtn.onclick = ()=>{
+    exitLibraryEditMode();
+    libraryForm.reset();
+    clearLibraryFieldRows();
+};
+
+function enterLibraryEditMode(entry){
+    editingLibraryId = entry.id;
+    libraryNameInput.value = entry.name;
+    clearLibraryFieldRows();
+    Object.entries(entry.customFields || {}).forEach(([k,v])=>addLibraryFieldRow(k, v));
+    librarySubmitBtn.textContent = "Update Entry";
+    libraryCancelBtn.style.display = "inline-block";
+    showTab("library");
+    window.scrollTo({top:0, behavior:"smooth"});
+    renderLibraryItems();
+}
+
+function exitLibraryEditMode(){
+    editingLibraryId = null;
+    librarySubmitBtn.textContent = "Save Entry";
+    libraryCancelBtn.style.display = "none";
+}
+
+function editLibraryItemById(id){
+    const entry = allLibraryItems.find(l=>l.id===id);
+    if(entry) enterLibraryEditMode(entry);
+}
+
+function deleteLibraryItem(id){
+    if(!confirm("Delete this library entry?")) return;
+
+    const tx = db.transaction("libraryItems","readwrite");
+    tx.objectStore("libraryItems").delete(id);
+    tx.oncomplete = ()=>{
+        if(id === editingLibraryId){
+            exitLibraryEditMode();
+            libraryForm.reset();
+            clearLibraryFieldRows();
+        }
+        loadLibraryItems();
+    };
+    tx.onerror = e=>alert("Failed to delete entry: "+e.target.error);
+}
+
+// Drops a library entry's fields straight into the record Editor's custom
+// fields, so the library can be used as a quick source of reusable field
+// sets while writing a record.
+function insertLibraryItemIntoRecord(id){
+    const entry = allLibraryItems.find(l=>l.id===id);
+    if(!entry) return;
+
+    Object.entries(entry.customFields || {}).forEach(([k,v])=>{
+        addCustomFieldRow(k, v);
+        rememberCustomFieldDefs([k]);
+    });
+
+    showTab("editor");
+}
+
+function renderLibraryItems(){
+    const container = document.getElementById("libraryItems");
+    const query = document.getElementById("librarySearchBox").value.trim().toLowerCase();
+
+    const filtered = allLibraryItems.filter(l=>{
+        if(!query) return true;
+        if((l.name || "").toLowerCase().includes(query)) return true;
+        return Object.entries(l.customFields || {}).some(([k,v])=>
+            k.toLowerCase().includes(query) || String(v).toLowerCase().includes(query)
+        );
+    });
+
+    filtered.sort((a,b)=> (a.name || "").localeCompare(b.name || "", undefined, {sensitivity:"base"}));
+
+    container.innerHTML = "";
+
+    if(filtered.length === 0){
+        container.innerHTML = `<p class="empty-msg">No library entries yet.</p>`;
+        return;
+    }
+
+    filtered.forEach(l=>{
+        const div = document.createElement("div");
+        div.className = "library-item" + (l.id === editingLibraryId ? " editing" : "");
+
+        const fieldsHtml = Object.entries(l.customFields || {})
+            .map(([k,v])=>`<div class="library-field-row"><b>${escapeHtml(k)}:</b> ${escapeHtml(v)}</div>`)
+            .join("");
+
+        div.innerHTML = `
+        <div class="library-name">${escapeHtml(l.name)}</div>
+        <div class="library-fields">${fieldsHtml || `<span class="empty-msg">No fields yet.</span>`}</div>
+        <div class="library-actions">
+            <button onclick="insertLibraryItemIntoRecord(${l.id})" class="btn-info">Add to Record</button>
+            <button onclick="editLibraryItemById(${l.id})">Edit</button>
+            <button onclick="deleteLibraryItem(${l.id})" class="btn-danger">Delete</button>
+        </div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+const librarySearchBox = document.getElementById("librarySearchBox");
+librarySearchBox.addEventListener("input", renderLibraryItems);
+librarySearchBox.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.keyCode === 13){
+        e.preventDefault();
+        renderLibraryItems();
+    }
+});
+
+// ---------- Folders ----------
+// Named, colored groups used to organize the freestanding Files store
+// below. Each folder is { id, name, color, parentId, createdAt, updatedAt }
+// in its own "folders" object store -- parentId points at another folder
+// (or is null for a top-level folder), so folders can be nested arbitrarily
+// deep, like a real directory tree. Files carry an optional folderId
+// pointing at one; deleting a folder un-assigns (never deletes) the files
+// in it and its subfolders, and removes the subfolders themselves.
+
+let allFolders = [];
+let editingFolderId = null;
+let currentFileFolderFilter = "all"; // "all" | "none" | a folder id
+
+const folderForm = document.getElementById("folderForm");
+const folderSubmitBtn = document.getElementById("folderSubmitBtn");
+const folderCancelBtn = document.getElementById("folderCancelBtn");
+const folderNameInput = document.getElementById("folderNameInput");
+const folderColorInput = document.getElementById("folderColorInput");
+const folderParentSelect = document.getElementById("folderParentSelect");
+const folderManageList = document.getElementById("folderManageList");
+const fileFolderSelect = document.getElementById("fileFolderSelect");
+const fileFolderChips = document.getElementById("fileFolderChips");
+const fileFolderBreadcrumb = document.getElementById("fileFolderBreadcrumb");
+
+const DEFAULT_FOLDER_COLOR = "#4a90d9";
+const FOLDER_INDENT_PX = 18;
+
+function getFolderById(id){
+    if(id === null || id === undefined) return null;
+    return allFolders.find(fo=>fo.id===id) || null;
+}
+
+// A folder's parentId is trusted only if it still points at a real folder --
+// this guards the tree-building helpers below against dangling references
+// (e.g. left over from a partial import) so they degrade to "top level"
+// instead of silently dropping the folder from the tree entirely.
+function getEffectiveParentId(folder){
+    if(!folder || folder.parentId === null || folder.parentId === undefined) return null;
+    return allFolders.some(fo=>fo.id===folder.parentId) ? folder.parentId : null;
+}
+
+// Walks up the parent chain to the root, returning ancestors first
+// (root, ..., folder itself). A visited-set guards against a cycle that
+// could otherwise infinite-loop (shouldn't happen via the UI, which
+// prevents creating one, but data can be hand-edited or imported).
+function getFolderPath(folder){
+    const path = [];
+    const visited = new Set();
+    let current = folder;
+    while(current && !visited.has(current.id)){
+        path.unshift(current);
+        visited.add(current.id);
+        const parentId = getEffectiveParentId(current);
+        current = parentId !== null ? getFolderById(parentId) : null;
+    }
+    return path;
+}
+
+// All descendant ids of a folder (children, grandchildren, ...), not
+// including the folder itself -- used for cascade delete and for treating
+// "select this folder" as "this folder and everything nested inside it".
+function getDescendantFolderIds(id){
+    const ids = [];
+    const stack = allFolders.filter(fo=>getEffectiveParentId(fo)===id).map(fo=>fo.id);
+    while(stack.length){
+        const next = stack.pop();
+        ids.push(next);
+        allFolders.filter(fo=>getEffectiveParentId(fo)===next).forEach(fo=>stack.push(fo.id));
+    }
+    return ids;
+}
+
+// Depth-first, alphabetical-at-each-level ordering of the whole folder
+// tree -- the shape used by every tree UI below (management list, parent
+// picker, filter tree).
+function buildFolderTreeOrder(){
+    const out = [];
+    function walk(parentId, depth){
+        allFolders
+            .filter(fo=>getEffectiveParentId(fo)===parentId)
+            .sort((a,b)=>(a.name||"").localeCompare(b.name||"", undefined, {sensitivity:"base"}))
+            .forEach(fo=>{
+                out.push({ folder:fo, depth });
+                walk(fo.id, depth+1);
+            });
+    }
+    walk(null, 0);
+    return out;
+}
+
+function loadFolders(){
+    if(!db) return;
+    const tx = db.transaction("folders", "readonly");
+    const req = tx.objectStore("folders").getAll();
+
+    req.onsuccess = ()=>{
+        allFolders = req.result;
+        if(currentFileFolderFilter !== "all" && currentFileFolderFilter !== "none" && !allFolders.some(fo=>fo.id===currentFileFolderFilter)){
+            currentFileFolderFilter = "all"; // the active filter's folder was deleted elsewhere
+        }
+        renderFolderManageList();
+        renderFolderParentSelect();
+        renderFolderSelect();
+        renderFiles();
+    };
+
+    req.onerror = e=>{
+        console.error("Failed to load folders:", e.target.error);
+    };
+}
+
+folderForm.onsubmit = (e)=>{
+    e.preventDefault();
+
+    const name = folderNameInput.value.trim();
+    if(!name) return;
+
+    if(!db){
+        alert("The database isn't ready yet. Please wait a moment and try Add Folder again.");
+        return;
+    }
+
+    const parentRaw = folderParentSelect.value;
+    const data = {
+        name,
+        color: folderColorInput.value || DEFAULT_FOLDER_COLOR,
+        parentId: parentRaw ? Number(parentRaw) : null,
+        updatedAt: getCurrentTimestamp()
+    };
+
+    try{
+        if(editingFolderId !== null){
+            const tx = db.transaction("folders","readwrite");
+            tx.objectStore("folders").get(editingFolderId).onsuccess = (ev)=>{
+                const existing = ev.target.result || {};
+                const tx2 = db.transaction("folders","readwrite");
+                tx2.objectStore("folders").put({ ...data, id: editingFolderId, createdAt: existing.createdAt || data.updatedAt });
+                tx2.oncomplete = ()=>{ exitFolderEditMode(); loadFolders(); };
+                tx2.onerror = e2=>alert("Failed to update folder: "+e2.target.error);
+            };
+        }else{
+            data.createdAt = data.updatedAt;
+            const tx = db.transaction("folders","readwrite");
+            tx.objectStore("folders").add(data);
+            tx.oncomplete = loadFolders;
+            tx.onerror = e=>alert("Failed to save folder: "+e.target.error);
+        }
+    }catch(err){
+        console.error("folder save failed:", err);
+        alert("Failed to save folder: "+err.message+"\n\nTry reloading the page.");
+        return;
+    }
+
+    folderForm.reset();
+    folderColorInput.value = DEFAULT_FOLDER_COLOR;
+    exitFolderEditMode();
+};
+
+folderCancelBtn.onclick = ()=>{
+    exitFolderEditMode();
+    folderForm.reset();
+    folderColorInput.value = DEFAULT_FOLDER_COLOR;
+};
+
+function enterFolderEditMode(folder){
+    editingFolderId = folder.id;
+    folderNameInput.value = folder.name;
+    folderColorInput.value = folder.color || DEFAULT_FOLDER_COLOR;
+    folderSubmitBtn.textContent = "Update Folder";
+    folderCancelBtn.style.display = "inline-block";
+    renderFolderParentSelect();
+    folderParentSelect.value = (folder.parentId !== null && folder.parentId !== undefined) ? String(folder.parentId) : "";
+    renderFolderManageList();
+}
+
+function exitFolderEditMode(){
+    editingFolderId = null;
+    folderSubmitBtn.textContent = "Add Folder";
+    folderCancelBtn.style.display = "none";
+    renderFolderParentSelect();
+    renderFolderManageList();
+}
+
+function editFolderById(id){
+    const folder = getFolderById(id);
+    if(folder) enterFolderEditMode(folder);
+}
+
+function deleteFolder(id){
+    const folder = getFolderById(id);
+    const descendantIds = getDescendantFolderIds(id);
+    const allTargetIds = [id, ...descendantIds];
+    const fileCount = allFiles.filter(f=>allTargetIds.includes(f.folderId)).length;
+
+    let warning = `Delete the folder "${folder ? folder.name : ""}"?`;
+    if(descendantIds.length > 0){
+        warning += ` This also deletes ${descendantIds.length} subfolder${descendantIds.length===1?"":"s"} inside it.`;
+    }
+    if(fileCount > 0){
+        warning += ` ${fileCount} file${fileCount===1?"":"s"} inside will become uncategorized, not deleted.`;
+    }
+    if(!confirm(warning)) return;
+
+    const tx = db.transaction("folders","readwrite");
+    const store = tx.objectStore("folders");
+    allTargetIds.forEach(fid=> store.delete(fid));
+    tx.oncomplete = ()=>{
+        if(allTargetIds.includes(editingFolderId)){
+            exitFolderEditMode();
+            folderForm.reset();
+            folderColorInput.value = DEFAULT_FOLDER_COLOR;
+        }
+        if(allTargetIds.includes(currentFileFolderFilter)){
+            currentFileFolderFilter = "all";
+        }
+
+        // Un-assign any files that pointed at this folder or one of its
+        // now-deleted subfolders.
+        const affected = allFiles.filter(f=>allTargetIds.includes(f.folderId));
+        if(affected.length === 0){
+            loadFolders();
+            return;
+        }
+
+        const ftx = db.transaction("files","readwrite");
+        const fstore = ftx.objectStore("files");
+        affected.forEach(f=> fstore.put({ ...f, folderId: null }));
+        ftx.oncomplete = ()=>{ loadFolders(); loadFiles(); };
+        ftx.onerror = e=>{
+            console.error("Failed to unassign files from deleted folder:", e.target.error);
+            loadFolders();
+            loadFiles();
+        };
+    };
+    tx.onerror = e=>alert("Failed to delete folder: "+e.target.error);
+}
+
+function renderFolderManageList(){
+    if(allFolders.length === 0){
+        folderManageList.innerHTML = `<p class="empty-msg">No folders yet &mdash; add one above to start organizing your files.</p>`;
+        return;
+    }
+
+    const order = buildFolderTreeOrder();
+
+    folderManageList.innerHTML = order.map(({folder:fo, depth})=>{
+        const descendantIds = getDescendantFolderIds(fo.id);
+        const count = allFiles.filter(f=>[fo.id, ...descendantIds].includes(f.folderId)).length;
+        return `
+        <div class="folder-manage-row${fo.id===editingFolderId ? " editing" : ""}" style="margin-left:${depth*FOLDER_INDENT_PX}px;">
+            <span class="folder-swatch" style="background:${escapeHtml(fo.color || DEFAULT_FOLDER_COLOR)};"></span>
+            <span class="folder-manage-name">${escapeHtml(fo.name)}</span>
+            <span class="folder-manage-count">${count} file${count===1?"":"s"}</span>
+            <span class="folder-manage-actions">
+                <button type="button" onclick="editFolderById(${fo.id})">Edit</button>
+                <button type="button" onclick="deleteFolder(${fo.id})" class="btn-danger">Delete</button>
+            </span>
+        </div>
+        `;
+    }).join("");
+}
+
+// Parent picker for the folder create/edit form. When editing, a folder
+// can't become its own parent, and can't be moved under one of its own
+// descendants (that would create a cycle) -- both are excluded here.
+function renderFolderParentSelect(){
+    const currentValue = folderParentSelect.value;
+    const excluded = editingFolderId !== null
+        ? new Set([editingFolderId, ...getDescendantFolderIds(editingFolderId)])
+        : new Set();
+
+    const order = buildFolderTreeOrder().filter(({folder})=>!excluded.has(folder.id));
+
+    folderParentSelect.innerHTML = `<option value="">Top level (no parent)</option>` +
+        order.map(({folder, depth})=>
+            `<option value="${folder.id}">${"&nbsp;&nbsp;".repeat(depth)}${depth>0?"&#8627; ":""}${escapeHtml(folder.name)}</option>`
+        ).join("");
+
+    if(order.some(({folder})=>String(folder.id)===currentValue)) folderParentSelect.value = currentValue;
+}
+
+function renderFolderSelect(){
+    const currentValue = fileFolderSelect.value;
+    const order = buildFolderTreeOrder();
+    fileFolderSelect.innerHTML = `<option value="">No folder</option>` +
+        order.map(({folder, depth})=>
+            `<option value="${folder.id}">${"&nbsp;&nbsp;".repeat(depth)}${depth>0?"&#8627; ":""}${escapeHtml(folder.name)}</option>`
+        ).join("");
+    if(order.some(({folder})=>String(folder.id)===currentValue)) fileFolderSelect.value = currentValue;
+}
+
+// Selecting a folder in the filter tree shows files in that folder *and*
+// everything nested inside it, matching how a normal file manager's
+// folder view behaves.
+function renderFileFolderChips(){
+    const allCount = allFiles.length;
+    const noneCount = allFiles.filter(f=>!f.folderId).length;
+    const order = buildFolderTreeOrder();
+
+    const chips = [
+        `<span class="folder-chip${currentFileFolderFilter==="all"?" active":""}" onclick="setFileFolderFilter('all')">All <span class="folder-chip-count">${allCount}</span></span>`,
+        `<span class="folder-chip${currentFileFolderFilter==="none"?" active":""}" onclick="setFileFolderFilter('none')">Uncategorized <span class="folder-chip-count">${noneCount}</span></span>`
+    ];
+
+    order.forEach(({folder:fo, depth})=>{
+        const descendantIds = getDescendantFolderIds(fo.id);
+        const count = allFiles.filter(f=>[fo.id, ...descendantIds].includes(f.folderId)).length;
+        chips.push(`
+            <span class="folder-chip${currentFileFolderFilter===fo.id?" active":""}" style="margin-left:${depth*FOLDER_INDENT_PX}px;" onclick="setFileFolderFilter(${fo.id})">
+                <span class="folder-swatch" style="background:${escapeHtml(fo.color || DEFAULT_FOLDER_COLOR)};"></span>
+                ${depth>0?"&#8627; ":""}${escapeHtml(fo.name)} <span class="folder-chip-count">${count}</span>
+            </span>
+        `);
+    });
+
+    fileFolderChips.innerHTML = chips.join("");
+
+    renderFileFolderBreadcrumb();
+}
+
+function renderFileFolderBreadcrumb(){
+    if(!fileFolderBreadcrumb) return;
+
+    if(currentFileFolderFilter === "all" || currentFileFolderFilter === "none"){
+        fileFolderBreadcrumb.innerHTML = "";
+        return;
+    }
+
+    const folder = getFolderById(currentFileFolderFilter);
+    if(!folder){
+        fileFolderBreadcrumb.innerHTML = "";
+        return;
+    }
+
+    const path = getFolderPath(folder);
+    const parts = [`<span class="breadcrumb-link" onclick="setFileFolderFilter('all')">All</span>`];
+    path.forEach(fo=>{
+        parts.push(`<span class="breadcrumb-link" onclick="setFileFolderFilter(${fo.id})">${escapeHtml(fo.name)}</span>`);
+    });
+    fileFolderBreadcrumb.innerHTML = parts.join(`<span class="breadcrumb-sep">/</span>`);
+}
+
+function setFileFolderFilter(value){
+    currentFileFolderFilter = value;
+    renderFiles();
+}
+
+// ---------- Files ----------
+// A simple file manager: a browsable overview of every item stored in this
+// database across all the other tabs (records, keywords, spreadsheets,
+// library entries, drawings), plus its own "files" object store for
+// freestanding plain-text/code files -- each is { id, name, content,
+// folderId, createdAt, updatedAt }, edited in-app with a built-in textarea
+// editor. folderId points at an entry in the "folders" store above, or is
+// null/absent for an uncategorized file.
+
+let allFiles = [];
+let editingFileId = null;
+
+const fileForm = document.getElementById("fileForm");
+const fileSubmitBtn = document.getElementById("fileSubmitBtn");
+const fileCancelBtn = document.getElementById("fileCancelBtn");
+const fileNameInput = document.getElementById("fileName");
+const fileContentInput = document.getElementById("fileContent");
+
+function loadFiles(){
+    if(!db) return;
+    const tx = db.transaction("files", "readonly");
+    const req = tx.objectStore("files").getAll();
+
+    req.onsuccess = ()=>{
+        allFiles = req.result;
+        renderFiles();
+        renderFileOverview();
+        renderFolderManageList();
+    };
+
+    req.onerror = e=>{
+        console.error("Failed to load files:", e.target.error);
+    };
+}
+
+fileForm.onsubmit = (e)=>{
+    e.preventDefault();
+
+    const name = fileNameInput.value.trim();
+    if(!name) return;
+
+    if(!db){
+        alert("The database isn't ready yet. Please wait a moment and try Save File again.");
+        return;
+    }
+
+    const folderIdRaw = fileFolderSelect.value;
+    const data = {
+        name,
+        content: fileContentInput.value,
+        folderId: folderIdRaw ? Number(folderIdRaw) : null,
+        updatedAt: getCurrentTimestamp()
+    };
+
+    try{
+        if(editingFileId !== null){
+            const tx = db.transaction("files","readwrite");
+            tx.objectStore("files").get(editingFileId).onsuccess = (ev)=>{
+                const existing = ev.target.result || {};
+                const tx2 = db.transaction("files","readwrite");
+                tx2.objectStore("files").put({ ...data, id: editingFileId, createdAt: existing.createdAt || data.updatedAt });
+                tx2.oncomplete = ()=>{ exitFileEditMode(); loadFiles(); };
+                tx2.onerror = e2=>alert("Failed to update file: "+e2.target.error);
+            };
+        }else{
+            data.createdAt = data.updatedAt;
+            const tx = db.transaction("files","readwrite");
+            tx.objectStore("files").add(data);
+            tx.oncomplete = loadFiles;
+            tx.onerror = e=>alert("Failed to save file: "+e.target.error);
+        }
+    }catch(err){
+        console.error("file save failed:", err);
+        alert("Failed to save file: "+err.message+"\n\nTry reloading the page.");
+        return;
+    }
+
+    fileForm.reset();
+    exitFileEditMode();
+};
+
+fileCancelBtn.onclick = ()=>{
+    exitFileEditMode();
+    fileForm.reset();
+};
+
+function enterFileEditMode(entry){
+    editingFileId = entry.id;
+    fileNameInput.value = entry.name;
+    fileContentInput.value = entry.content || "";
+    fileFolderSelect.value = (entry.folderId !== null && entry.folderId !== undefined) ? String(entry.folderId) : "";
+    fileSubmitBtn.textContent = "Update File";
+    fileCancelBtn.style.display = "inline-block";
+    showTab("files");
+    window.scrollTo({top:0, behavior:"smooth"});
+    renderFiles();
+}
+
+function exitFileEditMode(){
+    editingFileId = null;
+    fileSubmitBtn.textContent = "Save File";
+    fileCancelBtn.style.display = "none";
+    fileFolderSelect.value = "";
+    renderFiles();
+}
+
+function editFileById(id){
+    const entry = allFiles.find(f=>f.id===id);
+    if(entry) enterFileEditMode(entry);
+}
+
+function deleteFile(id){
+    if(!confirm("Delete this file?")) return;
+
+    const tx = db.transaction("files","readwrite");
+    tx.objectStore("files").delete(id);
+    tx.oncomplete = ()=>{
+        if(id === editingFileId){
+            exitFileEditMode();
+            fileForm.reset();
+        }
+        loadFiles();
+    };
+    tx.onerror = e=>alert("Failed to delete file: "+e.target.error);
+}
+
+function downloadFile(id){
+    const entry = allFiles.find(f=>f.id===id);
+    if(!entry) return;
+
+    const blob = new Blob([entry.content || ""], {type:"text/plain;charset=utf-8;"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = entry.name || "untitled.txt";
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function renderFiles(){
+    const container = document.getElementById("filesList");
+    const query = document.getElementById("fileSearchBox").value.trim().toLowerCase();
+
+    renderFileFolderChips();
+
+    // Selecting a folder includes files nested in any of its subfolders too,
+    // matching how a normal file manager's folder view behaves.
+    const folderScopeIds = (currentFileFolderFilter !== "all" && currentFileFolderFilter !== "none")
+        ? [currentFileFolderFilter, ...getDescendantFolderIds(currentFileFolderFilter)]
+        : null;
+
+    const filtered = allFiles.filter(f=>{
+        if(currentFileFolderFilter === "none" && f.folderId){
+            return false;
+        }
+        if(folderScopeIds && !folderScopeIds.includes(f.folderId)){
+            return false;
+        }
+        if(!query) return true;
+        if((f.name || "").toLowerCase().includes(query)) return true;
+        return (f.content || "").toLowerCase().includes(query);
+    });
+
+    filtered.sort((a,b)=> (a.name || "").localeCompare(b.name || "", undefined, {sensitivity:"base"}));
+
+    container.innerHTML = "";
+
+    if(filtered.length === 0){
+        container.innerHTML = allFiles.length === 0
+            ? `<p class="empty-msg">No files yet &mdash; use the editor above to create one.</p>`
+            : `<p class="empty-msg">No files match this folder/search.</p>`;
+        return;
+    }
+
+    filtered.forEach(f=>{
+        const div = document.createElement("div");
+        div.className = "file-item" + (f.id === editingFileId ? " editing" : "");
+
+        const modified = f.updatedAt ? formatTimestamp(f.updatedAt) : (f.createdAt ? formatTimestamp(f.createdAt) : "N/A");
+        const size = (f.content || "").length;
+        const preview = (f.content || "").slice(0, 300);
+        const folder = getFolderById(f.folderId);
+        const folderBadge = folder
+            ? `<span class="file-folder-badge"><span class="folder-swatch" style="background:${escapeHtml(folder.color || DEFAULT_FOLDER_COLOR)};"></span>${getFolderPath(folder).map(fo=>escapeHtml(fo.name)).join(" / ")}</span>`
+            : "";
+
+        div.innerHTML = `
+        <div class="file-item-header">
+            <span class="file-name">&#128196; ${escapeHtml(f.name)}</span>
+            <span class="file-meta">${folderBadge} ${size} chars &middot; modified ${modified}</span>
+        </div>
+        <div class="file-preview">${preview ? escapeHtml(preview) : `<span class="empty-msg">(empty file)</span>`}</div>
+        <div class="file-actions">
+            <button onclick="editFileById(${f.id})">Edit</button>
+            <button onclick="downloadFile(${f.id})">Download</button>
+            <button onclick="deleteFile(${f.id})" class="btn-danger">Delete</button>
+        </div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+const fileSearchBox = document.getElementById("fileSearchBox");
+fileSearchBox.addEventListener("input", renderFiles);
+fileSearchBox.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.keyCode === 13){
+        e.preventDefault();
+        renderFiles();
+    }
+});
+
+// ---------- Files: database overview / browser ----------
+// A read-through view over every store in the current database, so the
+// Files tab doubles as a central index of everything you've added --
+// records, dictionary terms, sheets, library entries, drawings, and files
+// -- each entry clickable to jump straight to it in its own tab.
+
+function renderFileOverview(){
+    const gridEl = document.getElementById("fileOverviewGrid");
+    const listEl = document.getElementById("fileBrowserList");
+    if(!gridEl || !listEl) return;
+
+    const stats = [
+        { label:"Records", count:allRecords.length, tab:"records" },
+        { label:"Dictionary", count:allKeywords.length, tab:"dictionary" },
+        { label:"Sheets", count:allSpreadsheets.length, tab:"spreadsheet" },
+        { label:"Library", count:allLibraryItems.length, tab:"library" },
+        { label:"Drawings", count:allDrawings.length, tab:"drawings" },
+        { label:"Files", count:allFiles.length, tab:"files" },
+        { label:"Folders", count:allFolders.length, tab:"files" }
+    ];
+
+    gridEl.innerHTML = stats.map(s => `
+        <div class="file-overview-stat" onclick="showTab('${s.tab}')">
+            <span class="stat-count">${s.count}</span>
+            <span class="stat-label">${escapeHtml(s.label)}</span>
+        </div>
+    `).join("");
+
+    const items = [];
+
+    allRecords.forEach(r => items.push({
+        icon:"&#128203;", type:"Record", name:r.name || "(untitled)",
+        date:r.updatedAt || r.createdAt, action:`editRecordById(${r.id})`
+    }));
+    allKeywords.forEach(k => items.push({
+        icon:"&#128214;", type:"Dictionary", name:k.term || "(untitled)",
+        date:k.updatedAt || k.createdAt, action:`editKeywordById(${k.id})`
+    }));
+    allSpreadsheets.forEach(s => items.push({
+        icon:"&#128202;", type:"Sheet", name:s.name || "(untitled)",
+        date:s.updatedAt || s.createdAt, action:`showTab('spreadsheet'); switchSpreadsheet(${s.id})`
+    }));
+    allLibraryItems.forEach(l => items.push({
+        icon:"&#128218;", type:"Library", name:l.name || "(untitled)",
+        date:l.updatedAt || l.createdAt, action:`editLibraryItemById(${l.id})`
+    }));
+    allDrawings.forEach(d => items.push({
+        icon:"&#127912;", type:"Drawing", name:d.name || "(untitled)",
+        date:d.updatedAt || d.createdAt, action:`showTab('drawings'); switchDrawing(${d.id})`
+    }));
+    allFiles.forEach(f => {
+        const folder = getFolderById(f.folderId);
+        items.push({
+            icon:"&#128196;", type:"File", name:f.name || "(untitled)",
+            date:f.updatedAt || f.createdAt, action:`editFileById(${f.id})`,
+            folderColor: folder ? (folder.color || DEFAULT_FOLDER_COLOR) : null,
+            folderName: folder ? getFolderPath(folder).map(fo=>fo.name).join(" / ") : null
+        });
+    });
+
+    if(items.length === 0){
+        listEl.innerHTML = `<p class="empty-msg" style="padding:8px;">Nothing saved in this database yet.</p>`;
+        return;
+    }
+
+    items.sort((a,b) => (b.date || "").localeCompare(a.date || ""));
+
+    listEl.innerHTML = items.map(item => `
+        <div class="file-browser-row" onclick="${item.action}">
+            <span class="file-browser-icon">${item.icon}</span>
+            <span class="file-browser-name">${escapeHtml(item.name)}</span>
+            <span class="file-browser-meta">${item.folderColor ? `<span class="folder-swatch" style="background:${escapeHtml(item.folderColor)};"></span> ${escapeHtml(item.folderName)} &middot; ` : ""}${escapeHtml(item.type)}${item.date ? " &middot; " + formatTimestamp(item.date) : ""}</span>
+        </div>
+    `).join("");
+}
+
+// ---------- Drawings ----------
+// Freehand canvas sketches stored in this database's "drawings" object
+// store, following the same pattern as spreadsheets: multiple named
+// drawings, switchable via a dropdown, autosaved a short moment after the
+// user stops drawing. Each drawing is stored as a single PNG data URL --
+// the canvas is kept at a fixed, modest resolution (800x500) specifically
+// so that data URL (and the exported/backed-up JSON that contains it)
+// doesn't balloon in size the way an uncapped or very high-DPI canvas would.
+
+const DRAWING_CANVAS_WIDTH = 800;
+const DRAWING_CANVAS_HEIGHT = 500;
+
+let allDrawings = [];
+let currentDrawing = null;
+let drawingSaveTimer = null;
+let isDrawingStroke = false;
+let drawingLastX = 0;
+let drawingLastY = 0;
+let drawingEraserActive = false;
+
+const drawingCanvas = document.getElementById("drawingCanvas");
+const drawingCtx = drawingCanvas.getContext("2d");
+const drawingColorInput = document.getElementById("drawingColor");
+const drawingBrushSizeInput = document.getElementById("drawingBrushSize");
+const drawingEraserBtn = document.getElementById("drawingEraserBtn");
+
+function loadDrawings(){
+    if(!db) return;
+    const tx = db.transaction("drawings", "readonly");
+    const req = tx.objectStore("drawings").getAll();
+
+    req.onsuccess = ()=>{
+        allDrawings = req.result.sort((a,b)=> (a.name||"").localeCompare(b.name||""));
+
+        if(allDrawings.length === 0){
+            createNewDrawing("Drawing 1");
+            return;
+        }
+
+        renderDrawingSelect();
+
+        const stillExists = currentDrawing && allDrawings.some(d=>d.id === currentDrawing.id);
+        openDrawing(stillExists ? currentDrawing.id : allDrawings[0].id);
+    };
+
+    req.onerror = e=>{
+        console.error("Failed to load drawings:", e.target.error);
+    };
+}
+
+function renderDrawingSelect(){
+    const select = document.getElementById("drawingSelect");
+    const currentId = currentDrawing ? currentDrawing.id : null;
+    select.innerHTML = "";
+    allDrawings.forEach(d=>{
+        const option = document.createElement("option");
+        option.value = d.id;
+        option.textContent = d.name;
+        if(d.id === currentId) option.selected = true;
+        select.appendChild(option);
+    });
+}
+
+// Paints a blank white canvas, then draws the stored PNG on top (if any) --
+// blank first so transparent PNGs (or a brand-new drawing) never show
+// through to whatever was previously on screen.
+function paintDrawingToCanvas(dataUrl){
+    drawingCtx.fillStyle = "#fff";
+    drawingCtx.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+
+    if(!dataUrl) return;
+
+    const img = new Image();
+    img.onload = () => drawingCtx.drawImage(img, 0, 0);
+    img.src = dataUrl;
+}
+
+function openDrawing(id){
+    const found = allDrawings.find(d=>d.id === id);
+    if(!found) return;
+
+    if(currentDrawing && currentDrawing.id !== id) flushDrawingSave();
+
+    currentDrawing = found;
+    drawingCanvas.width = found.width || DRAWING_CANVAS_WIDTH;
+    drawingCanvas.height = found.height || DRAWING_CANVAS_HEIGHT;
+    document.getElementById("drawingNameInput").value = currentDrawing.name;
+    renderDrawingSelect();
+    paintDrawingToCanvas(currentDrawing.dataUrl);
+}
+
+function switchDrawing(idStr){
+    openDrawing(parseInt(idStr, 10));
+}
+
+// Re-paints the current drawing onto the canvas -- used when the Drawings
+// tab becomes visible again, since a canvas that was hidden (display:none)
+// during an image load can end up blank on some mobile browsers.
+function redrawCurrentDrawingCanvas(){
+    if(currentDrawing) paintDrawingToCanvas(currentDrawing.dataUrl);
+}
+
+function createNewDrawing(presetName){
+    if(!db){
+        alert("The database isn't ready yet. Please wait a moment and try again.");
+        return;
+    }
+
+    const name = presetName || (()=>{
+        let n = allDrawings.length + 1;
+        let candidate = `Drawing ${n}`;
+        while(allDrawings.some(d=>d.name === candidate)){
+            n++;
+            candidate = `Drawing ${n}`;
+        }
+        return candidate;
+    })();
+
+    const now = getCurrentTimestamp();
+    const drawing = {
+        name,
+        dataUrl: "",
+        width: DRAWING_CANVAS_WIDTH,
+        height: DRAWING_CANVAS_HEIGHT,
+        createdAt: now,
+        updatedAt: now
+    };
+
+    try{
+        const tx = db.transaction("drawings", "readwrite");
+        const req = tx.objectStore("drawings").add(drawing);
+        tx.oncomplete = ()=>{
+            drawing.id = req.result;
+            allDrawings.push(drawing);
+            openDrawing(drawing.id);
+        };
+        tx.onerror = e=>alert("Failed to create new drawing: " + e.target.error);
+    }catch(err){
+        console.error("createNewDrawing failed:", err);
+        alert("Failed to create new drawing: " + err.message);
+    }
+}
+
+function duplicateCurrentDrawing(){
+    if(!currentDrawing) return;
+    if(!db){
+        alert("The database isn't ready yet. Please wait a moment and try again.");
+        return;
+    }
+
+    let n = 2;
+    let candidate = `${currentDrawing.name} (copy)`;
+    while(allDrawings.some(d=>d.name === candidate)){
+        candidate = `${currentDrawing.name} (copy ${n})`;
+        n++;
+    }
+
+    const now = getCurrentTimestamp();
+    const drawing = {
+        name: candidate,
+        dataUrl: currentDrawing.dataUrl,
+        width: currentDrawing.width,
+        height: currentDrawing.height,
+        createdAt: now,
+        updatedAt: now
+    };
+
+    try{
+        const tx = db.transaction("drawings", "readwrite");
+        const req = tx.objectStore("drawings").add(drawing);
+        tx.oncomplete = ()=>{
+            drawing.id = req.result;
+            allDrawings.push(drawing);
+            openDrawing(drawing.id);
+        };
+        tx.onerror = e=>alert("Failed to duplicate drawing: " + e.target.error);
+    }catch(err){
+        console.error("duplicateCurrentDrawing failed:", err);
+        alert("Failed to duplicate drawing: " + err.message);
+    }
+}
+
+function renameCurrentDrawing(newName){
+    if(!currentDrawing) return;
+    const trimmed = (newName || "").trim();
+    if(!trimmed){
+        document.getElementById("drawingNameInput").value = currentDrawing.name;
+        return;
+    }
+    currentDrawing.name = trimmed;
+    saveCurrentDrawing(()=>renderDrawingSelect());
+}
+
+function deleteCurrentDrawing(){
+    if(!currentDrawing) return;
+    if(!db) return;
+
+    if(!confirm(`Delete the drawing "${currentDrawing.name}"? This cannot be undone.`)){
+        return;
+    }
+
+    const idToDelete = currentDrawing.id;
+    const tx = db.transaction("drawings", "readwrite");
+    tx.objectStore("drawings").delete(idToDelete);
+    tx.oncomplete = ()=>{
+        allDrawings = allDrawings.filter(d=>d.id !== idToDelete);
+        currentDrawing = null;
+        if(allDrawings.length === 0){
+            createNewDrawing("Drawing 1");
+        }else{
+            openDrawing(allDrawings[0].id);
+        }
+    };
+    tx.onerror = e=>alert("Failed to delete drawing: " + e.target.error);
+}
+
+// Saved as PNG (not JPEG) despite being a bit larger, because PNG is
+// lossless for the crisp lines/flat colors a sketch canvas produces --
+// JPEG's artifacts would actually look worse at a similar size here. Size
+// is kept in check instead by capping the canvas at a fixed 800x500.
+function saveCurrentDrawing(onComplete){
+    if(!currentDrawing || !db) return;
+    currentDrawing.dataUrl = drawingCanvas.toDataURL("image/png");
+    currentDrawing.updatedAt = getCurrentTimestamp();
+
+    try{
+        const tx = db.transaction("drawings", "readwrite");
+        tx.objectStore("drawings").put(currentDrawing);
+        tx.oncomplete = ()=>{ if(onComplete) onComplete(); };
+        tx.onerror = e=>console.error("Failed to save drawing:", e.target.error);
+    }catch(err){
+        console.error("saveCurrentDrawing failed:", err);
+    }
+}
+
+function scheduleDrawingSave(){
+    if(drawingSaveTimer) clearTimeout(drawingSaveTimer);
+    drawingSaveTimer = setTimeout(()=>{
+        drawingSaveTimer = null;
+        saveCurrentDrawing();
+    }, 500);
+}
+
+function flushDrawingSave(){
+    if(drawingSaveTimer){
+        clearTimeout(drawingSaveTimer);
+        drawingSaveTimer = null;
+        saveCurrentDrawing();
+    }
+}
+
+window.addEventListener("beforeunload", flushDrawingSave);
+document.addEventListener("visibilitychange", ()=>{
+    if(document.visibilityState === "hidden") flushDrawingSave();
+});
+
+function clearCurrentDrawing(){
+    if(!currentDrawing) return;
+    if(!confirm("Clear this entire drawing? This cannot be undone.")) return;
+    drawingCtx.fillStyle = "#fff";
+    drawingCtx.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    saveCurrentDrawing();
+}
+
+function toggleDrawingEraser(){
+    drawingEraserActive = !drawingEraserActive;
+    drawingEraserBtn.classList.toggle("active", drawingEraserActive);
+}
+
+function downloadCurrentDrawingPNG(){
+    if(!currentDrawing) return;
+    const a = document.createElement("a");
+    a.href = drawingCanvas.toDataURL("image/png");
+    a.download = sanitizeFilename(currentDrawing.name) + ".png";
+    a.click();
+}
+
+// ---- Pointer handling: mouse + touch, drawn at canvas-pixel coordinates
+// so strokes land in the right place regardless of how the canvas is
+// scaled/displayed on screen.
+
+function drawingPointFromEvent(e){
+    const rect = drawingCanvas.getBoundingClientRect();
+    const scaleX = drawingCanvas.width / rect.width;
+    const scaleY = drawingCanvas.height / rect.height;
+    const point = e.touches ? e.touches[0] : e;
+    return {
+        x: (point.clientX - rect.left) * scaleX,
+        y: (point.clientY - rect.top) * scaleY
+    };
+}
+
+function drawingStrokeStart(e){
+    e.preventDefault();
+    isDrawingStroke = true;
+    const { x, y } = drawingPointFromEvent(e);
+    drawingLastX = x;
+    drawingLastY = y;
+
+    // A single tap/click with no movement should still leave a dot.
+    drawingCtx.beginPath();
+    drawingCtx.fillStyle = drawingEraserActive ? "#fff" : drawingColorInput.value;
+    drawingCtx.arc(x, y, (parseInt(drawingBrushSizeInput.value, 10) || 4) / 2, 0, Math.PI * 2);
+    drawingCtx.fill();
+}
+
+function drawingStrokeMove(e){
+    if(!isDrawingStroke) return;
+    e.preventDefault();
+    const { x, y } = drawingPointFromEvent(e);
+
+    drawingCtx.strokeStyle = drawingEraserActive ? "#fff" : drawingColorInput.value;
+    drawingCtx.lineWidth = parseInt(drawingBrushSizeInput.value, 10) || 4;
+    drawingCtx.lineCap = "round";
+    drawingCtx.lineJoin = "round";
+
+    drawingCtx.beginPath();
+    drawingCtx.moveTo(drawingLastX, drawingLastY);
+    drawingCtx.lineTo(x, y);
+    drawingCtx.stroke();
+
+    drawingLastX = x;
+    drawingLastY = y;
+}
+
+function drawingStrokeEnd(){
+    if(!isDrawingStroke) return;
+    isDrawingStroke = false;
+    scheduleDrawingSave();
+}
+
+drawingCanvas.addEventListener("mousedown", drawingStrokeStart);
+drawingCanvas.addEventListener("mousemove", drawingStrokeMove);
+window.addEventListener("mouseup", drawingStrokeEnd);
+drawingCanvas.addEventListener("touchstart", drawingStrokeStart, { passive:false });
+drawingCanvas.addEventListener("touchmove", drawingStrokeMove, { passive:false });
+drawingCanvas.addEventListener("touchend", drawingStrokeEnd);
+drawingCanvas.addEventListener("touchcancel", drawingStrokeEnd);
 
 // ---------- Import Text ----------
 //
@@ -2780,6 +5613,14 @@ document.getElementById("importInput").addEventListener("change", async (e)=>{
 
 // ---------- Export CSV ----------
 
+function escapeCsvValue(val){
+    const str = String(val ?? "");
+    if(/[",\n]/.test(str)){
+        return `"${str.replace(/"/g,'""')}"`;
+    }
+    return str;
+}
+
 function exportCSV(){
     if(allRecords.length === 0){
         alert("There are no records to export.");
@@ -2796,14 +5637,6 @@ function exportCSV(){
     );
 
     const headers = [...baseHeaders, ...customKeys];
-
-    const escapeCsvValue = (val)=>{
-        const str = String(val ?? "");
-        if(/[",\n]/.test(str)){
-            return `"${str.replace(/"/g,'""')}"`;
-        }
-        return str;
-    };
 
     const rows = allRecords.map(r=>{
         const plainRecord = { ...r, message: htmlToMarkdown(r.message) };
@@ -2891,6 +5724,224 @@ function exportExcel(){
     a.download = "records.xls";
     a.click();
     URL.revokeObjectURL(a.href);
+}
+
+// ---------- Export PDF ----------
+//
+// There's no PDF library involved: a print-ready HTML document is built
+// from the current records (reusing the same message-content formatting
+// rules as the on-screen view) and handed to the browser's own "Print to
+// PDF" via window.print(). Everything happens locally in the browser --
+// nothing is uploaded anywhere to generate the file.
+
+function getCurrentDbDisplayName(){
+    const registry = loadDbRegistry();
+    const currentId = getCurrentDbId();
+    const current = registry.find(r=>r.id === currentId) || registry[0];
+    return current ? current.name : "Database";
+}
+
+function buildPdfRecordHtml(r){
+    const charSheetHtml = r.characterSheet
+        ? `<div class="pdf-char-sheet"><b>Character Sheet:</b>\n${escapeHtml(r.characterSheet)}</div>`
+        : "";
+
+    const customFieldsHtml = Object.entries(r.customFields || {})
+        .map(([k,v])=>`<div class="pdf-field"><b>${escapeHtml(k)}:</b> ${escapeHtml(v)}</div>`)
+        .join("");
+
+    const messageHtml = sanitizeHtml(r.message || "");
+    const messageClass = "message-content" + (messageHtml.trim() === "" ? " empty-message" : "");
+
+    const createdAtFormatted = r.createdAt ? formatTimestamp(r.createdAt) : "N/A";
+    const updatedAtFormatted = r.updatedAt ? formatTimestamp(r.updatedAt) : createdAtFormatted;
+
+    return `
+    <div class="pdf-record">
+        <h3>${escapeHtml(r.name || "(untitled)")}</h3>
+        <div class="pdf-meta">ID: ${r.id} &nbsp;|&nbsp; UUID: ${escapeHtml(r.uuid || "N/A")} &nbsp;|&nbsp; Created: ${createdAtFormatted} &nbsp;|&nbsp; Modified: ${updatedAtFormatted}</div>
+        ${charSheetHtml}
+        ${customFieldsHtml}
+        <div class="${messageClass}">${messageHtml || ""}</div>
+    </div>`;
+}
+
+// Shared by both "export all" and "export single record": builds the
+// print-ready HTML document. Margins/spacing are kept intentionally tight
+// (small @page margin, no extra body margin, minimal per-record padding)
+// so the browser's "Print to PDF" produces as few pages -- and as small a
+// file -- as possible, especially important for a one-record export where
+// a full page of default whitespace would otherwise dwarf the content.
+function buildPdfDocument(records, titleText, subtitleText){
+    const recordsHtml = records.map(buildPdfRecordHtml).join("");
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${escapeHtml(titleText)}</title>
+<style>
+    @page{ margin:12mm 10mm; }
+
+    body{
+        font-family:Arial,sans-serif;
+        font-size:13px;
+        color:#1a1a1a;
+        max-width:800px;
+        margin:16px auto;
+        padding:0 12px;
+    }
+    h1{ font-size:1.4em; margin:0 0 2px; }
+    .pdf-subtitle{ color:#666; font-size:12px; margin:0 0 14px; }
+    hr{ border:none; border-top:1px solid #ccc; margin:0 0 14px; }
+
+    .pdf-record{
+        border:1px solid #ccc;
+        border-radius:6px;
+        padding:10px 14px;
+        margin-bottom:12px;
+        page-break-inside:avoid;
+    }
+    .pdf-record h3{ margin:0 0 4px; font-size:1.1em; }
+    .pdf-meta{ color:#666; font-size:11px; margin-bottom:6px; }
+    .pdf-field{ font-size:12px; margin:2px 0; }
+
+    .pdf-char-sheet{
+        background:#f4f4f4;
+        padding:8px;
+        border-left:3px solid #999;
+        margin:8px 0;
+        font-size:12px;
+        white-space:pre-wrap;
+    }
+
+    .message-content{
+        margin:8px 0 0;
+        padding:8px 10px;
+        border:1px solid #ddd;
+        border-radius:4px;
+        background:#fafafa;
+    }
+    .message-content:empty::before,
+    .message-content.empty-message::before{
+        content:"(no message)";
+        color:#999;
+        font-style:italic;
+    }
+    .message-content ul, .message-content ol{ margin:4px 0; padding-left:24px; }
+    .message-content h1, .message-content h2, .message-content h3,
+    .message-content h4, .message-content h5, .message-content h6{ margin:0.6em 0 0.3em; line-height:1.25; }
+    .message-content h1{ font-size:1.4em; }
+    .message-content h2{ font-size:1.25em; }
+    .message-content h3{ font-size:1.1em; }
+    .message-content blockquote{
+        border-left:4px solid #ccc;
+        margin:8px 0;
+        padding:4px 12px;
+        color:#555;
+        background:#f5f5f5;
+    }
+    .message-content pre{
+        background:#f6f8fa;
+        border:1px solid #ddd;
+        border-radius:6px;
+        padding:10px;
+        overflow-x:auto;
+        margin:8px 0;
+        white-space:pre-wrap;
+        word-break:break-word;
+    }
+    .message-content code{
+        font-family:Consolas, Menlo, monospace;
+        background:#f0f0f0;
+        padding:1px 5px;
+        border-radius:3px;
+        font-size:0.9em;
+    }
+    .message-content pre code{ background:none; padding:0; border-radius:0; font-size:0.85em; }
+    .message-content table{ border-collapse:collapse; margin:8px 0; width:100%; }
+    .message-content th, .message-content td{ border:1px solid #ccc; padding:5px 7px; text-align:left; }
+    .message-content th{ background:#f4f4f4; }
+
+    @media print{
+        body{ margin:0; padding:0 6px; }
+        .pdf-record{ break-inside:avoid; }
+    }
+</style>
+</head>
+<body>
+<h1>${escapeHtml(titleText)}</h1>
+<div class="pdf-subtitle">${escapeHtml(subtitleText)}</div>
+<hr>
+${recordsHtml}
+</body>
+</html>`;
+}
+
+// Opens a print window for the given document HTML and triggers "Print to
+// PDF". The window is opened by the caller (synchronously, before any
+// async work) so pop-up blockers treat it as a direct result of the click.
+function openPdfPrintWindow(printWindow, docHtml){
+    printWindow.document.open();
+    printWindow.document.write(docHtml);
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+    };
+}
+
+function exportPDF(){
+    if(allRecords.length === 0){
+        alert("There are no records to export.");
+        return;
+    }
+
+    const printWindow = window.open("", "_blank");
+    if(!printWindow){
+        alert("Your browser blocked the export window. Please allow pop-ups for this page and try again.");
+        return;
+    }
+
+    const dbName = getCurrentDbDisplayName();
+    const sortedRecords = sortRecordsList(allRecords.slice(), "name-asc");
+    const generatedAt = formatTimestamp(getCurrentTimestamp());
+
+    const doc = buildPdfDocument(
+        sortedRecords,
+        dbName,
+        `Exported ${generatedAt} \u2014 ${sortedRecords.length} record(s)`
+    );
+
+    openPdfPrintWindow(printWindow, doc);
+}
+
+// Export a single record as its own (small) PDF, reusing the same
+// print-to-PDF pipeline as the full export.
+function exportRecordPDF(id){
+    const printWindow = window.open("", "_blank");
+    if(!printWindow){
+        alert("Your browser blocked the export window. Please allow pop-ups for this page and try again.");
+        return;
+    }
+
+    const record = allRecords.find(r=>r.id===id);
+    if(!record){
+        printWindow.close();
+        alert("That record could not be found.");
+        return;
+    }
+
+    const generatedAt = formatTimestamp(getCurrentTimestamp());
+
+    const doc = buildPdfDocument(
+        [record],
+        record.name || "(untitled)",
+        `Exported ${generatedAt}`
+    );
+
+    openPdfPrintWindow(printWindow, doc);
 }
 
 // ---------- Delete All Records ----------
@@ -3053,6 +6104,312 @@ function escapeHtml(str){
         .replace(/"/g,"&quot;")
         .replace(/'/g,"&#39;");
 }
+
+// ---------- Math Question Generator ----------
+//
+// Everything here runs locally in the browser: question data and
+// answers are generated and formatted with plain JS/HTML/CSS, with no
+// external math-typesetting library and no network request involved.
+
+let mathQuestionSet = [];   // [{expr: htmlString, answer: string, text: plainTextString}]
+let mathAnswersShown = false;
+
+function mathRandInt(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function mathDifficultyRange(){
+    const level = document.getElementById("mathDifficulty").value;
+    if(level === "easy") return {min:1, max:10};
+    if(level === "hard") return {min:1, max:100};
+    if(level === "custom"){
+        let min = parseInt(document.getElementById("mathCustomMin").value, 10);
+        let max = parseInt(document.getElementById("mathCustomMax").value, 10);
+        if(isNaN(min)) min = 1;
+        if(isNaN(max)) max = min + 10;
+        if(min > max) [min, max] = [max, min];
+        return {min, max};
+    }
+    return {min:1, max:50};
+}
+
+function updateMathCustomRangeVisibility(){
+    const isCustom = document.getElementById("mathDifficulty").value === "custom";
+    document.getElementById("mathCustomRangeRow").style.display = isCustom ? "flex" : "none";
+}
+
+// Builds the small stacked-fraction markup used inline in a question.
+function mathFracHtml(num, den){
+    return `<span class="math-frac"><span class="math-frac-num">${num}</span><span class="math-frac-den">${den}</span></span>`;
+}
+
+// Builds a radical (square root) symbol with an overlined radicand.
+function mathSqrtHtml(inner){
+    return `<span class="math-radical">&radic;<span class="math-radicand">${inner}</span></span>`;
+}
+
+function mathGcd(a, b){
+    a = Math.abs(a); b = Math.abs(b);
+    while(b){ [a, b] = [b, a % b]; }
+    return a || 1;
+}
+
+// Picks a random integer in [min, max] but nudges it away from 0 -- used
+// anywhere a value can't be zero (a divisor, an equation coefficient).
+function mathRandNonZero(min, max){
+    const v = mathRandInt(min, max);
+    if(v !== 0) return v;
+    if(max >= 1) return 1;
+    if(min <= -1) return -1;
+    return 1; // range was just {0,0}; only sane fallback
+}
+
+// Like mathRandNonZero, but also avoids a specific excluded value (used
+// so two equation coefficients don't end up equal).
+function mathRandNonZeroDistinct(min, max, exclude){
+    for(let attempt = 0; attempt < 20; attempt++){
+        const v = mathRandNonZero(min, max);
+        if(v !== exclude) return v;
+    }
+    return exclude + 1; // fallback nudge if the range is too narrow
+}
+
+// Maps a (possibly zero/negative) range onto a range of positive integers
+// (>=1) -- used for denominators, roots, and exponents, where the value
+// has to be positive for the question to make sense.
+function mathPositiveRange(min, max){
+    const lo = Math.max(min, 1);
+    const hi = Math.max(max, lo);
+    return {lo, hi};
+}
+
+// A denominator additionally needs to be at least 2 to read as a fraction.
+function mathRandDenominator(min, max){
+    const {lo, hi} = mathPositiveRange(min, max);
+    const d = mathRandInt(Math.max(lo, 2), Math.max(hi, 2));
+    return d;
+}
+
+function mathGenerateOne(topic, range, algOptions){
+    const {min, max} = range;
+
+    switch(topic){
+        case "add": {
+            const a = mathRandInt(min, max), b = mathRandInt(min, max);
+            return { expr: `${a} + ${b} = ?`, answer: String(a + b), text: `${a} + ${b} = ?` };
+        }
+        case "sub": {
+            let a = mathRandInt(min, max), b = mathRandInt(min, max);
+            if(b > a) [a, b] = [b, a]; // keep results non-negative
+            return { expr: `${a} &minus; ${b} = ?`, answer: String(a - b), text: `${a} - ${b} = ?` };
+        }
+        case "mul": {
+            const a = mathRandInt(min, max), b = mathRandInt(min, max);
+            return { expr: `${a} &times; ${b} = ?`, answer: String(a * b), text: `${a} x ${b} = ?` };
+        }
+        case "div": {
+            const divisor = mathRandNonZero(min, max);
+            const quotient = mathRandInt(min, max);
+            const dividend = divisor * quotient;
+            return { expr: `${dividend} &divide; ${divisor} = ?`, answer: String(quotient), text: `${dividend} / ${divisor} = ?` };
+        }
+        case "frac": {
+            const d1 = mathRandDenominator(min, max), n1 = mathRandInt(1, d1 - 1 || 1);
+            const d2 = mathRandDenominator(min, max), n2 = mathRandInt(1, d2 - 1 || 1);
+            const num = n1 * d2 + n2 * d1;
+            const den = d1 * d2;
+            const g = mathGcd(num, den);
+            const simpNum = num / g, simpDen = den / g;
+            const answerFrac = simpDen === 1 ? String(simpNum) : `${simpNum}/${simpDen}`;
+            return {
+                expr: `${mathFracHtml(n1, d1)} + ${mathFracHtml(n2, d2)} = ?`,
+                answer: answerFrac,
+                text: `${n1}/${d1} + ${n2}/${d2} = ?`
+            };
+        }
+        case "exp": {
+            const base = mathRandInt(min, max);
+            const {lo: powLo, hi: powHi} = mathPositiveRange(min, max);
+            const power = mathRandInt(powLo, powHi);
+            return { expr: `${base}<sup>${power}</sup> = ?`, answer: String(Math.pow(base, power)), text: `${base}^${power} = ?` };
+        }
+        case "sqrt": {
+            const {lo, hi} = mathPositiveRange(min, max);
+            const root = mathRandInt(lo, hi);
+            const square = root * root;
+            return { expr: `${mathSqrtHtml(square)} = ?`, answer: String(root), text: `sqrt(${square}) = ?` };
+        }
+        case "alg":
+            return mathGenerateAlgebra(range, algOptions);
+        default:
+            return null;
+    }
+}
+
+// ---------- Simple Equations: variables + complex-equation options ----------
+
+let mathAlgVariables = ["x"];
+
+function renderMathVarChips(){
+    const wrap = document.getElementById("mathVarChips");
+    wrap.innerHTML = mathAlgVariables.map(v => `
+        <span class="math-var-chip">${escapeHtml(v)}${mathAlgVariables.length > 1 ? `<button type="button" onclick="removeMathVariable('${v}')" aria-label="Remove ${escapeHtml(v)}">&times;</button>` : ""}</span>
+    `).join("");
+}
+
+function addMathVariable(){
+    const input = document.getElementById("mathVarNewInput");
+    const val = (input.value || "").trim().toLowerCase();
+    input.value = "";
+
+    if(!/^[a-z]$/.test(val)){
+        alert("Enter a single letter (a-z) for the variable.");
+        return;
+    }
+    if(mathAlgVariables.includes(val)){
+        return;
+    }
+    if(mathAlgVariables.length >= 6){
+        alert("You can add up to 6 variables.");
+        return;
+    }
+    mathAlgVariables.push(val);
+    renderMathVarChips();
+}
+
+function removeMathVariable(v){
+    if(mathAlgVariables.length <= 1) return;
+    mathAlgVariables = mathAlgVariables.filter(existing => existing !== v);
+    renderMathVarChips();
+}
+
+function toggleMathAlgAdvancedVisibility(){
+    const isAlg = document.getElementById("mathTopicAlg").checked;
+    document.getElementById("mathAlgAdvancedGroup").style.display = isAlg ? "block" : "none";
+}
+
+// Formats one side of an equation like "3x + 4" or "x - 7", omitting a
+// coefficient of 1 and folding the sign of the constant into "+"/"-".
+function mathFormatEquationSide(coeff, variable, constant){
+    const coeffStr = coeff === 1 ? "" : coeff === -1 ? "-" : String(coeff);
+    const variableTerm = `${coeffStr}${variable}`;
+    if(constant === 0) return variableTerm;
+    const sign = constant > 0 ? "+" : "-";
+    return `${variableTerm} ${sign} ${Math.abs(constant)}`;
+}
+
+function mathGenerateAlgebra(range, algOptions){
+    const {min, max} = range;
+    const opts = algOptions || {variables: ["x"], complex: false};
+    const variables = opts.variables && opts.variables.length ? opts.variables : ["x"];
+    const variable = variables[mathRandInt(0, variables.length - 1)];
+
+    if(!opts.complex){
+        // One-step: variable + a = b
+        const x = mathRandInt(min, max);
+        const a = mathRandInt(min, max);
+        const b = x + a;
+        const expr = `${mathFormatEquationSide(1, variable, a)} = ${b}. ${variable} = ?`;
+        return { expr, answer: String(x), text: expr };
+    }
+
+    const mode = Math.random() < 0.5 ? "twostep" : "bothsides";
+
+    if(mode === "twostep"){
+        // Two-step: a*variable + b = c
+        const coeffA = mathRandNonZero(min, max);
+        const x = mathRandInt(min, max);
+        const b = mathRandInt(min, max);
+        const c = coeffA * x + b;
+        const expr = `${mathFormatEquationSide(coeffA, variable, b)} = ${c}. ${variable} = ?`;
+        return { expr, answer: String(x), text: expr };
+    }
+
+    // Both sides: a*variable + b = c*variable + d, with a !== c
+    const coeffA = mathRandNonZero(min, max);
+    const coeffC = mathRandNonZeroDistinct(min, max, coeffA);
+    const x = mathRandInt(min, max);
+    const b = mathRandInt(min, max);
+    const d = coeffA * x + b - coeffC * x;
+    const expr = `${mathFormatEquationSide(coeffA, variable, b)} = ${mathFormatEquationSide(coeffC, variable, d)}. ${variable} = ?`;
+    return { expr, answer: String(x), text: expr };
+}
+
+function generateMathQuestions(){
+    const topics = Array.from(document.querySelectorAll(".mathTopic:checked")).map(cb => cb.value);
+    if(topics.length === 0){
+        alert("Pick at least one topic to generate questions for.");
+        return;
+    }
+
+    const countInput = document.getElementById("mathCount");
+    const count = Math.min(50, Math.max(1, parseInt(countInput.value, 10) || 10));
+    countInput.value = count;
+
+    const range = mathDifficultyRange();
+    const algOptions = {
+        variables: mathAlgVariables,
+        complex: document.getElementById("mathAlgComplex").checked
+    };
+
+    mathQuestionSet = [];
+    for(let i = 0; i < count; i++){
+        const topic = topics[mathRandInt(0, topics.length - 1)];
+        const q = mathGenerateOne(topic, range, algOptions);
+        if(q) mathQuestionSet.push(q);
+    }
+
+    mathAnswersShown = false;
+    document.getElementById("mathToggleAnswersBtn").textContent = "Show Answers";
+    document.getElementById("mathToggleAnswersBtn").disabled = false;
+    document.getElementById("mathDownloadBtn").disabled = false;
+    renderMathQuestions();
+}
+
+function renderMathQuestions(){
+    const container = document.getElementById("mathQuestions");
+
+    if(mathQuestionSet.length === 0){
+        container.innerHTML = `<p class="empty-msg">No questions yet &mdash; choose topics and click "Generate Questions".</p>`;
+        return;
+    }
+
+    container.innerHTML = mathQuestionSet.map((q, i) => `
+        <div class="math-question">
+            <span class="math-q-index">${i + 1}.</span>
+            <span class="math-q-expr">${q.expr}</span>
+            <span class="math-q-answer${mathAnswersShown ? "" : " hidden-answer"}">${escapeHtml(q.answer)}</span>
+        </div>
+    `).join("");
+}
+
+function toggleMathAnswers(){
+    if(mathQuestionSet.length === 0) return;
+    mathAnswersShown = !mathAnswersShown;
+    document.getElementById("mathToggleAnswersBtn").textContent = mathAnswersShown ? "Hide Answers" : "Show Answers";
+    renderMathQuestions();
+}
+
+function downloadMathQuestions(){
+    if(mathQuestionSet.length === 0){
+        alert("There are no questions to download yet.");
+        return;
+    }
+
+    const lines = mathQuestionSet.map((q, i) => `${i + 1}. ${q.text}`);
+    const answerLines = mathQuestionSet.map((q, i) => `${i + 1}. ${q.answer}`);
+    const content = `Math Questions\n\n${lines.join("\n")}\n\n---\nAnswers\n\n${answerLines.join("\n")}`;
+
+    const blob = new Blob([content], {type:"text/plain;charset=utf-8;"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "math-questions.txt";
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+renderMathVarChips();
+renderMathQuestions();
 
 // ---------- Boot ----------
 
