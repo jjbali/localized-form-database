@@ -13,28 +13,100 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Localized Database Form">
+<meta name="apple-mobile-web-app-title" content="DB Form">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljsLightTheme">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljsDarkTheme" disabled>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
 
 <style>
+:root{
+    --bg:#ffffff;
+    --text:#1a1a1a;
+    --text-muted:#666;
+    --text-faint:#777;
+    --border:#ccc;
+    --border-strong:#999;
+    --input-bg:#ffffff;
+    --card-bg:#ffffff;
+    --card-border:#ccc;
+    --editing-bg:#f5f9ff;
+    --accent:#4a90d9;
+    --accent-dark:#2e5c8a;
+    --accent-darker:#1e3f5a;
+    --hover-bg:#e8e8e8;
+    --btn-bg:#f4f4f4;
+    --code-bg:#f0f0f0;
+    --pre-bg:#f6f8fa;
+    --pre-border:#ddd;
+    --table-header-bg:#f4f4f4;
+    --blockquote-bg:#fafafa;
+    --blockquote-text:#555;
+    --sidebar-bg:#ffffff;
+    --overlay-bg:rgba(0,0,0,0.45);
+    --field-btn-bg:#eef4fb;
+    --field-btn-border:#b9d3ec;
+    --hint-link:#4a6fa5;
+    --danger-bg:#ffebee;
+    --danger-border:#f44336;
+    --success-bg:#e8f5e9;
+    --success-border:#4caf50;
+}
+
+body.dark{
+    --bg:#181a1b;
+    --text:#e8e6e3;
+    --text-muted:#aaa;
+    --text-faint:#999;
+    --border:#3a3d40;
+    --border-strong:#5a5d60;
+    --input-bg:#232527;
+    --card-bg:#212325;
+    --card-border:#3a3d40;
+    --editing-bg:#1c2733;
+    --accent:#5b9bd9;
+    --accent-dark:#3f78b0;
+    --accent-darker:#2c567f;
+    --hover-bg:#2c2e30;
+    --btn-bg:#2a2c2e;
+    --code-bg:#2a2c2e;
+    --pre-bg:#1f2123;
+    --pre-border:#3a3d40;
+    --table-header-bg:#2a2c2e;
+    --blockquote-bg:#202224;
+    --blockquote-text:#c2c2c2;
+    --sidebar-bg:#1e2021;
+    --overlay-bg:rgba(0,0,0,0.6);
+    --field-btn-bg:#1c2733;
+    --field-btn-border:#2e4a63;
+    --hint-link:#7fa8dd;
+    --danger-bg:#3a1f22;
+    --danger-border:#e05a5a;
+    --success-bg:#183024;
+    --success-border:#4caf50;
+}
+
 body{
     font-family:Arial,sans-serif;
     max-width:700px;
     margin:30px auto;
     padding:20px;
+    background:var(--bg);
+    color:var(--text);
+    transition:background 0.2s ease, color 0.2s ease;
 }
 
-input, textarea{
+input, textarea, select{
     width:100%;
     padding:10px;
     margin:8px 0;
     box-sizing:border-box;
-    border:1px solid #ccc;
+    border:1px solid var(--border);
     border-radius:4px;
     font-family:inherit;
+    background:var(--input-bg);
+    color:var(--text);
 }
 
 textarea{
@@ -45,18 +117,23 @@ button{
     padding:8px 14px;
     margin:4px 4px 4px 0;
     cursor:pointer;
+    background:var(--btn-bg);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:4px;
 }
 
 .record{
-    border:1px solid #ccc;
+    border:1px solid var(--card-border);
+    background:var(--card-bg);
     padding:10px;
     margin-top:10px;
     border-radius:6px;
 }
 
 .record.editing{
-    border-color:#4a90d9;
-    background:#f5f9ff;
+    border-color:var(--accent);
+    background:var(--editing-bg);
 }
 
 .toolbar{
@@ -74,9 +151,9 @@ button{
 }
 
 #searchBtn{
-    background:#4a90d9;
+    background:var(--accent);
     color:white;
-    border:1px solid #2e5c8a;
+    border:1px solid var(--accent-dark);
     border-radius:4px;
     padding:10px 16px;
     font-weight:bold;
@@ -85,11 +162,11 @@ button{
 }
 
 #searchBtn:hover{
-    background:#2e5c8a;
+    background:var(--accent-dark);
 }
 
 #searchBtn:active{
-    background:#1e3f5a;
+    background:var(--accent-darker);
 }
 
 .hidden-file-input{
@@ -101,12 +178,12 @@ button{
 }
 
 .empty-msg{
-    color:#777;
+    color:var(--text-faint);
     font-style:italic;
 }
 
 .record small{
-    color:#666;
+    color:var(--text-muted);
 }
 
 .custom-field-row{
@@ -135,8 +212,8 @@ button{
 }
 
 #addFieldBtn{
-    background:#eef4fb;
-    border:1px solid #b9d3ec;
+    background:var(--field-btn-bg);
+    border:1px solid var(--field-btn-border);
 }
 
 .wysiwyg-toolbar{
@@ -150,14 +227,15 @@ button{
     padding:6px 10px;
     margin:0;
     min-width:36px;
-    background:#f4f4f4;
-    border:1px solid #ccc;
+    background:var(--btn-bg);
+    border:1px solid var(--border);
     border-radius:4px;
     font-size:14px;
+    color:var(--text);
 }
 
 .wysiwyg-toolbar button:hover{
-    background:#e8e8e8;
+    background:var(--hover-bg);
 }
 
 .wysiwyg-editor{
@@ -165,21 +243,22 @@ button{
     min-height:120px;
     padding:10px;
     margin:4px 0 8px;
-    border:1px solid #ccc;
+    border:1px solid var(--border);
     border-radius:4px;
     box-sizing:border-box;
-    background:#fff;
+    background:var(--input-bg);
+    color:var(--text);
     overflow-y:auto;
 }
 
 .wysiwyg-editor:focus{
-    outline:2px solid #4a90d9;
+    outline:2px solid var(--accent);
     outline-offset:-1px;
 }
 
 .wysiwyg-editor:empty::before{
     content:attr(data-placeholder);
-    color:#999;
+    color:var(--text-faint);
 }
 
 .wysiwyg-editor ul, .wysiwyg-editor ol{
@@ -187,8 +266,14 @@ button{
     padding-left:24px;
 }
 
+/* Rendered message box on each saved record: bordered so it reads as a
+   distinct block from the record's other fields, matching the editor. */
 .message-content{
-    margin:4px 0;
+    margin:8px 0;
+    padding:10px;
+    border:1px solid var(--card-border);
+    border-radius:4px;
+    background:var(--input-bg);
 }
 
 .message-content ul, .message-content ol{
@@ -199,7 +284,7 @@ button{
 .message-content:empty::before,
 .message-content.empty-message::before{
     content:"(no message)";
-    color:#999;
+    color:var(--text-faint);
     font-style:italic;
 }
 
@@ -218,16 +303,16 @@ button{
 .wysiwyg-editor h3, .message-content h3{ font-size:1.15em; }
 
 .wysiwyg-editor blockquote, .message-content blockquote{
-    border-left:4px solid #ccc;
+    border-left:4px solid var(--border);
     margin:8px 0;
     padding:4px 12px;
-    color:#555;
-    background:#fafafa;
+    color:var(--blockquote-text);
+    background:var(--blockquote-bg);
 }
 
 .wysiwyg-editor pre, .message-content pre{
-    background:#f6f8fa;
-    border:1px solid #ddd;
+    background:var(--pre-bg);
+    border:1px solid var(--pre-border);
     border-radius:6px;
     padding:10px;
     overflow-x:auto;
@@ -236,7 +321,7 @@ button{
 
 .wysiwyg-editor code, .message-content code{
     font-family:Consolas, Menlo, monospace;
-    background:#f0f0f0;
+    background:var(--code-bg);
     padding:1px 5px;
     border-radius:3px;
     font-size:0.9em;
@@ -251,7 +336,7 @@ button{
 
 .wysiwyg-editor hr, .message-content hr{
     border:none;
-    border-top:1px solid #ccc;
+    border-top:1px solid var(--border);
     margin:12px 0;
 }
 
@@ -263,13 +348,13 @@ button{
 
 .wysiwyg-editor th, .wysiwyg-editor td,
 .message-content th, .message-content td{
-    border:1px solid #ccc;
+    border:1px solid var(--border);
     padding:6px 8px;
     text-align:left;
 }
 
 .wysiwyg-editor th, .message-content th{
-    background:#f4f4f4;
+    background:var(--table-header-bg);
 }
 
 /* ---- Admonitions / callouts ---- */
@@ -280,6 +365,7 @@ button{
     border-radius:4px;
     padding:10px 14px;
     margin:10px 0;
+    color:#1a1a1a;
 }
 
 .admonition-title{
@@ -309,31 +395,49 @@ button{
 .admonition-danger{ border-color:#ff5252; background:#fdeaea; }
 .admonition-danger .admonition-title{ color:#c62828; }
 
+body.dark .admonition{ color:#e8e6e3; }
+
+body.dark .admonition-note{ background:#132a42; border-color:#448aff; }
+body.dark .admonition-note .admonition-title{ color:#7fb2ff; }
+
+body.dark .admonition-tip{ background:#123023; border-color:#00c853; }
+body.dark .admonition-tip .admonition-title{ color:#5fe0a0; }
+
+body.dark .admonition-info{ background:#0f2c31; border-color:#00b8d4; }
+body.dark .admonition-info .admonition-title{ color:#5fd6ea; }
+
+body.dark .admonition-warning{ background:#3a2a10; border-color:#ff9100; }
+body.dark .admonition-warning .admonition-title{ color:#ffb84d; }
+
+body.dark .admonition-danger{ background:#3a1518; border-color:#ff5252; }
+body.dark .admonition-danger .admonition-title{ color:#ff8a8a; }
+
 /* ---- Toolbar extras ---- */
 
 .wysiwyg-toolbar select{
     padding:5px 6px;
-    border:1px solid #ccc;
+    border:1px solid var(--border);
     border-radius:4px;
-    background:#fff;
+    background:var(--input-bg);
+    color:var(--text);
     font-size:13px;
 }
 
 .wysiwyg-toolbar .sep{
     width:1px;
     align-self:stretch;
-    background:#ddd;
+    background:var(--border);
     margin:0 4px;
 }
 
 .markdown-hint{
     font-size:12px;
-    color:#777;
+    color:var(--text-faint);
     margin:2px 0 10px;
 }
 
 .markdown-hint code{
-    background:#f0f0f0;
+    background:var(--code-bg);
     padding:0 4px;
     border-radius:3px;
 }
@@ -347,7 +451,7 @@ button{
 .hint-details summary{
     cursor:pointer;
     font-size:12px;
-    color:#4a6fa5;
+    color:var(--hint-link);
     font-weight:bold;
     list-style:none;
     padding:4px 0;
@@ -372,6 +476,92 @@ button{
     margin:6px 0 0;
 }
 
+/* ---- Dark mode toggle (in sidebar menu) ---- */
+
+.theme-toggle-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:8px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--btn-bg);
+}
+
+.theme-toggle-row span{
+    font-size:14px;
+    font-weight:bold;
+}
+
+.btn-info{
+    background:var(--field-btn-bg);
+    border-color:var(--field-btn-border);
+}
+
+.btn-success{
+    background:var(--success-bg);
+    border-color:var(--success-border);
+}
+
+.btn-danger{
+    background:var(--danger-bg);
+    border-color:var(--danger-border);
+}
+
+.char-sheet-box{
+    background:var(--btn-bg);
+    padding:8px;
+    border-left:3px solid var(--border-strong);
+    margin:8px 0;
+    font-size:0.9em;
+    white-space:pre-wrap;
+}
+
+.switch{
+    position:relative;
+    display:inline-block;
+    width:44px;
+    height:24px;
+    flex:0 0 auto;
+}
+
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+    margin:0;
+}
+
+.switch .slider{
+    position:absolute;
+    cursor:pointer;
+    inset:0;
+    background:var(--border-strong);
+    border-radius:24px;
+    transition:background 0.2s ease;
+}
+
+.switch .slider::before{
+    content:"";
+    position:absolute;
+    height:18px;
+    width:18px;
+    left:3px;
+    bottom:3px;
+    background:#fff;
+    border-radius:50%;
+    transition:transform 0.2s ease;
+}
+
+.switch input:checked + .slider{
+    background:var(--accent);
+}
+
+.switch input:checked + .slider::before{
+    transform:translateX(20px);
+}
+
 /* ---- Mobile navigation: hamburger menu, slide-in sidebar, editor/records tabs ---- */
 
 .page-header{
@@ -387,7 +577,7 @@ button{
     width:42px;
     height:42px;
     border-radius:50%;
-    background:#4a90d9;
+    background:var(--accent);
     color:#fff;
     border:none;
     font-size:18px;
@@ -407,7 +597,7 @@ button{
     display:block;
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.45);
+    background:var(--overlay-bg);
     z-index:1150;
 }
 
@@ -420,7 +610,7 @@ button{
     font-size:0.8em;
     text-transform:uppercase;
     letter-spacing:0.03em;
-    color:#888;
+    color:var(--text-faint);
 }
 
 #sidebarPanel h4:first-of-type{
@@ -519,7 +709,7 @@ button{
         height:100%;
         width:84%;
         max-width:300px;
-        background:#fff;
+        background:var(--sidebar-bg);
         z-index:1200;
         padding:18px;
         box-shadow:-2px 0 14px rgba(0,0,0,0.3);
@@ -538,7 +728,7 @@ button{
         justify-content:space-between;
         margin-bottom:10px;
         padding-bottom:10px;
-        border-bottom:1px solid #eee;
+        border-bottom:1px solid var(--border);
     }
 
     #sidebarPanel .sidebar-header h3{
@@ -555,7 +745,7 @@ button{
         cursor:pointer;
         padding:2px 8px;
         margin:0;
-        color:#555;
+        color:var(--text-muted);
     }
 
     #sidebarPanel .toolbar{
@@ -580,10 +770,10 @@ button{
         margin:2px 0 14px;
         position:sticky;
         top:0;
-        background:#fff;
+        background:var(--bg);
         padding:8px 0;
         z-index:60;
-        border-bottom:1px solid #eee;
+        border-bottom:1px solid var(--border);
     }
 
     .mobile-tabs button{
@@ -591,16 +781,16 @@ button{
         margin:0;
         padding:10px 6px;
         border-radius:6px;
-        border:1px solid #ccc;
-        background:#f4f4f4;
+        border:1px solid var(--border);
+        background:var(--btn-bg);
         font-weight:bold;
         font-size:13px;
     }
 
     .mobile-tabs button.active{
-        background:#4a90d9;
+        background:var(--accent);
         color:#fff;
-        border-color:#2e5c8a;
+        border-color:var(--accent-dark);
     }
 
     .tab-panel.tab-hidden{
@@ -624,21 +814,30 @@ button{
         <button type="button" id="sidebarCloseBtn" onclick="closeSidebar()" aria-label="Close menu">&times;</button>
     </div>
 
+    <h4>Appearance</h4>
+    <div class="theme-toggle-row">
+        <span>&#127769; Dark Mode</span>
+        <label class="switch">
+            <input type="checkbox" id="darkModeToggle" onchange="setDarkMode(this.checked)">
+            <span class="slider"></span>
+        </label>
+    </div>
+
     <h4>Database</h4>
     <div class="toolbar" id="dbToolbar">
         <label for="databaseSelect" style="margin:0 8px 0 0;"><b>Database:</b></label>
         <select id="databaseSelect" onchange="switchDatabase()" style="padding:8px; border:1px solid #ccc; border-radius:4px; min-width:180px;"></select>
-        <button type="button" id="newDbBtn" onclick="createNewDatabase()" style="background:#eef4fb; border-color:#b9d3ec;">+ New Database</button>
+        <button type="button" id="newDbBtn" onclick="createNewDatabase()" class="btn-info">+ New Database</button>
         <button type="button" id="renameDbBtn" onclick="renameCurrentDatabase()">Rename</button>
-        <button type="button" id="deleteDbBtn" onclick="deleteCurrentDatabase()" style="background:#ffebee; border-color:#f44336;">Delete Database</button>
+        <button type="button" id="deleteDbBtn" onclick="deleteCurrentDatabase()" class="btn-danger">Delete Database</button>
     </div>
     <div class="markdown-hint" id="activeDbHint"></div>
 
     <h4>Backup &amp; Restore</h4>
     <div class="toolbar" id="dbBackupToolbar">
-        <button type="button" onclick="exportCurrentDatabaseLiteral()" style="background:#e8f5e9; border-color:#4caf50;">Export Database (.json)</button>
-        <button type="button" onclick="exportAllDatabasesLiteral()" style="background:#e8f5e9; border-color:#4caf50;">Export All Databases (.json)</button>
-        <button type="button" onclick="document.getElementById('importDbInput').click()" style="background:#eef4fb; border-color:#b9d3ec;">Import Database(s) (.json)</button>
+        <button type="button" onclick="exportCurrentDatabaseLiteral()" class="btn-success">Export Database (.json)</button>
+        <button type="button" onclick="exportAllDatabasesLiteral()" class="btn-success">Export All Databases (.json)</button>
+        <button type="button" onclick="document.getElementById('importDbInput').click()" class="btn-info">Import Database(s) (.json)</button>
         <input type="file" id="importDbInput" class="hidden-file-input" accept="application/json,.json">
     </div>
     <details class="hint-details">
@@ -657,7 +856,7 @@ button{
     </details>
 
     <h4>App</h4>
-    <button type="button" id="installAppBtn" style="display:none; width:100%; background:#e8f5e9; border-color:#4caf50;">&#128241; Install App</button>
+    <button type="button" id="installAppBtn" class="btn-success" style="display:none; width:100%;">&#128241; Install App</button>
     <div class="markdown-hint" id="installAppHint">This app can be installed to your home screen for offline, full-screen use.</div>
 </div>
 
@@ -669,10 +868,6 @@ button{
 <div id="editorPanel" class="tab-panel">
 <form id="form">
 <input id="name" placeholder="Name" required>
-
-<input id="age" type="number" placeholder="Age" required>
-
-<input id="section" placeholder="Section" required>
 
 <textarea id="characterSheet" placeholder="Character Sheet (Abilities, stats, or biography...)" rows="4"></textarea>
 
@@ -753,28 +948,27 @@ button{
     <button onclick="exportCSV()">Export CSV</button>
     <button onclick="exportExcel()">Export Excel (.xls)</button>
     <button onclick="document.getElementById('importInput').click()">Import Text</button>
-    <button onclick="viewCurrentDatabase()" style="background:#e8f5e9; border-color:#4caf50;">View Current Database</button>
-    <button onclick="deleteAllRecords()" style="background:#ffebee; border-color:#f44336;">Delete All</button>
+    <button onclick="viewCurrentDatabase()" class="btn-success">View Current Database</button>
+    <button onclick="deleteAllRecords()" class="btn-danger">Delete All</button>
     <input type="file" id="importInput" class="hidden-file-input" accept="text/plain,.txt" multiple>
 </div>
 
 <div class="toolbar">
-    <input type="text" id="searchBox" placeholder="Search by name, section, message, age, ID, UUID, or date..." enterkeyhint="search">
+    <input type="text" id="searchBox" placeholder="Search by name, message, ID, UUID, or date..." enterkeyhint="search">
     <button type="button" onclick="renderRecords()" id="searchBtn">Search</button>
 </div>
 
 <div class="toolbar">
-    <label for="filterSection" style="margin:0 8px 0 0;"><b>Filter by Section:</b></label>
-    <select id="filterSection" onchange="renderRecords()" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
-        <option value="">All Sections</option>
+    <label for="sortRecords" style="margin:0 8px 0 0;"><b>Sort by:</b></label>
+    <select id="sortRecords" onchange="renderRecords()" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+        <option value="modified-desc">Recently Modified</option>
+        <option value="added-desc">Recently Added</option>
+        <option value="added-asc">Oldest Added</option>
+        <option value="name-asc">Name (A-Z)</option>
+        <option value="name-desc">Name (Z-A)</option>
     </select>
-    
-    <label for="filterAge" style="margin:0 8px 0 16px;"><b>Filter by Age:</b></label>
-    <select id="filterAge" onchange="renderRecords()" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
-        <option value="">All Ages</option>
-    </select>
-    
-    <button type="button" onclick="clearFilters()" style="margin-left:16px; background:#f0f0f0; border:1px solid #999;">Clear Filters</button>
+
+    <button type="button" onclick="clearFilters()" style="margin-left:16px; background:#f0f0f0; border:1px solid #999;">Clear Search</button>
 </div>
 
 <h3 class="section-label">Saved Records</h3>
@@ -787,6 +981,34 @@ button{
 let db;
 let editingId = null;   // id currently being edited, or null
 let allRecords = [];    // in-memory cache of all records, used for search/filter + export
+
+// ---------- Dark mode ----------
+//
+// A simple on/off theme toggle, persisted in localStorage so it's
+// remembered across visits (and shared across every database, since it's
+// a display preference rather than data). Applied immediately on load,
+// before the rest of the app initializes, to avoid a light-mode flash.
+
+const DARK_MODE_KEY = "localizedDarkMode";
+
+function isDarkModeEnabled(){
+    return localStorage.getItem(DARK_MODE_KEY) === "1";
+}
+
+function setDarkMode(enabled){
+    document.body.classList.toggle("dark", !!enabled);
+    localStorage.setItem(DARK_MODE_KEY, enabled ? "1" : "0");
+
+    const lightTheme = document.getElementById("hljsLightTheme");
+    const darkTheme = document.getElementById("hljsDarkTheme");
+    if(lightTheme) lightTheme.disabled = !!enabled;
+    if(darkTheme) darkTheme.disabled = !enabled;
+
+    const toggle = document.getElementById("darkModeToggle");
+    if(toggle) toggle.checked = !!enabled;
+}
+
+setDarkMode(isDarkModeEnabled());
 
 // ---------- Mobile navigation: hamburger sidebar + Editor/Records tabs ----------
 //
@@ -978,7 +1200,7 @@ function initActiveDatabase(){
         exitEditMode();
         form.reset();
         setMessageHtml("");
-        clearCustomFieldRows();
+        resetCustomFieldRows();
         loadRecords();
     }).catch(err=>{
         console.error("IndexedDB error opening database:", entry, err);
@@ -1011,7 +1233,7 @@ function recoverFromFailedDatabaseOpen(failedEntry, err){
         exitEditMode();
         form.reset();
         setMessageHtml("");
-        clearCustomFieldRows();
+        resetCustomFieldRows();
         loadRecords();
 
         const failedName = failedEntry ? failedEntry.name : "the selected";
@@ -1258,15 +1480,15 @@ async function importRecordsIntoNewDatabase(displayName, createdAt, records){
         const store = tx.objectStore("records");
 
         (records || []).forEach(r=>{
+            const createdAt = r.createdAt || getCurrentTimestamp();
             store.add({
                 name: r.name ?? "",
-                age: r.age ?? "",
-                section: r.section ?? "",
                 characterSheet: r.characterSheet ?? "",
                 message: sanitizeHtml(r.message ?? ""),
                 customFields: (r.customFields && typeof r.customFields === "object") ? r.customFields : {},
                 uuid: r.uuid || generateUUID(),
-                createdAt: r.createdAt || getCurrentTimestamp()
+                createdAt: createdAt,
+                updatedAt: r.updatedAt || createdAt
             });
         });
 
@@ -1343,7 +1565,8 @@ function updateRecord(id, data){
             ...data,
             id,
             uuid: existingRecord.uuid,
-            createdAt: existingRecord.createdAt
+            createdAt: existingRecord.createdAt,
+            updatedAt: getCurrentTimestamp()
         });
         tx2.oncomplete=()=>{
             exitEditMode();
@@ -1799,10 +2022,96 @@ function tryInlineShortcut(){
     }
 }
 
+// Finds the closest ancestor of `node` (inclusive) inside the editor that
+// matches `predicate`, or null if none is found before reaching the editor.
+function closestInEditor(node, predicate){
+    let cur = node && node.nodeType === Node.ELEMENT_NODE ? node : (node ? node.parentNode : null);
+    while(cur && cur !== messageEditor){
+        if(predicate(cur)) return cur;
+        cur = cur.parentNode;
+    }
+    return null;
+}
+
+// True when the collapsed selection in `range` sits at the very first
+// caret position inside `el`.
+function isCaretAtElementStart(range, el){
+    const testRange = document.createRange();
+    testRange.selectNodeContents(el);
+    testRange.collapse(true);
+    return range.compareBoundaryPoints(Range.START_TO_START, testRange) === 0;
+}
+
 messageEditor.addEventListener("keydown", (e)=>{
     if(e.key === " "){
         if(tryLineStartShortcut()){
             e.preventDefault();
+        }
+        return;
+    }
+
+    const sel = window.getSelection();
+    if(!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+
+    if(e.key === "Enter"){
+        // Default contenteditable Enter handling tends to break OUT of a
+        // <pre><code> block or an admonition callout entirely, instead of
+        // adding a line inside it. Handle both cases manually.
+
+        const codeEl = closestInEditor(range.startContainer, n=>n.tagName === "CODE" && n.parentNode && n.parentNode.tagName === "PRE");
+        if(codeEl){
+            e.preventDefault();
+            range.deleteContents();
+            const nl = document.createTextNode("\n");
+            range.insertNode(nl);
+            range.setStartAfter(nl);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            return;
+        }
+
+        const admonitionContent = closestInEditor(range.startContainer, n=>n.classList && n.classList.contains("admonition-content"));
+        if(admonitionContent){
+            e.preventDefault();
+            range.deleteContents();
+            const p = document.createElement("p");
+            p.appendChild(document.createElement("br"));
+            range.insertNode(p);
+            const newRange = document.createRange();
+            newRange.setStart(p, 0);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            return;
+        }
+    }
+
+    if((e.key === "Backspace") && range.collapsed){
+        // Let an empty code block or empty admonition be deleted entirely
+        // when the caret sits at its very start, instead of getting stuck.
+
+        const pre = closestInEditor(range.startContainer, n=>n.tagName === "PRE");
+        if(pre){
+            const codeEl = pre.querySelector("code");
+            const isEmpty = !codeEl || codeEl.textContent.length === 0;
+            if(isEmpty && isCaretAtElementStart(range, codeEl || pre)){
+                e.preventDefault();
+                pre.remove();
+                return;
+            }
+        }
+
+        const admonition = closestInEditor(range.startContainer, n=>n.classList && n.classList.contains("admonition"));
+        if(admonition){
+            const content = admonition.querySelector(".admonition-content");
+            const isEmpty = !content || stripHtml(content.innerHTML).length === 0;
+            if(isEmpty && isCaretAtElementStart(range, content || admonition)){
+                e.preventDefault();
+                admonition.remove();
+                return;
+            }
         }
     }
 });
@@ -1975,6 +2284,54 @@ function htmlToMarkdown(html){
 }
 
 // ---------- Custom field editor ----------
+//
+// Custom field *names* (not values) persist in localStorage across
+// database switches and new entries, so a field the user has set up
+// keeps showing up on the form until they explicitly remove it with the
+// row's "x" button. Values are always per-record and never persisted here.
+
+const CUSTOM_FIELD_DEFS_KEY = "localizedCustomFieldDefs";
+
+function loadCustomFieldDefs(){
+    try{
+        const raw = localStorage.getItem(CUSTOM_FIELD_DEFS_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    }catch(e){
+        console.error("Failed to parse custom field definitions:", e);
+        return [];
+    }
+}
+
+function saveCustomFieldDefs(defs){
+    localStorage.setItem(CUSTOM_FIELD_DEFS_KEY, JSON.stringify(defs));
+}
+
+// Adds any not-yet-known field names to the persisted list.
+function rememberCustomFieldDefs(names){
+    const defs = loadCustomFieldDefs();
+    let changed = false;
+
+    names.forEach(name=>{
+        const trimmed = (name || "").trim();
+        if(trimmed && !defs.includes(trimmed)){
+            defs.push(trimmed);
+            changed = true;
+        }
+    });
+
+    if(changed) saveCustomFieldDefs(defs);
+}
+
+// Removes a single field name from the persisted list (called when the
+// user clicks the row's remove button), so it stops reappearing.
+function forgetCustomFieldDef(name){
+    const trimmed = (name || "").trim();
+    if(!trimmed) return;
+
+    const defs = loadCustomFieldDefs().filter(n=>n !== trimmed);
+    saveCustomFieldDefs(defs);
+}
 
 function addCustomFieldRow(name = "", value = ""){
     const row = document.createElement("div");
@@ -1986,7 +2343,16 @@ function addCustomFieldRow(name = "", value = ""){
         <button type="button" class="remove-field-btn" title="Remove field">&times;</button>
     `;
 
-    row.querySelector(".remove-field-btn").onclick = () => row.remove();
+    const nameInput = row.querySelector(".field-name");
+
+    // Persist the field name as soon as the user finishes typing it, so it
+    // survives even if they never hit Save (e.g. they switch databases first).
+    nameInput.addEventListener("change", () => rememberCustomFieldDefs([nameInput.value]));
+
+    row.querySelector(".remove-field-btn").onclick = () => {
+        forgetCustomFieldDef(nameInput.value);
+        row.remove();
+    };
 
     customFieldsContainer.appendChild(row);
 }
@@ -2031,49 +2397,63 @@ function clearCustomFieldRows(){
     customFieldsContainer.innerHTML = "";
 }
 
+// Used whenever the form is reset for a *new* entry (after saving,
+// cancelling, switching/deleting a database, etc). Rather than wiping
+// custom fields entirely, it repopulates the persisted field names with
+// blank values, so they stay available until explicitly removed.
+function resetCustomFieldRows(){
+    clearCustomFieldRows();
+    loadCustomFieldDefs().forEach(name => addCustomFieldRow(name, ""));
+}
+
 form.onsubmit = (e) => {
     e.preventDefault();
 
     const data = {
         name: document.getElementById("name").value.trim(),
-        age: document.getElementById("age").value,
-        section: document.getElementById("section").value.trim(),
         characterSheet: document.getElementById("characterSheet").value.trim(),
         message: getMessageHtml(),
         customFields: getCustomFieldsFromForm()
     };
+
+    rememberCustomFieldDefs(Object.keys(data.customFields));
 
     if(editingId !== null){
         updateRecord(editingId, data);
     }else{
         data.uuid = generateUUID();
         data.createdAt = getCurrentTimestamp();
+        data.updatedAt = data.createdAt;
         addRecord(data);
     }
 
     form.reset();
     setMessageHtml("");
-    clearCustomFieldRows();
+    resetCustomFieldRows();
 };
 
 cancelEditBtn.onclick = () => {
     exitEditMode();
     form.reset();
     setMessageHtml("");
-    clearCustomFieldRows();
+    resetCustomFieldRows();
 };
 
 function enterEditMode(record){
     editingId = record.id;
     document.getElementById("name").value = record.name;
-    document.getElementById("age").value = record.age;
-    document.getElementById("section").value = record.section;
     document.getElementById("characterSheet").value = record.characterSheet || "";
     setMessageHtml(record.message);
 
     clearCustomFieldRows();
-    Object.entries(record.customFields || {}).forEach(([key, value])=>{
+    const recordFields = record.customFields || {};
+    Object.entries(recordFields).forEach(([key, value])=>{
         addCustomFieldRow(key, value);
+    });
+    // Also show any persisted custom field names not present on this
+    // record yet, so they stay available to fill in until removed.
+    loadCustomFieldDefs().forEach(name=>{
+        if(!(name in recordFields)) addCustomFieldRow(name, "");
     });
 
     submitBtn.textContent = "Update";
@@ -2103,65 +2483,47 @@ function loadRecords(){
             cursor.continue();
         }else{
             allRecords = results;
-            updateFilterOptions();
             renderRecords();
         }
     };
 }
 
-function updateFilterOptions(){
-    const sectionSet = new Set();
-    const ageSet = new Set();
-    
-    allRecords.forEach(r=>{
-        if(r.section) sectionSet.add(r.section);
-        if(r.age) ageSet.add(String(r.age));
-    });
-    
-    const sectionSelect = document.getElementById("filterSection");
-    const ageSelect = document.getElementById("filterAge");
-    
-    const currentSection = sectionSelect.value;
-    const currentAge = ageSelect.value;
-    
-    sectionSelect.innerHTML = '<option value="">All Sections</option>';
-    Array.from(sectionSet).sort().forEach(section=>{
-        const opt = document.createElement("option");
-        opt.value = section;
-        opt.textContent = section;
-        sectionSelect.appendChild(opt);
-    });
-    sectionSelect.value = currentSection;
-    
-    ageSelect.innerHTML = '<option value="">All Ages</option>';
-    Array.from(ageSet).sort((a,b)=>Number(a)-Number(b)).forEach(age=>{
-        const opt = document.createElement("option");
-        opt.value = age;
-        opt.textContent = age;
-        ageSelect.appendChild(opt);
-    });
-    ageSelect.value = currentAge;
-}
-
 function clearFilters(){
     document.getElementById("searchBox").value = "";
-    document.getElementById("filterSection").value = "";
-    document.getElementById("filterAge").value = "";
     renderRecords();
+}
+
+function sortRecordsList(records, sortMode){
+    const sorted = records.slice();
+
+    switch(sortMode){
+        case "added-asc":
+            sorted.sort((a,b)=> new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+            break;
+        case "name-asc":
+            sorted.sort((a,b)=> (a.name || "").localeCompare(b.name || "", undefined, {sensitivity:"base"}));
+            break;
+        case "name-desc":
+            sorted.sort((a,b)=> (b.name || "").localeCompare(a.name || "", undefined, {sensitivity:"base"}));
+            break;
+        case "added-desc":
+            sorted.sort((a,b)=> new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            break;
+        case "modified-desc":
+        default:
+            sorted.sort((a,b)=> new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+            break;
+    }
+
+    return sorted;
 }
 
 function renderRecords(){
     const container=document.getElementById("records");
     const query = document.getElementById("searchBox").value.trim().toLowerCase();
-    const filterSection = document.getElementById("filterSection").value;
-    const filterAge = document.getElementById("filterAge").value;
+    const sortMode = document.getElementById("sortRecords").value;
 
     const filtered = allRecords.filter(r=>{
-        const matchesSection = !filterSection || r.section === filterSection;
-        const matchesAge = !filterAge || String(r.age) === filterAge;
-        
-        if(!matchesSection || !matchesAge) return false;
-        
         if(!query) return true;
         
         const customFieldsMatch = Object.entries(r.customFields || {}).some(([k,v])=>
@@ -2172,9 +2534,7 @@ function renderRecords(){
         const createdAtIso = r.createdAt ? r.createdAt : "";
 
         return (r.name || "").toLowerCase().includes(query)
-            || (r.section || "").toLowerCase().includes(query)
             || stripHtml(r.message).toLowerCase().includes(query)
-            || String(r.age || "").toLowerCase().includes(query)
             || String(r.id || "").toLowerCase().includes(query)
             || (r.uuid || "").toLowerCase().includes(query)
             || createdAtFormatted.toLowerCase().includes(query)
@@ -2183,14 +2543,16 @@ function renderRecords(){
             || customFieldsMatch;
     });
 
+    const sortedFiltered = sortRecordsList(filtered, sortMode);
+
     container.innerHTML="";
 
-    if(filtered.length === 0){
+    if(sortedFiltered.length === 0){
         container.innerHTML = `<p class="empty-msg">No records found.</p>`;
         return;
     }
 
-    filtered.forEach(r=>{
+    sortedFiltered.forEach(r=>{
         const div=document.createElement("div");
         div.className = "record" + (r.id === editingId ? " editing" : "");
 
@@ -2202,18 +2564,17 @@ function renderRecords(){
         const messageClass = "message-content" + (messageHtml.trim() === "" ? " empty-message" : "");
 
         const createdAtFormatted = r.createdAt ? formatTimestamp(r.createdAt) : "N/A";
+        const updatedAtFormatted = r.updatedAt ? formatTimestamp(r.updatedAt) : createdAtFormatted;
         
-        const charSheetHtml = r.characterSheet ? `<div style="background:#f9f9f9; padding:8px; border-left:3px solid #666; margin:8px 0; font-size:0.9em; white-space:pre-wrap;"><b>Character Sheet:</b>\n${escapeHtml(r.characterSheet)}</div>` : "";
+        const charSheetHtml = r.characterSheet ? `<div class="char-sheet-box"><b>Character Sheet:</b>\n${escapeHtml(r.characterSheet)}</div>` : "";
 
         div.innerHTML=`
         <b>Name: ${escapeHtml(r.name)}</b><br>
-        Age: ${escapeHtml(String(r.age))}<br>
-        Section: ${escapeHtml(r.section)}<br>
         ${charSheetHtml}
         Message:
         <div class="${messageClass}">${messageHtml}</div>
         ${customFieldsHtml}
-        <small>ID: ${r.id} | UUID: ${escapeHtml(r.uuid || "N/A")} | Created: ${createdAtFormatted}</small><br><br>
+        <small>ID: ${r.id} | UUID: ${escapeHtml(r.uuid || "N/A")} | Created: ${createdAtFormatted} | Modified: ${updatedAtFormatted}</small><br><br>
 
         <button onclick="editRecordById(${r.id})">Edit</button>
         <button onclick="downloadRecord(${r.id})">Download</button>
@@ -2253,7 +2614,7 @@ function deleteRecord(id){
             exitEditMode();
             form.reset();
             setMessageHtml("");
-            clearCustomFieldRows();
+            resetCustomFieldRows();
         }
         loadRecords();
     };
@@ -2262,12 +2623,10 @@ function deleteRecord(id){
 
 // Plain-text record format:
 //   Name: John Doe
-//   Age: 20
-//   Section: A
 //   Message: Hello there
 //   Any Custom Field: some value
 // Multiple records are separated by a blank line. Any line that isn't
-// Name/Age/Section/Message is treated as a custom field.
+// Name/Message is treated as a custom field.
 
 function recordToText(r){
     const messageMarkdown = htmlToMarkdown(r.message || "")
@@ -2278,9 +2637,8 @@ function recordToText(r){
         `ID: ${r.id ?? ""}`,
         `UUID: ${r.uuid ?? ""}`,
         `Created: ${r.createdAt ?? ""}`,
+        `Modified: ${r.updatedAt ?? r.createdAt ?? ""}`,
         `Name: ${r.name ?? ""}`,
-        `Age: ${r.age ?? ""}`,
-        `Section: ${r.section ?? ""}`,
         `Message: ${messageMarkdown}`
     ];
 
@@ -2335,8 +2693,6 @@ function downloadAll(){
 //
 // Expects the same plain-text format produced by the Download buttons:
 //   Name: John Doe
-//   Age: 20
-//   Section: A
 //   Message: Hello there
 // Records are separated by one or more blank lines. Field labels are
 // matched case-insensitively.
@@ -2348,10 +2704,10 @@ function parseTextRecords(text){
         .map(b=>b.trim())
         .filter(Boolean);
 
-    const standardKeys = ["name","age","section","message"];
+    const standardKeys = ["name","message"];
 
     return blocks.map(block=>{
-        const record = { name:"", age:"", section:"", message:"", customFields:{} };
+        const record = { name:"", message:"", customFields:{} };
 
         block.split("\n").forEach(line=>{
             const match = line.match(/^\s*([^:]+?)\s*:\s*(.*)$/);
@@ -2390,19 +2746,21 @@ document.getElementById("importInput").addEventListener("change", async (e)=>{
             }
 
             for(const rest of records){
-                if(!rest.name || !rest.section){
+                if(!rest.name){
                     failedCount++;
                     continue;
                 }
 
                 await new Promise((resolve)=>{
                     const tx = db.transaction("records","readwrite");
+                    const importedAt = getCurrentTimestamp();
                     tx.objectStore("records").add({
                         name: rest.name ?? "",
-                        age: rest.age ?? "",
-                        section: rest.section ?? "",
                         message: markdownToHtml(rest.message ?? ""),
-                        customFields: rest.customFields ?? {}
+                        customFields: rest.customFields ?? {},
+                        uuid: generateUUID(),
+                        createdAt: importedAt,
+                        updatedAt: importedAt
                     });
                     tx.oncomplete = ()=>{ importedCount++; resolve(); };
                     tx.onerror = ()=>{ failedCount++; resolve(); };
@@ -2428,7 +2786,7 @@ function exportCSV(){
         return;
     }
 
-    const baseHeaders = ["id","uuid","createdAt","name","age","section","message"];
+    const baseHeaders = ["id","uuid","createdAt","updatedAt","name","message"];
 
     const customKeys = Array.from(
         allRecords.reduce((set, r)=>{
@@ -2488,7 +2846,7 @@ function exportExcel(){
         return;
     }
 
-    const baseHeaders = ["id","uuid","createdAt","name","age","section","message"];
+    const baseHeaders = ["id","uuid","createdAt","updatedAt","name","message"];
 
     const customKeys = Array.from(
         allRecords.reduce((set, r)=>{
@@ -2555,7 +2913,7 @@ function deleteAllRecords(){
         exitEditMode();
         form.reset();
         setMessageHtml("");
-        clearCustomFieldRows();
+        resetCustomFieldRows();
         loadRecords();
         alert("All records have been deleted successfully.");
     };
@@ -2581,13 +2939,13 @@ function viewCurrentDatabase(){
         const messageText = stripHtml(r.message || "(no message)");
 
         const createdAtFormatted = r.createdAt ? formatTimestamp(r.createdAt) : "N/A";
+        const updatedAtFormatted = r.updatedAt ? formatTimestamp(r.updatedAt) : createdAtFormatted;
         return `Record ${index + 1}:
   ID: ${r.id}
   UUID: ${r.uuid || "N/A"}
   Created: ${createdAtFormatted}
+  Modified: ${updatedAtFormatted}
   Name: ${r.name}
-  Age: ${r.age}
-  Section: ${r.section}
   Message: ${messageText}${customFieldsText ? "\n" + customFieldsText : ""}`;
     }).join("\n\n");
 
@@ -2607,7 +2965,8 @@ function viewCurrentDatabase(){
 
     const content = document.createElement("div");
     content.style.cssText = `
-        background: white;
+        background: var(--card-bg);
+        color: var(--text);
         border-radius: 8px;
         padding: 20px;
         max-width: 600px;
@@ -2624,7 +2983,8 @@ function viewCurrentDatabase(){
     const pre = document.createElement("pre");
     pre.textContent = dbContent;
     pre.style.cssText = `
-        background: #f5f5f5;
+        background: var(--pre-bg);
+        color: var(--text);
         padding: 12px;
         border-radius: 4px;
         overflow-x: auto;
