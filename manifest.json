@@ -1,6 +1,6 @@
 {
     "name": "Localized Database Form",
-    "short_name": "DB Form",
+    "short_name": "Localized Database Form",
     "description": "An offline-first, on-device database form for records — supports multiple databases, rich messages, and full backup/restore. All data stays on this device.",
     "start_url": "./index.html",
     "scope": "./",
