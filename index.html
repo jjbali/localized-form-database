@@ -1103,6 +1103,74 @@ table.spreadsheet-grid input.cell-input.selected{
     overflow-x:auto;
 }
 
+/* ---- Code editor overlay: gives the plain-text file editor live syntax
+   highlighting (HTML, CSS, JS, JSON, etc. -- via highlight.js, already
+   loaded for rendering message content elsewhere in the app). A highlighted
+   <pre><code> sits absolutely positioned behind the real textarea; the
+   textarea's own text is made transparent (only its caret/selection show)
+   so what the user sees is the colored code, while typing/selecting/undo
+   all still work exactly like a normal textarea. The wrapper carries the
+   border/background so both layers line up pixel-for-pixel. ---- */
+.code-editor-wrap{
+    position:relative;
+    margin:4px 0 8px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    background:var(--input-bg);
+}
+
+.code-editor-wrap .file-editor-textarea{
+    position:relative;
+    z-index:1;
+    margin:0;
+    border:none;
+    border-radius:4px;
+    background:transparent;
+    color:transparent;
+    caret-color:var(--text);
+}
+
+.code-editor-wrap .file-editor-textarea::selection{
+    background:var(--accent);
+    opacity:0.35;
+}
+
+.code-editor-highlight{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    margin:0;
+    padding:10px;
+    box-sizing:border-box;
+    overflow:hidden;
+    pointer-events:none;
+    border:1px solid transparent;
+    border-radius:4px;
+    background:transparent;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:13px;
+    line-height:1.5;
+    white-space:pre;
+    color:var(--text);
+}
+
+.code-editor-highlight code.hljs{
+    background:transparent !important;
+    padding:0 !important;
+    color:inherit;
+    font-family:inherit;
+    font-size:inherit;
+    white-space:inherit;
+}
+
+.code-editor-lang{
+    display:block;
+    text-align:right;
+    font-size:0.78em;
+    color:var(--text-faint);
+    margin:-4px 0 4px;
+}
+
 /* ---- Folders: organize the freestanding Files store into named, colored
    groups. Folders are their own small object store ({id, name, color,
    createdAt, updatedAt}); each file optionally carries a folderId pointing
@@ -1968,7 +2036,11 @@ table.spreadsheet-grid input.cell-input.selected{
 <form id="fileForm">
 <input id="fileName" placeholder="File name (e.g. notes.txt, script.js)" required>
 <select id="fileFolderSelect" class="file-folder-select"><option value="">No folder</option></select>
-<textarea id="fileContent" class="html-editor file-editor-textarea" placeholder="File contents..." rows="14"></textarea>
+<span class="code-editor-lang" id="fileContentLangLabel"></span>
+<div class="code-editor-wrap">
+    <pre class="code-editor-highlight" id="fileContentHighlightPre" aria-hidden="true"><code id="fileContentHighlightCode" class="hljs"></code></pre>
+    <textarea id="fileContent" class="html-editor file-editor-textarea" placeholder="File contents..." rows="14" spellcheck="false"></textarea>
+</div>
 <button type="submit" id="fileSubmitBtn">Save File</button>
 <button type="button" id="fileCancelBtn" style="display:none;">Cancel Edit</button>
 </form>
@@ -4913,6 +4985,67 @@ const fileSubmitBtn = document.getElementById("fileSubmitBtn");
 const fileCancelBtn = document.getElementById("fileCancelBtn");
 const fileNameInput = document.getElementById("fileName");
 const fileContentInput = document.getElementById("fileContent");
+const fileContentHighlightPre = document.getElementById("fileContentHighlightPre");
+const fileContentHighlightCode = document.getElementById("fileContentHighlightCode");
+const fileContentLangLabel = document.getElementById("fileContentLangLabel");
+
+// ---- File editor syntax highlighting ----
+// Maps a file's extension to a highlight.js language so the editor can
+// color it live. "html" is an alias highlight.js resolves to its XML/HTML
+// grammar. Unrecognized extensions fall back to hljs's own auto-detection
+// rather than going uncolored.
+const FILE_EXT_LANGUAGE_MAP = {
+    html:"html", htm:"html", xhtml:"html", svg:"xml", xml:"xml",
+    css:"css", scss:"scss", less:"less",
+    js:"javascript", mjs:"javascript", cjs:"javascript", jsx:"javascript",
+    ts:"typescript", tsx:"typescript",
+    json:"json", jsonc:"json",
+    md:"markdown", markdown:"markdown",
+    py:"python", rb:"ruby", php:"php", java:"java", c:"c", h:"c",
+    cpp:"cpp", cc:"cpp", cs:"csharp", go:"go", rs:"rust", swift:"swift",
+    sh:"bash", bash:"bash", zsh:"bash",
+    yml:"yaml", yaml:"yaml", sql:"sql", toml:"ini", ini:"ini", txt:"plaintext"
+};
+
+function getFileLanguage(name){
+    const ext = (name || "").split(".").pop().toLowerCase();
+    return FILE_EXT_LANGUAGE_MAP[ext] || null;
+}
+
+function refreshFileEditorHighlight(){
+    if(!fileContentHighlightCode) return;
+
+    const code = fileContentInput.value;
+    const lang = getFileLanguage(fileNameInput.value);
+
+    let html, resolvedLang = lang;
+    if(typeof hljs === "undefined"){
+        html = escapeHtml(code);
+        resolvedLang = null;
+    }else if(lang && hljs.getLanguage(lang)){
+        html = hljs.highlight(code, { language: lang }).value;
+    }else{
+        const auto = hljs.highlightAuto(code);
+        html = auto.value;
+        resolvedLang = code.trim() ? auto.language : null;
+    }
+
+    // Trailing newline keeps the highlighted block the same height as the
+    // textarea when the content ends with a blank line, so scroll stays in sync.
+    fileContentHighlightCode.innerHTML = html + "\n";
+    fileContentLangLabel.textContent = resolvedLang ? resolvedLang : "";
+    syncFileEditorScroll();
+}
+
+function syncFileEditorScroll(){
+    if(!fileContentHighlightPre) return;
+    fileContentHighlightPre.scrollTop = fileContentInput.scrollTop;
+    fileContentHighlightPre.scrollLeft = fileContentInput.scrollLeft;
+}
+
+fileContentInput.addEventListener("input", refreshFileEditorHighlight);
+fileContentInput.addEventListener("scroll", syncFileEditorScroll);
+fileNameInput.addEventListener("input", refreshFileEditorHighlight);
 
 function loadFiles(){
     if(!db) return;
@@ -4952,19 +5085,27 @@ fileForm.onsubmit = (e)=>{
 
     try{
         if(editingFileId !== null){
+            // Snapshot the id being edited. editingFileId is a mutable module-level
+            // variable that exitFileEditMode() clears to null -- if that happened
+            // before these async IndexedDB callbacks run (which it previously did,
+            // since exitFileEditMode() was called synchronously right after this
+            // try block), the put() below would end up writing with id: null
+            // instead of the real record id, and the edit would silently fail to save.
+            const idToUpdate = editingFileId;
             const tx = db.transaction("files","readwrite");
-            tx.objectStore("files").get(editingFileId).onsuccess = (ev)=>{
+            tx.objectStore("files").get(idToUpdate).onsuccess = (ev)=>{
                 const existing = ev.target.result || {};
                 const tx2 = db.transaction("files","readwrite");
-                tx2.objectStore("files").put({ ...data, id: editingFileId, createdAt: existing.createdAt || data.updatedAt });
-                tx2.oncomplete = ()=>{ exitFileEditMode(); loadFiles(); };
+                tx2.objectStore("files").put({ ...data, id: idToUpdate, createdAt: existing.createdAt || data.updatedAt });
+                tx2.oncomplete = ()=>{ fileForm.reset(); exitFileEditMode(); refreshFileEditorHighlight(); loadFiles(); };
                 tx2.onerror = e2=>alert("Failed to update file: "+e2.target.error);
             };
+            tx.onerror = e=>alert("Failed to update file: "+e.target.error);
         }else{
             data.createdAt = data.updatedAt;
             const tx = db.transaction("files","readwrite");
             tx.objectStore("files").add(data);
-            tx.oncomplete = loadFiles;
+            tx.oncomplete = ()=>{ fileForm.reset(); exitFileEditMode(); refreshFileEditorHighlight(); loadFiles(); };
             tx.onerror = e=>alert("Failed to save file: "+e.target.error);
         }
     }catch(err){
@@ -4972,14 +5113,12 @@ fileForm.onsubmit = (e)=>{
         alert("Failed to save file: "+err.message+"\n\nTry reloading the page.");
         return;
     }
-
-    fileForm.reset();
-    exitFileEditMode();
 };
 
 fileCancelBtn.onclick = ()=>{
     exitFileEditMode();
     fileForm.reset();
+    refreshFileEditorHighlight();
 };
 
 function enterFileEditMode(entry){
@@ -4992,6 +5131,7 @@ function enterFileEditMode(entry){
     showTab("files");
     window.scrollTo({top:0, behavior:"smooth"});
     renderFiles();
+    refreshFileEditorHighlight();
 }
 
 function exitFileEditMode(){
@@ -5016,6 +5156,7 @@ function deleteFile(id){
         if(id === editingFileId){
             exitFileEditMode();
             fileForm.reset();
+            refreshFileEditorHighlight();
         }
         loadFiles();
     };
@@ -6413,6 +6554,7 @@ renderMathQuestions();
 
 // ---------- Boot ----------
 
+refreshFileEditorHighlight();
 initActiveDatabase();
 
 </script>
