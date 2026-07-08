@@ -1,0 +1,2704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Localized Database Form</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4a90d9">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="DB Form">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    max-width:700px;
+    margin:30px auto;
+    padding:20px;
+}
+
+input, textarea{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    box-sizing:border-box;
+    border:1px solid #ccc;
+    border-radius:4px;
+    font-family:inherit;
+}
+
+textarea{
+    resize:vertical;
+}
+
+button{
+    padding:8px 14px;
+    margin:4px 4px 4px 0;
+    cursor:pointer;
+}
+
+.record{
+    border:1px solid #ccc;
+    padding:10px;
+    margin-top:10px;
+    border-radius:6px;
+}
+
+.record.editing{
+    border-color:#4a90d9;
+    background:#f5f9ff;
+}
+
+.toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:center;
+    margin:16px 0;
+}
+
+.toolbar input[type="text"]{
+    flex:1;
+    min-width:180px;
+    margin:0;
+}
+
+#searchBtn{
+    background:#4a90d9;
+    color:white;
+    border:1px solid #2e5c8a;
+    border-radius:4px;
+    padding:10px 16px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:background 0.2s ease;
+}
+
+#searchBtn:hover{
+    background:#2e5c8a;
+}
+
+#searchBtn:active{
+    background:#1e3f5a;
+}
+
+.hidden-file-input{
+    display:none;
+}
+
+.section-label{
+    margin-top:24px;
+}
+
+.empty-msg{
+    color:#777;
+    font-style:italic;
+}
+
+.record small{
+    color:#666;
+}
+
+.custom-field-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    margin:8px 0;
+}
+
+.custom-field-row input{
+    margin:0;
+}
+
+.custom-field-row .field-name{
+    flex:0 0 35%;
+}
+
+.custom-field-row .field-value{
+    flex:1;
+}
+
+.custom-field-row .remove-field-btn{
+    flex:0 0 auto;
+    padding:6px 10px;
+    margin:0;
+}
+
+#addFieldBtn{
+    background:#eef4fb;
+    border:1px solid #b9d3ec;
+}
+
+.wysiwyg-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px;
+    margin:8px 0 0;
+}
+
+.wysiwyg-toolbar button{
+    padding:6px 10px;
+    margin:0;
+    min-width:36px;
+    background:#f4f4f4;
+    border:1px solid #ccc;
+    border-radius:4px;
+    font-size:14px;
+}
+
+.wysiwyg-toolbar button:hover{
+    background:#e8e8e8;
+}
+
+.wysiwyg-editor{
+    width:100%;
+    min-height:120px;
+    padding:10px;
+    margin:4px 0 8px;
+    border:1px solid #ccc;
+    border-radius:4px;
+    box-sizing:border-box;
+    background:#fff;
+    overflow-y:auto;
+}
+
+.wysiwyg-editor:focus{
+    outline:2px solid #4a90d9;
+    outline-offset:-1px;
+}
+
+.wysiwyg-editor:empty::before{
+    content:attr(data-placeholder);
+    color:#999;
+}
+
+.wysiwyg-editor ul, .wysiwyg-editor ol{
+    margin:4px 0;
+    padding-left:24px;
+}
+
+.message-content{
+    margin:4px 0;
+}
+
+.message-content ul, .message-content ol{
+    margin:4px 0;
+    padding-left:24px;
+}
+
+.message-content:empty::before,
+.message-content.empty-message::before{
+    content:"(no message)";
+    color:#999;
+    font-style:italic;
+}
+
+/* ---- Markdown-rendered content (editor + saved records) ---- */
+
+.wysiwyg-editor h1, .wysiwyg-editor h2, .wysiwyg-editor h3,
+.wysiwyg-editor h4, .wysiwyg-editor h5, .wysiwyg-editor h6,
+.message-content h1, .message-content h2, .message-content h3,
+.message-content h4, .message-content h5, .message-content h6{
+    margin:0.6em 0 0.3em;
+    line-height:1.25;
+}
+
+.wysiwyg-editor h1, .message-content h1{ font-size:1.6em; }
+.wysiwyg-editor h2, .message-content h2{ font-size:1.35em; }
+.wysiwyg-editor h3, .message-content h3{ font-size:1.15em; }
+
+.wysiwyg-editor blockquote, .message-content blockquote{
+    border-left:4px solid #ccc;
+    margin:8px 0;
+    padding:4px 12px;
+    color:#555;
+    background:#fafafa;
+}
+
+.wysiwyg-editor pre, .message-content pre{
+    background:#f6f8fa;
+    border:1px solid #ddd;
+    border-radius:6px;
+    padding:10px;
+    overflow-x:auto;
+    margin:8px 0;
+}
+
+.wysiwyg-editor code, .message-content code{
+    font-family:Consolas, Menlo, monospace;
+    background:#f0f0f0;
+    padding:1px 5px;
+    border-radius:3px;
+    font-size:0.9em;
+}
+
+.wysiwyg-editor pre code, .message-content pre code{
+    background:none;
+    padding:0;
+    border-radius:0;
+    font-size:0.85em;
+}
+
+.wysiwyg-editor hr, .message-content hr{
+    border:none;
+    border-top:1px solid #ccc;
+    margin:12px 0;
+}
+
+.wysiwyg-editor table, .message-content table{
+    border-collapse:collapse;
+    margin:8px 0;
+    width:100%;
+}
+
+.wysiwyg-editor th, .wysiwyg-editor td,
+.message-content th, .message-content td{
+    border:1px solid #ccc;
+    padding:6px 8px;
+    text-align:left;
+}
+
+.wysiwyg-editor th, .message-content th{
+    background:#f4f4f4;
+}
+
+/* ---- Admonitions / callouts ---- */
+
+.admonition{
+    border-left:4px solid #448aff;
+    background:#e7f2fa;
+    border-radius:4px;
+    padding:10px 14px;
+    margin:10px 0;
+}
+
+.admonition-title{
+    font-weight:bold;
+    margin:0 0 6px;
+    text-transform:uppercase;
+    font-size:0.78em;
+    letter-spacing:0.03em;
+}
+
+.admonition-content > *:last-child{
+    margin-bottom:0;
+}
+
+.admonition-note{ border-color:#448aff; background:#e7f2fa; }
+.admonition-note .admonition-title{ color:#2962ff; }
+
+.admonition-tip{ border-color:#00c853; background:#e8f8ef; }
+.admonition-tip .admonition-title{ color:#00964f; }
+
+.admonition-info{ border-color:#00b8d4; background:#e3f8fb; }
+.admonition-info .admonition-title{ color:#00838f; }
+
+.admonition-warning{ border-color:#ff9100; background:#fff4e0; }
+.admonition-warning .admonition-title{ color:#c56a00; }
+
+.admonition-danger{ border-color:#ff5252; background:#fdeaea; }
+.admonition-danger .admonition-title{ color:#c62828; }
+
+/* ---- Toolbar extras ---- */
+
+.wysiwyg-toolbar select{
+    padding:5px 6px;
+    border:1px solid #ccc;
+    border-radius:4px;
+    background:#fff;
+    font-size:13px;
+}
+
+.wysiwyg-toolbar .sep{
+    width:1px;
+    align-self:stretch;
+    background:#ddd;
+    margin:0 4px;
+}
+
+.markdown-hint{
+    font-size:12px;
+    color:#777;
+    margin:2px 0 10px;
+}
+
+.markdown-hint code{
+    background:#f0f0f0;
+    padding:0 4px;
+    border-radius:3px;
+}
+
+/* ---- Collapsible hints: keeps help text out of the way until asked for ---- */
+
+.hint-details{
+    margin:4px 0 14px;
+}
+
+.hint-details summary{
+    cursor:pointer;
+    font-size:12px;
+    color:#4a6fa5;
+    font-weight:bold;
+    list-style:none;
+    padding:4px 0;
+    user-select:none;
+}
+
+.hint-details summary::-webkit-details-marker{
+    display:none;
+}
+
+.hint-details summary::before{
+    content:"\25B8\0020";
+    display:inline-block;
+    transition:transform 0.15s ease;
+}
+
+.hint-details[open] summary::before{
+    transform:rotate(90deg);
+}
+
+.hint-details .markdown-hint{
+    margin:6px 0 0;
+}
+
+/* ---- Mobile navigation: hamburger menu, slide-in sidebar, editor/records tabs ---- */
+
+.page-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+}
+
+#mobileMenuBtn{
+    display:none;
+    flex:0 0 auto;
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:#4a90d9;
+    color:#fff;
+    border:none;
+    font-size:18px;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+    cursor:pointer;
+    padding:0;
+    margin:0;
+}
+
+#sidebarOverlay{
+    display:none;
+}
+
+#sidebarOverlay.open{
+    display:block;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.45);
+    z-index:1150;
+}
+
+#sidebarPanel .sidebar-header{
+    display:none;
+}
+
+#sidebarPanel h4{
+    margin:18px 0 4px;
+    font-size:0.8em;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color:#888;
+}
+
+#sidebarPanel h4:first-of-type{
+    margin-top:0;
+}
+
+.mobile-tabs{
+    display:none;
+}
+
+.tab-panel.tab-hidden{
+    /* no-op outside the mobile breakpoint, so desktop layout is unaffected */
+}
+
+@media (max-width: 640px){
+
+    body{
+        max-width:100%;
+        margin:0;
+        padding:12px 12px 32px;
+    }
+
+    h2{
+        font-size:1.2em;
+        margin:4px 0 10px;
+    }
+
+    input, textarea, select{
+        padding:8px;
+        margin:6px 0;
+        font-size:15px; /* keeps iOS Safari from auto-zooming on focus */
+    }
+
+    button{
+        padding:7px 10px;
+        font-size:13px;
+        margin:3px 3px 3px 0;
+    }
+
+    .toolbar{
+        gap:5px;
+        margin:10px 0;
+    }
+
+    .toolbar input[type="text"]{
+        min-width:0;
+    }
+
+    .markdown-hint{
+        font-size:11px;
+        margin:2px 0 8px;
+    }
+
+    .record{
+        padding:8px;
+        margin-top:8px;
+    }
+
+    .wysiwyg-toolbar{
+        gap:3px;
+    }
+
+    .wysiwyg-toolbar button, .wysiwyg-toolbar select{
+        padding:5px 7px;
+        font-size:12px;
+        min-width:30px;
+    }
+
+    .wysiwyg-editor{
+        min-height:100px;
+        padding:8px;
+    }
+
+    .custom-field-row{
+        flex-wrap:wrap;
+    }
+
+    .custom-field-row .field-name{
+        flex:0 0 100%;
+    }
+
+    .custom-field-row .field-value{
+        flex:1 1 auto;
+    }
+
+    /* Hamburger button + slide-in sidebar for database/backup controls */
+
+    #mobileMenuBtn{
+        display:flex;
+    }
+
+    #sidebarPanel{
+        position:fixed;
+        top:0;
+        right:0;
+        height:100%;
+        width:84%;
+        max-width:300px;
+        background:#fff;
+        z-index:1200;
+        padding:18px;
+        box-shadow:-2px 0 14px rgba(0,0,0,0.3);
+        overflow-y:auto;
+        transform:translateX(100%);
+        transition:transform 0.25s ease;
+    }
+
+    #sidebarPanel.open{
+        transform:translateX(0);
+    }
+
+    #sidebarPanel .sidebar-header{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        margin-bottom:10px;
+        padding-bottom:10px;
+        border-bottom:1px solid #eee;
+    }
+
+    #sidebarPanel .sidebar-header h3{
+        margin:0;
+        font-size:1.05em;
+    }
+
+    #sidebarCloseBtn{
+        display:inline-block;
+        background:none;
+        border:none;
+        font-size:24px;
+        line-height:1;
+        cursor:pointer;
+        padding:2px 8px;
+        margin:0;
+        color:#555;
+    }
+
+    #sidebarPanel .toolbar{
+        flex-direction:column;
+        align-items:stretch;
+        gap:6px;
+    }
+
+    #sidebarPanel .toolbar select,
+    #sidebarPanel .toolbar button,
+    #sidebarPanel .toolbar label{
+        width:100%;
+        margin:0;
+        box-sizing:border-box;
+    }
+
+    /* Editor / Records tabs, in place of one long scrolling page */
+
+    .mobile-tabs{
+        display:flex;
+        gap:6px;
+        margin:2px 0 14px;
+        position:sticky;
+        top:0;
+        background:#fff;
+        padding:8px 0;
+        z-index:60;
+        border-bottom:1px solid #eee;
+    }
+
+    .mobile-tabs button{
+        flex:1;
+        margin:0;
+        padding:10px 6px;
+        border-radius:6px;
+        border:1px solid #ccc;
+        background:#f4f4f4;
+        font-weight:bold;
+        font-size:13px;
+    }
+
+    .mobile-tabs button.active{
+        background:#4a90d9;
+        color:#fff;
+        border-color:#2e5c8a;
+    }
+
+    .tab-panel.tab-hidden{
+        display:none;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+    <h2>Localized Database Form</h2>
+    <button type="button" id="mobileMenuBtn" onclick="openSidebar()" title="Menu" aria-label="Open menu">&#9776;</button>
+</div>
+
+<div id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div id="sidebarPanel">
+    <div class="sidebar-header">
+        <h3>Menu</h3>
+        <button type="button" id="sidebarCloseBtn" onclick="closeSidebar()" aria-label="Close menu">&times;</button>
+    </div>
+
+    <h4>Database</h4>
+    <div class="toolbar" id="dbToolbar">
+        <label for="databaseSelect" style="margin:0 8px 0 0;"><b>Database:</b></label>
+        <select id="databaseSelect" onchange="switchDatabase()" style="padding:8px; border:1px solid #ccc; border-radius:4px; min-width:180px;"></select>
+        <button type="button" id="newDbBtn" onclick="createNewDatabase()" style="background:#eef4fb; border-color:#b9d3ec;">+ New Database</button>
+        <button type="button" id="renameDbBtn" onclick="renameCurrentDatabase()">Rename</button>
+        <button type="button" id="deleteDbBtn" onclick="deleteCurrentDatabase()" style="background:#ffebee; border-color:#f44336;">Delete Database</button>
+    </div>
+    <div class="markdown-hint" id="activeDbHint"></div>
+
+    <h4>Backup &amp; Restore</h4>
+    <div class="toolbar" id="dbBackupToolbar">
+        <button type="button" onclick="exportCurrentDatabaseLiteral()" style="background:#e8f5e9; border-color:#4caf50;">Export Database (.json)</button>
+        <button type="button" onclick="exportAllDatabasesLiteral()" style="background:#e8f5e9; border-color:#4caf50;">Export All Databases (.json)</button>
+        <button type="button" onclick="document.getElementById('importDbInput').click()" style="background:#eef4fb; border-color:#b9d3ec;">Import Database(s) (.json)</button>
+        <input type="file" id="importDbInput" class="hidden-file-input" accept="application/json,.json">
+    </div>
+    <details class="hint-details">
+        <summary>What does export/import do?</summary>
+        <div class="markdown-hint">
+        Database export/import creates a literal, full-fidelity copy of your database(s) &mdash; every field of every record (including formatted messages and custom fields) is preserved exactly, not simplified into plain text. Use "Export Database" to save just the database selected above as a single <code>.json</code> file you can move to another device; use "Export All Databases" to back up everything at once. "Import Database(s)" reads such a file back in &mdash; it always creates brand-new database(s) alongside whatever is already on this device, so nothing existing is ever overwritten.
+        </div>
+    </details>
+
+    <h4>About</h4>
+    <details class="hint-details">
+        <summary>Where is my data stored?</summary>
+        <div class="markdown-hint">
+        The data is stored locally, meaning there is no server involved or someone that will mess with your data, you can download all of your saved data below. If you're not the only one using this device, please delete your data after downloading all the records.
+        </div>
+    </details>
+
+    <h4>App</h4>
+    <button type="button" id="installAppBtn" style="display:none; width:100%; background:#e8f5e9; border-color:#4caf50;">&#128241; Install App</button>
+    <div class="markdown-hint" id="installAppHint">This app can be installed to your home screen for offline, full-screen use.</div>
+</div>
+
+<div class="mobile-tabs">
+    <button type="button" id="tabEditorBtn" class="active" onclick="showTab('editor')">&#9998; Editor</button>
+    <button type="button" id="tabRecordsBtn" onclick="showTab('records')">&#128203; Records</button>
+</div>
+
+<div id="editorPanel" class="tab-panel">
+<form id="form">
+<input id="name" placeholder="Name" required>
+
+<input id="age" type="number" placeholder="Age" required>
+
+<input id="section" placeholder="Section" required>
+
+<textarea id="characterSheet" placeholder="Character Sheet (Abilities, stats, or biography...)" rows="4"></textarea>
+
+<div class="wysiwyg-toolbar">
+    <button type="button" onclick="execCmd('bold')" title="Bold"><b>B</b></button>
+    <button type="button" onclick="execCmd('italic')" title="Italic"><i>I</i></button>
+    <button type="button" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
+    <button type="button" onclick="execCmd('strikeThrough')" title="Strikethrough"><s>S</s></button>
+    <span class="sep"></span>
+    <button type="button" onclick="formatBlockCmd('h1')" title="Heading 1">H1</button>
+    <button type="button" onclick="formatBlockCmd('h2')" title="Heading 2">H2</button>
+    <button type="button" onclick="formatBlockCmd('h3')" title="Heading 3">H3</button>
+    <button type="button" onclick="formatBlockCmd('p')" title="Paragraph">&#182;</button>
+    <span class="sep"></span>
+    <button type="button" onclick="execCmd('insertUnorderedList')" title="Bullet list">&#8226; List</button>
+    <button type="button" onclick="execCmd('insertOrderedList')" title="Numbered list">1. List</button>
+    <button type="button" onclick="formatBlockCmd('blockquote')" title="Blockquote">&#10077;</button>
+    <span class="sep"></span>
+    <button type="button" onclick="insertInlineCode()" title="Inline code">&lt;/&gt;</button>
+    <select id="codeLangSelect" title="Code block language">
+        <option value="plaintext">Plain</option>
+        <option value="javascript">JS</option>
+        <option value="python">Python</option>
+        <option value="html">HTML</option>
+        <option value="css">CSS</option>
+        <option value="json">JSON</option>
+        <option value="bash">Bash</option>
+        <option value="sql">SQL</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+    </select>
+    <button type="button" onclick="insertCodeBlock()" title="Code block">Code Block</button>
+    <span class="sep"></span>
+    <button type="button" onclick="insertLink()" title="Insert link">Link</button>
+    <button type="button" onclick="execCmd('insertHorizontalRule')" title="Horizontal rule">HR</button>
+    <span class="sep"></span>
+    <select id="admonitionSelect" title="Admonition type">
+        <option value="note">Note</option>
+        <option value="tip">Tip</option>
+        <option value="info">Info</option>
+        <option value="warning">Warning</option>
+        <option value="danger">Danger</option>
+    </select>
+    <button type="button" onclick="insertAdmonition()" title="Insert admonition">Callout</button>
+    <span class="sep"></span>
+    <button type="button" onclick="execCmd('removeFormat')" title="Clear formatting">Clear</button>
+    <span class="sep"></span>
+    <label for="highlightColorPicker" title="Highlight color">Highlight:</label>
+    <input type="color" id="highlightColorPicker" value="#FFFF00" style="width:40px; height:32px; padding:2px; cursor:pointer; border:1px solid #ccc; border-radius:4px;">
+    <button type="button" onclick="applyHighlight()" title="Apply highlight">Apply</button>
+    <button type="button" onclick="removeHighlight()" title="Remove highlight">Remove</button>
+</div>
+<details class="hint-details">
+    <summary>Formatting shortcuts</summary>
+    <div class="markdown-hint">
+        Shortcuts while typing: <code># </code> <code>## </code> <code>### </code> for headings,
+        <code>&gt; </code> for a quote, <code>- </code> / <code>1. </code> for lists,
+        <code>```lang</code> for a code block, <code>**bold**</code>, <code>*italic*</code>,
+        <code>~~strike~~</code>, <code>`code`</code> and <code>[text](url)</code>.
+    </div>
+</details>
+<div id="message" class="wysiwyg-editor" contenteditable="true" data-placeholder="Message"></div>
+
+<div id="customFieldsContainer"></div>
+<button type="button" id="addFieldBtn">+ Add Field</button>
+
+<br><br>
+<button type="submit" id="submitBtn">Save</button>
+<button type="button" id="cancelEditBtn" style="display:none;">Cancel Edit</button>
+</form>
+</div>
+
+<div id="recordsPanel" class="tab-panel tab-hidden">
+<hr>
+
+<div class="toolbar">
+    <button onclick="downloadAll()">Download All (Text)</button>
+    <button onclick="exportCSV()">Export CSV</button>
+    <button onclick="exportExcel()">Export Excel (.xls)</button>
+    <button onclick="document.getElementById('importInput').click()">Import Text</button>
+    <button onclick="viewCurrentDatabase()" style="background:#e8f5e9; border-color:#4caf50;">View Current Database</button>
+    <button onclick="deleteAllRecords()" style="background:#ffebee; border-color:#f44336;">Delete All</button>
+    <input type="file" id="importInput" class="hidden-file-input" accept="text/plain,.txt" multiple>
+</div>
+
+<div class="toolbar">
+    <input type="text" id="searchBox" placeholder="Search by name, section, message, age, ID, UUID, or date..." enterkeyhint="search">
+    <button type="button" onclick="renderRecords()" id="searchBtn">Search</button>
+</div>
+
+<div class="toolbar">
+    <label for="filterSection" style="margin:0 8px 0 0;"><b>Filter by Section:</b></label>
+    <select id="filterSection" onchange="renderRecords()" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+        <option value="">All Sections</option>
+    </select>
+    
+    <label for="filterAge" style="margin:0 8px 0 16px;"><b>Filter by Age:</b></label>
+    <select id="filterAge" onchange="renderRecords()" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+        <option value="">All Ages</option>
+    </select>
+    
+    <button type="button" onclick="clearFilters()" style="margin-left:16px; background:#f0f0f0; border:1px solid #999;">Clear Filters</button>
+</div>
+
+<h3 class="section-label">Saved Records</h3>
+
+<div id="records"></div>
+</div>
+
+<script>
+
+let db;
+let editingId = null;   // id currently being edited, or null
+let allRecords = [];    // in-memory cache of all records, used for search/filter + export
+
+// ---------- Mobile navigation: hamburger sidebar + Editor/Records tabs ----------
+//
+// Below the 640px breakpoint, the database/backup controls move into a
+// slide-in sidebar and the form/record-list are shown one at a time as
+// tabs, so the small screen isn't dominated by long stacked content.
+// Above the breakpoint these are all just normal, always-visible sections.
+
+function openSidebar(){
+    document.getElementById("sidebarPanel").classList.add("open");
+    document.getElementById("sidebarOverlay").classList.add("open");
+}
+
+function closeSidebar(){
+    document.getElementById("sidebarPanel").classList.remove("open");
+    document.getElementById("sidebarOverlay").classList.remove("open");
+}
+
+function showTab(tab){
+    document.getElementById("editorPanel").classList.toggle("tab-hidden", tab !== "editor");
+    document.getElementById("recordsPanel").classList.toggle("tab-hidden", tab !== "records");
+    document.getElementById("tabEditorBtn").classList.toggle("active", tab === "editor");
+    document.getElementById("tabRecordsBtn").classList.toggle("active", tab === "records");
+}
+
+// ---------- PWA install + offline support ----------
+//
+// Registers the service worker (app shell caching, offline support) and
+// wires up the "Install App" button using the standard beforeinstallprompt
+// flow. On file:// or browsers without support, this quietly no-ops --
+// the app itself works exactly the same either way, it just won't be
+// installable until it's served over http(s).
+
+if("serviceWorker" in navigator){
+    window.addEventListener("load", ()=>{
+        navigator.serviceWorker.register("service-worker.js").catch(err=>{
+            console.error("Service worker registration failed:", err);
+        });
+    });
+}
+
+let deferredInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e)=>{
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    const btn = document.getElementById("installAppBtn");
+    const hint = document.getElementById("installAppHint");
+    if(btn) btn.style.display = "block";
+    if(hint) hint.textContent = "Tap \"Install App\" above to add this to your home screen.";
+});
+
+document.getElementById("installAppBtn")?.addEventListener("click", async ()=>{
+    if(!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    const btn = document.getElementById("installAppBtn");
+    if(btn) btn.style.display = "none";
+});
+
+window.addEventListener("appinstalled", ()=>{
+    deferredInstallPrompt = null;
+    const btn = document.getElementById("installAppBtn");
+    const hint = document.getElementById("installAppHint");
+    if(btn) btn.style.display = "none";
+    if(hint) hint.textContent = "Installed! You can open this app from your home screen.";
+});
+
+
+// ---------- Multi-database management ----------
+//
+// Multiple independent IndexedDB databases can be created, switched
+// between, renamed, and deleted. A small registry describing them
+// (display name + underlying IndexedDB name) lives in localStorage,
+// while the actual records for each database live in their own
+// separate IndexedDB database, keeping everything fully isolated.
+
+const DB_REGISTRY_KEY = "localizedDbRegistry";
+const DB_CURRENT_KEY = "localizedDbCurrentId";
+const LEGACY_DB_NAME = "LocalizedAppDB"; // preserves any pre-existing user data
+
+function loadDbRegistry(){
+    try{
+        const raw = localStorage.getItem(DB_REGISTRY_KEY);
+        if(raw){
+            const parsed = JSON.parse(raw);
+            if(Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+    }catch(e){
+        console.error("Failed to parse database registry:", e);
+    }
+
+    // No registry yet: bootstrap with the original database name so
+    // anyone with existing data doesn't lose access to it.
+    const defaultEntry = {
+        id: generateUUID(),
+        name: "Default",
+        dbName: LEGACY_DB_NAME,
+        createdAt: getCurrentTimestamp()
+    };
+    const registry = [defaultEntry];
+    saveDbRegistry(registry);
+    localStorage.setItem(DB_CURRENT_KEY, defaultEntry.id);
+    return registry;
+}
+
+function saveDbRegistry(registry){
+    localStorage.setItem(DB_REGISTRY_KEY, JSON.stringify(registry));
+}
+
+function getCurrentDbId(){
+    const registry = loadDbRegistry();
+    let id = localStorage.getItem(DB_CURRENT_KEY);
+
+    if(!id || !registry.some(r=>r.id === id)){
+        id = registry[0].id;
+        localStorage.setItem(DB_CURRENT_KEY, id);
+    }
+
+    return id;
+}
+
+function getCurrentDbEntry(){
+    const registry = loadDbRegistry();
+    const id = getCurrentDbId();
+    return registry.find(r=>r.id === id) || registry[0];
+}
+
+function openDatabase(dbName){
+    return new Promise((resolve, reject)=>{
+        const req = indexedDB.open(dbName, 1);
+
+        req.onupgradeneeded = e=>{
+            const upgradeDb = e.target.result;
+            if(!upgradeDb.objectStoreNames.contains("records")){
+                upgradeDb.createObjectStore("records", { keyPath:"id", autoIncrement:true });
+            }
+        };
+
+        req.onsuccess = e=> resolve(e.target.result);
+        req.onerror = e=> reject(e.target.error);
+    });
+}
+
+function updateDatabaseUI(){
+    const registry = loadDbRegistry();
+    const currentId = getCurrentDbId();
+    const select = document.getElementById("databaseSelect");
+
+    select.innerHTML = "";
+    registry.forEach(entry=>{
+        const option = document.createElement("option");
+        option.value = entry.id;
+        option.textContent = entry.name;
+        if(entry.id === currentId) option.selected = true;
+        select.appendChild(option);
+    });
+
+    const current = registry.find(r=>r.id === currentId) || registry[0];
+    document.getElementById("activeDbHint").textContent =
+        `Currently viewing database "${current.name}". Records you save, edit, import, or delete only affect this database. Use the controls above to switch to, add, rename, or delete a database.`;
+
+    document.getElementById("deleteDbBtn").disabled = registry.length <= 1;
+}
+
+function isIndexedDbAvailable(){
+    try{
+        return typeof indexedDB !== "undefined" && indexedDB !== null;
+    }catch(e){
+        return false;
+    }
+}
+
+function initActiveDatabase(){
+    if(!isIndexedDbAvailable()){
+        alert(
+            "This browser (or the way this page was opened) doesn't allow the local storage this app needs.\n\n" +
+            "If you opened this file directly by double-clicking it (a file:// address), try instead opening it through a local web server, or try a different browser."
+        );
+        return;
+    }
+
+    const entry = getCurrentDbEntry();
+
+    openDatabase(entry.dbName).then(openedDb=>{
+        db = openedDb;
+        updateDatabaseUI();
+        exitEditMode();
+        form.reset();
+        setMessageHtml("");
+        clearCustomFieldRows();
+        loadRecords();
+    }).catch(err=>{
+        console.error("IndexedDB error opening database:", entry, err);
+        recoverFromFailedDatabaseOpen(entry, err);
+    });
+}
+
+// If the currently-selected database can't be opened (a corrupted entry, a
+// version conflict, etc.), don't leave the app in a dead end: create a new,
+// empty default database, add it to the registry, and switch to it. The
+// database that failed to open is left in the registry (still selectable
+// from the dropdown) rather than deleted, in case it was a transient issue.
+function recoverFromFailedDatabaseOpen(failedEntry, err){
+    const registry = loadDbRegistry();
+
+    const freshEntry = {
+        id: generateUUID(),
+        name: uniqueDbDisplayName("Default"),
+        dbName: "LocalizedAppDB_" + generateUUID(),
+        createdAt: getCurrentTimestamp()
+    };
+
+    registry.push(freshEntry);
+    saveDbRegistry(registry);
+    localStorage.setItem(DB_CURRENT_KEY, freshEntry.id);
+
+    openDatabase(freshEntry.dbName).then(openedDb=>{
+        db = openedDb;
+        updateDatabaseUI();
+        exitEditMode();
+        form.reset();
+        setMessageHtml("");
+        clearCustomFieldRows();
+        loadRecords();
+
+        const failedName = failedEntry ? failedEntry.name : "the selected";
+        alert(
+            `Couldn't open the "${failedName}" database, so a new empty database called "${freshEntry.name}" was created and selected instead.\n\n` +
+            `"${failedName}" is still listed in the Database dropdown in case you want to try switching back to it later.\n\n` +
+            `If you have an exported backup (.json), use "Import Database(s)" to restore your records.`
+        );
+    }).catch(err2=>{
+        console.error("Could not create a fallback database either:", err2);
+        alert(
+            "This browser (or the way this page was opened) doesn't allow the local storage this app needs.\n\n" +
+            "If you opened this file directly by double-clicking it (a file:// address), try instead opening it through a local web server, or try a different browser.\n\n" +
+            "Details: " + err2
+        );
+    });
+}
+
+function switchDatabase(){
+    const select = document.getElementById("databaseSelect");
+    const chosenId = select.value;
+
+    localStorage.setItem(DB_CURRENT_KEY, chosenId);
+    if(db){ try{ db.close(); }catch(e){} }
+    initActiveDatabase();
+}
+
+function createNewDatabase(){
+    const name = prompt("Enter a name for the new database:");
+    if(name === null) return;
+
+    const trimmed = name.trim();
+    if(!trimmed){
+        alert("Database name cannot be empty.");
+        return;
+    }
+
+    const registry = loadDbRegistry();
+    if(registry.some(r=>r.name.toLowerCase() === trimmed.toLowerCase())){
+        alert("A database with that name already exists.");
+        return;
+    }
+
+    const entry = {
+        id: generateUUID(),
+        name: trimmed,
+        dbName: "LocalizedAppDB_" + generateUUID(),
+        createdAt: getCurrentTimestamp()
+    };
+
+    registry.push(entry);
+    saveDbRegistry(registry);
+    localStorage.setItem(DB_CURRENT_KEY, entry.id);
+
+    if(db){ try{ db.close(); }catch(e){} }
+    initActiveDatabase();
+}
+
+function renameCurrentDatabase(){
+    const registry = loadDbRegistry();
+    const currentId = getCurrentDbId();
+    const entry = registry.find(r=>r.id === currentId);
+    if(!entry) return;
+
+    const name = prompt("Enter a new name for this database:", entry.name);
+    if(name === null) return;
+
+    const trimmed = name.trim();
+    if(!trimmed){
+        alert("Database name cannot be empty.");
+        return;
+    }
+
+    if(registry.some(r=>r.id !== currentId && r.name.toLowerCase() === trimmed.toLowerCase())){
+        alert("A database with that name already exists.");
+        return;
+    }
+
+    entry.name = trimmed;
+    saveDbRegistry(registry);
+    updateDatabaseUI();
+}
+
+function deleteCurrentDatabase(){
+    const registry = loadDbRegistry();
+
+    if(registry.length <= 1){
+        alert("You can't delete the only remaining database.");
+        return;
+    }
+
+    const currentId = getCurrentDbId();
+    const entry = registry.find(r=>r.id === currentId);
+    if(!entry) return;
+
+    if(!confirm(`Are you sure you want to permanently delete the database "${entry.name}" and ALL of its records? This action cannot be undone.`)){
+        return;
+    }
+
+    const remaining = registry.filter(r=>r.id !== currentId);
+    saveDbRegistry(remaining);
+
+    const nextEntry = remaining[0];
+    localStorage.setItem(DB_CURRENT_KEY, nextEntry.id);
+
+    if(db){ try{ db.close(); }catch(e){} }
+
+    const deleteRequest = indexedDB.deleteDatabase(entry.dbName);
+    const proceed = () => initActiveDatabase();
+
+    deleteRequest.onsuccess = proceed;
+    deleteRequest.onblocked = proceed;
+    deleteRequest.onerror = () => {
+        alert("The database was removed from the list, but its underlying data could not be fully deleted.");
+        proceed();
+    };
+}
+
+// ---------- Literal database export / import ----------
+//
+// Unlike the CSV/Excel/plain-text export below (which flatten records into
+// simplified rows), these functions serialize a database's records exactly
+// as they're stored -- every field, including the full formatted message
+// HTML and any custom fields -- into a single portable .json file. That
+// file can be copied to another device and imported back in, recreating
+// the database faithfully. Importing never overwrites anything already on
+// the device: it always creates a fresh database (or databases) alongside
+// the existing ones.
+
+function sanitizeFilename(name){
+    const cleaned = String(name ?? "").trim().replace(/[^a-z0-9-_ ]+/gi, "").trim().replace(/\s+/g,"_");
+    return cleaned || "database";
+}
+
+function downloadJson(payload, filename){
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json;charset=utf-8;"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function recordToPortable(r){
+    // Drop the local autoIncrement id (meaningless on another device/database)
+    // but keep everything else, including fields this app doesn't currently
+    // know about, so re-imports stay lossless even as the app evolves.
+    const { id, ...rest } = r;
+    return rest;
+}
+
+function getAllRecordsFromDbName(dbName){
+    return openDatabase(dbName).then(tempDb=>{
+        return new Promise((resolve, reject)=>{
+            const tx = tempDb.transaction("records","readonly");
+            const req = tx.objectStore("records").getAll();
+            req.onsuccess = ()=>{ resolve(req.result); tempDb.close(); };
+            req.onerror = e=>{ tempDb.close(); reject(e.target.error); };
+        });
+    });
+}
+
+function exportCurrentDatabaseLiteral(){
+    const entry = getCurrentDbEntry();
+
+    const payload = {
+        app: "localized-database-form",
+        exportFormat: "single-database",
+        schemaVersion: 1,
+        exportedAt: getCurrentTimestamp(),
+        databaseName: entry.name,
+        databaseCreatedAt: entry.createdAt || null,
+        recordCount: allRecords.length,
+        records: allRecords.map(recordToPortable)
+    };
+
+    downloadJson(payload, sanitizeFilename(entry.name) + ".database.json");
+}
+
+async function exportAllDatabasesLiteral(){
+    const registry = loadDbRegistry();
+
+    if(registry.length === 0){
+        alert("There are no databases to export.");
+        return;
+    }
+
+    try{
+        const databases = [];
+        for(const entry of registry){
+            const records = await getAllRecordsFromDbName(entry.dbName);
+            databases.push({
+                name: entry.name,
+                createdAt: entry.createdAt || null,
+                recordCount: records.length,
+                records: records.map(recordToPortable)
+            });
+        }
+
+        const payload = {
+            app: "localized-database-form",
+            exportFormat: "all-databases",
+            schemaVersion: 1,
+            exportedAt: getCurrentTimestamp(),
+            databaseCount: databases.length,
+            databases
+        };
+
+        downloadJson(payload, "all-databases.database.json");
+    }catch(err){
+        console.error("Failed to export all databases:", err);
+        alert("Failed to export all databases: " + err);
+    }
+}
+
+function uniqueDbDisplayName(baseName){
+    const registry = loadDbRegistry();
+    const base = (baseName || "Imported Database").trim() || "Imported Database";
+
+    if(!registry.some(r=>r.name.toLowerCase() === base.toLowerCase())) return base;
+
+    let n = 2;
+    while(registry.some(r=>r.name.toLowerCase() === `${base} (${n})`.toLowerCase())) n++;
+    return `${base} (${n})`;
+}
+
+async function importRecordsIntoNewDatabase(displayName, createdAt, records){
+    const registry = loadDbRegistry();
+
+    const entry = {
+        id: generateUUID(),
+        name: uniqueDbDisplayName(displayName),
+        dbName: "LocalizedAppDB_" + generateUUID(),
+        createdAt: createdAt || getCurrentTimestamp()
+    };
+
+    registry.push(entry);
+    saveDbRegistry(registry);
+
+    const newDb = await openDatabase(entry.dbName);
+
+    await new Promise((resolve, reject)=>{
+        const tx = newDb.transaction("records","readwrite");
+        const store = tx.objectStore("records");
+
+        (records || []).forEach(r=>{
+            store.add({
+                name: r.name ?? "",
+                age: r.age ?? "",
+                section: r.section ?? "",
+                characterSheet: r.characterSheet ?? "",
+                message: sanitizeHtml(r.message ?? ""),
+                customFields: (r.customFields && typeof r.customFields === "object") ? r.customFields : {},
+                uuid: r.uuid || generateUUID(),
+                createdAt: r.createdAt || getCurrentTimestamp()
+            });
+        });
+
+        tx.oncomplete = resolve;
+        tx.onerror = e=>reject(e.target.error);
+    });
+
+    newDb.close();
+    return entry;
+}
+
+document.getElementById("importDbInput").addEventListener("change", async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+
+    try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+        const importedEntries = [];
+
+        if(data && data.exportFormat === "all-databases" && Array.isArray(data.databases)){
+            for(const dbData of data.databases){
+                const entry = await importRecordsIntoNewDatabase(
+                    dbData.name || "Imported Database",
+                    dbData.createdAt,
+                    dbData.records
+                );
+                importedEntries.push(entry);
+            }
+        }else if(data && Array.isArray(data.records)){
+            const fallbackName = file.name.replace(/\.[^.]+$/, "").replace(/\.database$/, "");
+            const entry = await importRecordsIntoNewDatabase(
+                data.databaseName || fallbackName || "Imported Database",
+                data.databaseCreatedAt || data.exportedAt,
+                data.records
+            );
+            importedEntries.push(entry);
+        }else{
+            alert("This file doesn't look like a valid database export.");
+            e.target.value = "";
+            return;
+        }
+
+        if(importedEntries.length > 0){
+            localStorage.setItem(DB_CURRENT_KEY, importedEntries[0].id);
+            if(db){ try{ db.close(); }catch(err){} }
+            initActiveDatabase();
+        }
+
+        alert(`Import complete. Added ${importedEntries.length} database(s): ${importedEntries.map(en=>en.name).join(", ")}.`);
+    }catch(err){
+        console.error("Failed to import database file:", err);
+        alert("Failed to import database file: " + err.message);
+    }finally{
+        e.target.value = "";
+    }
+});
+
+function addRecord(data){
+    const tx=db.transaction("records","readwrite");
+    tx.objectStore("records").add(data);
+    tx.oncomplete=loadRecords;
+    tx.onerror=e=>alert("Failed to save record: "+e.target.error);
+}
+
+function updateRecord(id, data){
+    const tx=db.transaction("records","readonly");
+    const getRequest=tx.objectStore("records").get(id);
+    
+    getRequest.onsuccess=()=>{
+        const existingRecord=getRequest.result;
+        const tx2=db.transaction("records","readwrite");
+        tx2.objectStore("records").put({
+            ...data,
+            id,
+            uuid: existingRecord.uuid,
+            createdAt: existingRecord.createdAt
+        });
+        tx2.oncomplete=()=>{
+            exitEditMode();
+            loadRecords();
+        };
+        tx2.onerror=e=>alert("Failed to update record: "+e.target.error);
+    };
+    
+    getRequest.onerror=e=>alert("Failed to retrieve record: "+e.target.error);
+}
+
+const form = document.getElementById("form");
+const submitBtn = document.getElementById("submitBtn");
+const cancelEditBtn = document.getElementById("cancelEditBtn");
+const customFieldsContainer = document.getElementById("customFieldsContainer");
+const addFieldBtn = document.getElementById("addFieldBtn");
+const messageEditor = document.getElementById("message");
+
+// ---------- WYSIWYG message editor ----------
+//
+// Only a small allow-list of formatting tags is kept; everything else
+// (scripts, styles, images, iframes, event-handler attributes, etc.)
+// is stripped so pasted or imported content can't run arbitrary code.
+
+const ALLOWED_TAGS = new Set([
+    "B","STRONG","I","EM","U","S","STRIKE","DEL","UL","OL","LI","BR","DIV","P","SPAN","A",
+    "H1","H2","H3","H4","H5","H6","BLOCKQUOTE","PRE","CODE","HR",
+    "TABLE","THEAD","TBODY","TR","TH","TD"
+]);
+const REMOVE_ENTIRELY_TAGS = new Set(["SCRIPT","STYLE","IFRAME","OBJECT","EMBED","LINK","META","IMG","svg"]);
+
+// class values are only ever used for markdown code-block languages
+// (language-xxx), highlight.js token/theme classes (hljs, hljs-xxx), and
+// admonition callout boxes (admonition, admonition-note/tip/info/...).
+const ALLOWED_CLASS_TOKEN = /^(language-[\w+-]+|hljs(-[\w-]+)?|admonition(-(note|tip|info|warning|danger|title|content))?)$/;
+
+function isAttributeAllowed(child, attr){
+    const name = attr.name.toLowerCase();
+
+    if(child.tagName === "A" && name === "href"){
+        return /^(https?:|mailto:)/i.test(attr.value.trim());
+    }
+
+    if(name === "class"){
+        const tokens = attr.value.trim().split(/\s+/).filter(Boolean);
+        return tokens.length > 0 && tokens.every(t=>ALLOWED_CLASS_TOKEN.test(t));
+    }
+    
+    if(name === "style" && child.tagName === "SPAN"){
+        const style = attr.value.toLowerCase();
+        return /^(background-color\s*:\s*#[0-9a-f]{6}|padding\s*:|border-radius\s*:)/.test(style);
+    }
+
+    return false;
+}
+
+function sanitizeChildren(parent){
+    Array.from(parent.childNodes).forEach(child=>{
+        if(child.nodeType === Node.ELEMENT_NODE){
+            if(REMOVE_ENTIRELY_TAGS.has(child.tagName)){
+                parent.removeChild(child);
+                return;
+            }
+
+            sanitizeChildren(child); // clean descendants first
+
+            if(ALLOWED_TAGS.has(child.tagName)){
+                Array.from(child.attributes).forEach(attr=>{
+                    if(!isAttributeAllowed(child, attr)){
+                        child.removeAttribute(attr.name);
+                    }
+                });
+            }else{
+                // Unwrap disallowed tags, keeping their sanitized children
+                while(child.firstChild){
+                    parent.insertBefore(child.firstChild, child);
+                }
+                parent.removeChild(child);
+            }
+        }else if(child.nodeType !== Node.TEXT_NODE){
+            parent.removeChild(child); // strip comments etc.
+        }
+    });
+}
+
+function sanitizeHtml(html){
+    const template = document.createElement("template");
+    template.innerHTML = String(html ?? "");
+    sanitizeChildren(template.content);
+    return template.innerHTML;
+}
+
+function stripHtml(html){
+    const div = document.createElement("div");
+    div.innerHTML = String(html ?? "");
+    return (div.textContent || div.innerText || "").trim();
+}
+
+function execCmd(command){
+    messageEditor.focus();
+    document.execCommand(command, false, null);
+}
+
+function formatBlockCmd(tag){
+    messageEditor.focus();
+    document.execCommand("formatBlock", false, "<" + tag + ">");
+}
+
+function selectNodeContentsCollapsed(el, atStart){
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(!!atStart);
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
+
+function insertInlineCode(){
+    messageEditor.focus();
+    const sel = window.getSelection();
+    if(!sel || sel.rangeCount === 0) return;
+
+    const range = sel.getRangeAt(0);
+    const codeEl = document.createElement("code");
+
+    if(range.collapsed){
+        codeEl.textContent = "code";
+        range.insertNode(codeEl);
+        selectNodeContentsCollapsed(codeEl, false);
+        sel.getRangeAt(0).selectNodeContents(codeEl);
+    }else{
+        codeEl.appendChild(range.extractContents());
+        range.insertNode(codeEl);
+        range.setStartAfter(codeEl);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+}
+
+function insertCodeBlock(){
+    messageEditor.focus();
+    const lang = document.getElementById("codeLangSelect").value;
+
+    const pre = document.createElement("pre");
+    const code = document.createElement("code");
+    code.className = "language-" + lang;
+    code.textContent = "your code here";
+    pre.appendChild(code);
+
+    const sel = window.getSelection();
+    if(sel && sel.rangeCount > 0){
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(pre);
+    }else{
+        messageEditor.appendChild(pre);
+    }
+
+    selectNodeContentsCollapsed(code, false);
+    document.getSelection().getRangeAt(0).selectNodeContents(code);
+    highlightEditorCode();
+}
+
+function insertLink(){
+    messageEditor.focus();
+    const url = prompt("Enter URL (https://, http://, or mailto:):");
+    if(!url) return;
+
+    if(!/^(https?:|mailto:)/i.test(url.trim())){
+        alert("Only http(s):// or mailto: links are allowed.");
+        return;
+    }
+
+    document.execCommand("createLink", false, url.trim());
+}
+
+function insertAdmonition(){
+    messageEditor.focus();
+    const type = document.getElementById("admonitionSelect").value;
+    const titles = { note:"Note", tip:"Tip", info:"Info", warning:"Warning", danger:"Danger" };
+
+    const div = document.createElement("div");
+    div.className = "admonition admonition-" + type;
+
+    const title = document.createElement("p");
+    title.className = "admonition-title";
+    title.textContent = titles[type] || type;
+
+    const content = document.createElement("div");
+    content.className = "admonition-content";
+    const p = document.createElement("p");
+    p.textContent = "Type your callout content here...";
+    content.appendChild(p);
+
+    div.appendChild(title);
+    div.appendChild(content);
+
+    const sel = window.getSelection();
+    if(sel && sel.rangeCount > 0){
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(div);
+    }else{
+        messageEditor.appendChild(div);
+    }
+
+    selectNodeContentsCollapsed(p, false);
+    document.getSelection().getRangeAt(0).selectNodeContents(p);
+}
+
+// ---------- Syntax highlighting (highlight.js) ----------
+
+function highlightEditorCode(){
+    if(typeof hljs === "undefined") return;
+    messageEditor.querySelectorAll("pre code").forEach(block=>{
+        hljs.highlightElement(block);
+    });
+}
+
+function highlightRenderedCode(container){
+    if(typeof hljs === "undefined") return;
+    container.querySelectorAll("pre code").forEach(block=>{
+        hljs.highlightElement(block);
+    });
+}
+
+// Re-highlight whenever the editor loses focus, rather than on every
+// keystroke, so highlight.js doesn't fight the caret while typing.
+messageEditor.addEventListener("blur", highlightEditorCode);
+
+function getMessageHtml(){
+    return sanitizeHtml(messageEditor.innerHTML.trim());
+}
+
+function setMessageHtml(html){
+    messageEditor.innerHTML = sanitizeHtml(html || "");
+    highlightEditorCode();
+}
+
+// ---------- Text Highlighting ----------
+
+function applyHighlight(){
+    messageEditor.focus();
+    const color = document.getElementById("highlightColorPicker").value;
+    const sel = window.getSelection();
+    
+    if(!sel || sel.rangeCount === 0 || sel.isCollapsed){
+        alert("Please select text to highlight.");
+        return;
+    }
+    
+    const range = sel.getRangeAt(0);
+    const span = document.createElement("span");
+    span.style.backgroundColor = color;
+    span.style.padding = "2px 4px";
+    span.style.borderRadius = "3px";
+    
+    try{
+        range.surroundContents(span);
+    }catch(e){
+        // If surroundContents fails (complex selection), use insertNode
+        const contents = range.extractContents();
+        span.appendChild(contents);
+        range.insertNode(span);
+    }
+}
+
+function removeHighlight(){
+    messageEditor.focus();
+    const sel = window.getSelection();
+    
+    if(!sel || sel.rangeCount === 0 || sel.isCollapsed){
+        alert("Please select highlighted text to remove the highlight.");
+        return;
+    }
+    
+    const range = sel.getRangeAt(0);
+    const container = document.createElement("div");
+    container.appendChild(range.extractContents());
+    
+    // Remove all span elements with background color
+    const spans = container.querySelectorAll("span[style*='background']");
+    spans.forEach(span=>{
+        while(span.firstChild){
+            span.parentNode.insertBefore(span.firstChild, span);
+        }
+        span.parentNode.removeChild(span);
+    });
+    
+    range.insertNode(container.firstChild);
+}
+
+// ---------- Markdown-as-you-type shortcuts ----------
+//
+// Small, best-effort autoformatter: recognizes common markdown syntax at
+// the point the trigger character is typed and converts it into the
+// equivalent rich-text formatting. Toolbar buttons remain the reliable
+// way to reach every feature; these shortcuts are a convenience layer.
+
+function placeCaretAtStart(el){
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
+
+function tryLineStartShortcut(){
+    const sel = window.getSelection();
+    if(!sel || sel.rangeCount === 0) return false;
+
+    const range = sel.getRangeAt(0);
+    if(!range.collapsed) return false;
+
+    const node = range.startContainer;
+    if(node.nodeType !== Node.TEXT_NODE) return false;
+
+    const textBefore = node.textContent.slice(0, range.startOffset);
+
+    const headingMatch = textBefore.match(/^(#{1,6})$/);
+    if(headingMatch){
+        node.textContent = node.textContent.slice(range.startOffset);
+        formatBlockCmd("h" + Math.min(headingMatch[1].length, 6));
+        return true;
+    }
+
+    if(/^>$/.test(textBefore)){
+        node.textContent = node.textContent.slice(range.startOffset);
+        formatBlockCmd("blockquote");
+        return true;
+    }
+
+    if(/^[-*]$/.test(textBefore)){
+        node.textContent = node.textContent.slice(range.startOffset);
+        messageEditor.focus();
+        document.execCommand("insertUnorderedList");
+        return true;
+    }
+
+    if(/^\d+\.$/.test(textBefore)){
+        node.textContent = node.textContent.slice(range.startOffset);
+        messageEditor.focus();
+        document.execCommand("insertOrderedList");
+        return true;
+    }
+
+    const fenceMatch = textBefore.match(/^```([\w+-]*)$/);
+    if(fenceMatch){
+        const beforeFence = node.textContent.slice(0, range.startOffset - fenceMatch[0].length);
+        const afterFence = node.textContent.slice(range.startOffset);
+        node.textContent = beforeFence + afterFence;
+        
+        const langSelect = document.getElementById("codeLangSelect");
+        const wanted = fenceMatch[1].toLowerCase();
+        const hasOption = Array.from(langSelect.options).some(o=>o.value === wanted);
+        langSelect.value = hasOption ? wanted : "plaintext";
+        
+        const pre = document.createElement("pre");
+        const code = document.createElement("code");
+        code.className = "language-" + langSelect.value;
+        code.textContent = "your code here";
+        pre.appendChild(code);
+        
+        node.parentNode.insertBefore(pre, node.nextSibling);
+        
+        const sel = window.getSelection();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(code);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        
+        highlightEditorCode();
+        return true;
+    }
+
+    return false;
+}
+
+function wrapInlineMatch(node, range, matchLength, groupText, tagName){
+    const start = range.startOffset - matchLength;
+    const before = node.textContent.slice(0, start);
+    const after = node.textContent.slice(range.startOffset);
+
+    const wrapper = document.createElement(tagName);
+    wrapper.textContent = groupText;
+
+    const parent = node.parentNode;
+    const afterTextNode = document.createTextNode(after);
+    node.textContent = before;
+    parent.insertBefore(wrapper, node.nextSibling);
+    parent.insertBefore(afterTextNode, wrapper.nextSibling);
+
+    const sel = window.getSelection();
+    const newRange = document.createRange();
+    newRange.setStart(afterTextNode, 0);
+    newRange.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(newRange);
+}
+
+function tryInlineShortcut(){
+    const sel = window.getSelection();
+    if(!sel || sel.rangeCount === 0) return;
+
+    const range = sel.getRangeAt(0);
+    if(!range.collapsed) return;
+
+    const node = range.startContainer;
+    if(node.nodeType !== Node.TEXT_NODE) return;
+
+    const text = node.textContent.slice(0, range.startOffset);
+
+    const inlinePatterns = [
+        { re:/\*\*([^*\n]+)\*\*$/, tag:"strong" },
+        { re:/~~([^~\n]+)~~$/, tag:"del" },
+        { re:/(?<!`)(`(?!`))([^`\n]+)\1(?!`)$/, tag:"code", groupIdx: 2 },
+        { re:/(?:^|[^*])\*([^*\n]+)\*$/, tag:"em" }
+    ];
+
+    for(const p of inlinePatterns){
+        const m = text.match(p.re);
+        if(m){
+            const groupIdx = p.groupIdx !== undefined ? p.groupIdx : 1;
+            wrapInlineMatch(node, range, m[0].length, m[groupIdx], p.tag);
+            return;
+        }
+    }
+
+    const linkMatch = text.match(/\[([^\]\n]+)\]\(([^)\n]+)\)$/);
+    if(linkMatch && /^(https?:|mailto:)/i.test(linkMatch[2].trim())){
+        const start = range.startOffset - linkMatch[0].length;
+        const before = node.textContent.slice(0, start);
+        const after = node.textContent.slice(range.startOffset);
+
+        const a = document.createElement("a");
+        a.href = linkMatch[2].trim();
+        a.textContent = linkMatch[1];
+
+        const parent = node.parentNode;
+        const afterTextNode = document.createTextNode(after);
+        node.textContent = before;
+        parent.insertBefore(a, node.nextSibling);
+        parent.insertBefore(afterTextNode, a.nextSibling);
+
+        const newRange = document.createRange();
+        newRange.setStart(afterTextNode, 0);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+    }
+}
+
+messageEditor.addEventListener("keydown", (e)=>{
+    if(e.key === " "){
+        if(tryLineStartShortcut()){
+            e.preventDefault();
+        }
+    }
+});
+
+messageEditor.addEventListener("input", (e)=>{
+    if(e.inputType && e.inputType.startsWith("insert")){
+        tryInlineShortcut();
+    }
+});
+
+// ---------- Markdown <-> HTML conversion ----------
+//
+// The editor itself works with sanitized HTML (so the rich-text toolbar
+// and shortcuts above can manipulate it directly via the DOM), but
+// records are exported/imported as real Markdown text, including fenced
+// code blocks and ':::type' admonitions, so files stay portable and
+// human-editable outside this app.
+
+let markedConfigured = false;
+
+function configureMarked(){
+    if(markedConfigured || typeof marked === "undefined") return;
+
+    const titles = { note:"Note", tip:"Tip", info:"Info", warning:"Warning", danger:"Danger" };
+
+    const admonitionExtension = {
+        name: "admonition",
+        level: "block",
+        start(src){
+            const m = src.match(/:::(note|tip|info|warning|danger)/);
+            return m ? m.index : undefined;
+        },
+        tokenizer(src){
+            const rule = /^:::(note|tip|info|warning|danger)[ \t]*\n([\s\S]*?)\n:::[ \t]*(?:\n+|$)/;
+            const match = rule.exec(src);
+            if(match){
+                return { type:"admonition", raw:match[0], admType:match[1], text:match[2] };
+            }
+        },
+        renderer(token){
+            const inner = marked.parse(token.text || "");
+            return `<div class="admonition admonition-${token.admType}"><p class="admonition-title">${titles[token.admType]}</p><div class="admonition-content">${inner}</div></div>`;
+        }
+    };
+
+    marked.use({ extensions:[admonitionExtension] });
+
+    const renderer = new marked.Renderer();
+    renderer.code = function(code, infostring){
+        const lang = (infostring || "").trim().split(/\s+/)[0].toLowerCase();
+        let highlighted;
+        try{
+            highlighted = (lang && typeof hljs !== "undefined" && hljs.getLanguage(lang))
+                ? hljs.highlight(code, { language:lang }).value
+                : (typeof hljs !== "undefined" ? hljs.highlightAuto(code).value : escapeHtml(code));
+        }catch(err){
+            highlighted = escapeHtml(code);
+        }
+        const langClass = lang ? `language-${lang} hljs` : "hljs";
+        return `<pre><code class="${langClass}">${highlighted}</code></pre>`;
+    };
+
+    marked.setOptions({ renderer, breaks:true, gfm:true });
+    markedConfigured = true;
+}
+
+function markdownToHtml(md){
+    if(typeof marked === "undefined"){
+        return `<p>${escapeHtml(md)}</p>`;
+    }
+    configureMarked();
+    return sanitizeHtml(marked.parse(String(md ?? "")));
+}
+
+function inlineChildrenToMarkdown(node){
+    let out = "";
+    node.childNodes.forEach(child=>{ out += singleNodeToMarkdown(child); });
+    return out;
+}
+
+function nodeToMarkdown(node){
+    let out = "";
+    node.childNodes.forEach(child=>{ out += singleNodeToMarkdown(child); });
+    return out;
+}
+
+function singleNodeToMarkdown(node){
+    if(node.nodeType === Node.TEXT_NODE) return node.textContent;
+    if(node.nodeType !== Node.ELEMENT_NODE) return "";
+
+    switch(node.tagName){
+        case "STRONG": case "B":
+            return `**${inlineChildrenToMarkdown(node)}**`;
+        case "EM": case "I":
+            return `*${inlineChildrenToMarkdown(node)}*`;
+        case "S": case "STRIKE": case "DEL":
+            return `~~${inlineChildrenToMarkdown(node)}~~`;
+        case "U":
+            return `<u>${inlineChildrenToMarkdown(node)}</u>`;
+        case "A":
+            return `[${inlineChildrenToMarkdown(node)}](${node.getAttribute("href") || ""})`;
+        case "CODE":
+            if(node.parentNode && node.parentNode.tagName === "PRE") return node.textContent;
+            return `\`${node.textContent}\``;
+        case "PRE": {
+            const codeEl = node.querySelector("code");
+            const langMatch = (codeEl ? codeEl.className : "").match(/language-(\w+)/);
+            const lang = langMatch ? langMatch[1] : "";
+            const code = (codeEl ? codeEl.textContent : node.textContent).replace(/\n+$/, "");
+            return "```" + lang + "\n" + code + "\n```\n\n";
+        }
+        case "BLOCKQUOTE": {
+            const inner = nodeToMarkdown(node).trim();
+            return inner.split("\n").map(l=>"> " + l).join("\n") + "\n\n";
+        }
+        case "H1": return `# ${inlineChildrenToMarkdown(node)}\n\n`;
+        case "H2": return `## ${inlineChildrenToMarkdown(node)}\n\n`;
+        case "H3": return `### ${inlineChildrenToMarkdown(node)}\n\n`;
+        case "H4": return `#### ${inlineChildrenToMarkdown(node)}\n\n`;
+        case "H5": return `##### ${inlineChildrenToMarkdown(node)}\n\n`;
+        case "H6": return `###### ${inlineChildrenToMarkdown(node)}\n\n`;
+        case "HR": return "---\n\n";
+        case "BR": return "\n";
+        case "UL": {
+            let out = "";
+            Array.from(node.children).forEach(li=>{
+                if(li.tagName === "LI") out += `- ${inlineChildrenToMarkdown(li)}\n`;
+            });
+            return out + "\n";
+        }
+        case "OL": {
+            let out = "";
+            Array.from(node.children).forEach((li, i)=>{
+                if(li.tagName === "LI") out += `${i + 1}. ${inlineChildrenToMarkdown(li)}\n`;
+            });
+            return out + "\n";
+        }
+        case "TABLE": {
+            const rows = Array.from(node.querySelectorAll("tr"));
+            if(rows.length === 0) return "";
+            let out = "";
+            rows.forEach((row, i)=>{
+                const cells = Array.from(row.children).map(c=>inlineChildrenToMarkdown(c).trim() || " ");
+                out += "| " + cells.join(" | ") + " |\n";
+                if(i === 0) out += "| " + cells.map(()=>"---").join(" | ") + " |\n";
+            });
+            return out + "\n";
+        }
+        case "DIV": {
+            const className = node.className || "";
+            if(/\badmonition-(note|tip|info|warning|danger)\b/.test(className)){
+                const type = className.match(/admonition-(note|tip|info|warning|danger)/)[1];
+                const contentEl = node.querySelector(".admonition-content") || node;
+                const inner = nodeToMarkdown(contentEl).trim();
+                return `:::${type}\n${inner}\n:::\n\n`;
+            }
+            return nodeToMarkdown(node) + "\n";
+        }
+        case "P":
+            return inlineChildrenToMarkdown(node) + "\n\n";
+        default:
+            return nodeToMarkdown(node);
+    }
+}
+
+function htmlToMarkdown(html){
+    const container = document.createElement("div");
+    container.innerHTML = sanitizeHtml(html || "");
+    return nodeToMarkdown(container).replace(/\n{3,}/g, "\n\n").trim();
+}
+
+// ---------- Custom field editor ----------
+
+function addCustomFieldRow(name = "", value = ""){
+    const row = document.createElement("div");
+    row.className = "custom-field-row";
+
+    row.innerHTML = `
+        <input type="text" class="field-name" placeholder="Field name" value="${escapeHtml(name)}">
+        <input type="text" class="field-value" placeholder="Value" value="${escapeHtml(value)}">
+        <button type="button" class="remove-field-btn" title="Remove field">&times;</button>
+    `;
+
+    row.querySelector(".remove-field-btn").onclick = () => row.remove();
+
+    customFieldsContainer.appendChild(row);
+}
+
+// ---------- UUID and Timestamp Generation ----------
+
+function generateUUID(){
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+function getCurrentTimestamp(){
+    return new Date().toISOString();
+}
+
+function formatTimestamp(isoString){
+    const date = new Date(isoString);
+    return date.toLocaleString();
+}
+
+addFieldBtn.onclick = () => addCustomFieldRow();
+
+function getCustomFieldsFromForm(){
+    const fields = {};
+
+    customFieldsContainer.querySelectorAll(".custom-field-row").forEach(row=>{
+        const name = row.querySelector(".field-name").value.trim();
+        const value = row.querySelector(".field-value").value;
+
+        if(name){
+            fields[name] = value;
+        }
+    });
+
+    return fields;
+}
+
+function clearCustomFieldRows(){
+    customFieldsContainer.innerHTML = "";
+}
+
+form.onsubmit = (e) => {
+    e.preventDefault();
+
+    const data = {
+        name: document.getElementById("name").value.trim(),
+        age: document.getElementById("age").value,
+        section: document.getElementById("section").value.trim(),
+        characterSheet: document.getElementById("characterSheet").value.trim(),
+        message: getMessageHtml(),
+        customFields: getCustomFieldsFromForm()
+    };
+
+    if(editingId !== null){
+        updateRecord(editingId, data);
+    }else{
+        data.uuid = generateUUID();
+        data.createdAt = getCurrentTimestamp();
+        addRecord(data);
+    }
+
+    form.reset();
+    setMessageHtml("");
+    clearCustomFieldRows();
+};
+
+cancelEditBtn.onclick = () => {
+    exitEditMode();
+    form.reset();
+    setMessageHtml("");
+    clearCustomFieldRows();
+};
+
+function enterEditMode(record){
+    editingId = record.id;
+    document.getElementById("name").value = record.name;
+    document.getElementById("age").value = record.age;
+    document.getElementById("section").value = record.section;
+    document.getElementById("characterSheet").value = record.characterSheet || "";
+    setMessageHtml(record.message);
+
+    clearCustomFieldRows();
+    Object.entries(record.customFields || {}).forEach(([key, value])=>{
+        addCustomFieldRow(key, value);
+    });
+
+    submitBtn.textContent = "Update";
+    cancelEditBtn.style.display = "inline-block";
+
+    showTab("editor"); // the form lives behind the Editor tab on mobile
+    window.scrollTo({top:0, behavior:"smooth"});
+    renderRecords(); // re-render so the editing card gets highlighted
+}
+
+function exitEditMode(){
+    editingId = null;
+    submitBtn.textContent = "Save";
+    cancelEditBtn.style.display = "none";
+}
+
+function loadRecords(){
+    const tx=db.transaction("records","readonly");
+    const store=tx.objectStore("records");
+    const results=[];
+
+    store.openCursor().onsuccess=e=>{
+        const cursor=e.target.result;
+
+        if(cursor){
+            results.push(cursor.value);
+            cursor.continue();
+        }else{
+            allRecords = results;
+            updateFilterOptions();
+            renderRecords();
+        }
+    };
+}
+
+function updateFilterOptions(){
+    const sectionSet = new Set();
+    const ageSet = new Set();
+    
+    allRecords.forEach(r=>{
+        if(r.section) sectionSet.add(r.section);
+        if(r.age) ageSet.add(String(r.age));
+    });
+    
+    const sectionSelect = document.getElementById("filterSection");
+    const ageSelect = document.getElementById("filterAge");
+    
+    const currentSection = sectionSelect.value;
+    const currentAge = ageSelect.value;
+    
+    sectionSelect.innerHTML = '<option value="">All Sections</option>';
+    Array.from(sectionSet).sort().forEach(section=>{
+        const opt = document.createElement("option");
+        opt.value = section;
+        opt.textContent = section;
+        sectionSelect.appendChild(opt);
+    });
+    sectionSelect.value = currentSection;
+    
+    ageSelect.innerHTML = '<option value="">All Ages</option>';
+    Array.from(ageSet).sort((a,b)=>Number(a)-Number(b)).forEach(age=>{
+        const opt = document.createElement("option");
+        opt.value = age;
+        opt.textContent = age;
+        ageSelect.appendChild(opt);
+    });
+    ageSelect.value = currentAge;
+}
+
+function clearFilters(){
+    document.getElementById("searchBox").value = "";
+    document.getElementById("filterSection").value = "";
+    document.getElementById("filterAge").value = "";
+    renderRecords();
+}
+
+function renderRecords(){
+    const container=document.getElementById("records");
+    const query = document.getElementById("searchBox").value.trim().toLowerCase();
+    const filterSection = document.getElementById("filterSection").value;
+    const filterAge = document.getElementById("filterAge").value;
+
+    const filtered = allRecords.filter(r=>{
+        const matchesSection = !filterSection || r.section === filterSection;
+        const matchesAge = !filterAge || String(r.age) === filterAge;
+        
+        if(!matchesSection || !matchesAge) return false;
+        
+        if(!query) return true;
+        
+        const customFieldsMatch = Object.entries(r.customFields || {}).some(([k,v])=>
+            k.toLowerCase().includes(query) || String(v ?? "").toLowerCase().includes(query)
+        );
+
+        const createdAtFormatted = r.createdAt ? formatTimestamp(r.createdAt) : "";
+        const createdAtIso = r.createdAt ? r.createdAt : "";
+
+        return (r.name || "").toLowerCase().includes(query)
+            || (r.section || "").toLowerCase().includes(query)
+            || stripHtml(r.message).toLowerCase().includes(query)
+            || String(r.age || "").toLowerCase().includes(query)
+            || String(r.id || "").toLowerCase().includes(query)
+            || (r.uuid || "").toLowerCase().includes(query)
+            || createdAtFormatted.toLowerCase().includes(query)
+            || createdAtIso.toLowerCase().includes(query)
+            || (r.characterSheet || "").toLowerCase().includes(query)
+            || customFieldsMatch;
+    });
+
+    container.innerHTML="";
+
+    if(filtered.length === 0){
+        container.innerHTML = `<p class="empty-msg">No records found.</p>`;
+        return;
+    }
+
+    filtered.forEach(r=>{
+        const div=document.createElement("div");
+        div.className = "record" + (r.id === editingId ? " editing" : "");
+
+        const customFieldsHtml = Object.entries(r.customFields || {})
+            .map(([k,v])=>`${escapeHtml(k)}: ${escapeHtml(v)}<br>`)
+            .join("");
+
+        const messageHtml = sanitizeHtml(r.message || "");
+        const messageClass = "message-content" + (messageHtml.trim() === "" ? " empty-message" : "");
+
+        const createdAtFormatted = r.createdAt ? formatTimestamp(r.createdAt) : "N/A";
+        
+        const charSheetHtml = r.characterSheet ? `<div style="background:#f9f9f9; padding:8px; border-left:3px solid #666; margin:8px 0; font-size:0.9em; white-space:pre-wrap;"><b>Character Sheet:</b>\n${escapeHtml(r.characterSheet)}</div>` : "";
+
+        div.innerHTML=`
+        <b>Name: ${escapeHtml(r.name)}</b><br>
+        Age: ${escapeHtml(String(r.age))}<br>
+        Section: ${escapeHtml(r.section)}<br>
+        ${charSheetHtml}
+        Message:
+        <div class="${messageClass}">${messageHtml}</div>
+        ${customFieldsHtml}
+        <small>ID: ${r.id} | UUID: ${escapeHtml(r.uuid || "N/A")} | Created: ${createdAtFormatted}</small><br><br>
+
+        <button onclick="editRecordById(${r.id})">Edit</button>
+        <button onclick="downloadRecord(${r.id})">Download</button>
+        <button onclick="deleteRecord(${r.id})">Delete</button>
+        `;
+
+        container.appendChild(div);
+        highlightRenderedCode(div);
+    });
+}
+
+function editRecordById(id){
+    const record = allRecords.find(r=>r.id===id);
+    if(record) enterEditMode(record);
+}
+
+const searchBox = document.getElementById("searchBox");
+searchBox.addEventListener("input", renderRecords);
+searchBox.addEventListener("keypress", (e) => {
+    if(e.key === "Enter" || e.keyCode === 13){
+        e.preventDefault();
+        renderRecords();
+    }
+});
+searchBox.addEventListener("keydown", (e) => {
+    if(e.key === "Enter" || e.keyCode === 13){
+        e.preventDefault();
+        renderRecords();
+    }
+});
+
+function deleteRecord(id){
+    const tx=db.transaction("records","readwrite");
+    tx.objectStore("records").delete(id);
+    tx.oncomplete=()=>{
+        if(id === editingId){
+            exitEditMode();
+            form.reset();
+            setMessageHtml("");
+            clearCustomFieldRows();
+        }
+        loadRecords();
+    };
+    tx.onerror=e=>alert("Failed to delete record: "+e.target.error);
+}
+
+// Plain-text record format:
+//   Name: John Doe
+//   Age: 20
+//   Section: A
+//   Message: Hello there
+//   Any Custom Field: some value
+// Multiple records are separated by a blank line. Any line that isn't
+// Name/Age/Section/Message is treated as a custom field.
+
+function recordToText(r){
+    const messageMarkdown = htmlToMarkdown(r.message || "")
+        .replace(/\r\n/g, "\n")
+        .replace(/\n/g, "\\n");
+
+    const lines = [
+        `ID: ${r.id ?? ""}`,
+        `UUID: ${r.uuid ?? ""}`,
+        `Created: ${r.createdAt ?? ""}`,
+        `Name: ${r.name ?? ""}`,
+        `Age: ${r.age ?? ""}`,
+        `Section: ${r.section ?? ""}`,
+        `Message: ${messageMarkdown}`
+    ];
+
+    Object.entries(r.customFields || {}).forEach(([key, value])=>{
+        lines.push(`${key}: ${value ?? ""}`);
+    });
+
+    return lines.join("\n");
+}
+
+function downloadRecord(id){
+    const tx=db.transaction("records","readonly");
+    const req=tx.objectStore("records").get(id);
+
+    req.onsuccess=()=>{
+        const blob=new Blob(
+            [recordToText(req.result)],
+            {type:"text/plain;charset=utf-8;"}
+        );
+
+        const a=document.createElement("a");
+        a.href=URL.createObjectURL(blob);
+        a.download=`record_${id}.txt`;
+        a.click();
+
+        URL.revokeObjectURL(a.href);
+    };
+}
+
+function downloadAll(){
+    if(allRecords.length === 0){
+        alert("There are no records to download.");
+        return;
+    }
+
+    const textContent = allRecords.map(recordToText).join("\n\n");
+
+    const blob=new Blob(
+        [textContent],
+        {type:"text/plain;charset=utf-8;"}
+    );
+
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="all_records.txt";
+    a.click();
+
+    URL.revokeObjectURL(a.href);
+}
+
+// ---------- Import Text ----------
+//
+// Expects the same plain-text format produced by the Download buttons:
+//   Name: John Doe
+//   Age: 20
+//   Section: A
+//   Message: Hello there
+// Records are separated by one or more blank lines. Field labels are
+// matched case-insensitively.
+
+function parseTextRecords(text){
+    const blocks = text
+        .replace(/\r\n/g, "\n")
+        .split(/\n\s*\n/)
+        .map(b=>b.trim())
+        .filter(Boolean);
+
+    const standardKeys = ["name","age","section","message"];
+
+    return blocks.map(block=>{
+        const record = { name:"", age:"", section:"", message:"", customFields:{} };
+
+        block.split("\n").forEach(line=>{
+            const match = line.match(/^\s*([^:]+?)\s*:\s*(.*)$/);
+            if(!match) return;
+
+            const rawKey = match[1].trim();
+            const key = rawKey.toLowerCase();
+            const value = match[2].trim();
+
+            if(standardKeys.includes(key)){
+                record[key] = key === "message" ? value.replace(/\\n/g, "\n") : value;
+            }else{
+                record.customFields[rawKey] = value;
+            }
+        });
+
+        return record;
+    });
+}
+
+document.getElementById("importInput").addEventListener("change", async (e)=>{
+    const files = Array.from(e.target.files);
+    if(files.length === 0) return;
+
+    let importedCount = 0;
+    let failedCount = 0;
+
+    for(const file of files){
+        try{
+            const text = await file.text();
+            const records = parseTextRecords(text);
+
+            if(records.length === 0){
+                failedCount++;
+                continue;
+            }
+
+            for(const rest of records){
+                if(!rest.name || !rest.section){
+                    failedCount++;
+                    continue;
+                }
+
+                await new Promise((resolve)=>{
+                    const tx = db.transaction("records","readwrite");
+                    tx.objectStore("records").add({
+                        name: rest.name ?? "",
+                        age: rest.age ?? "",
+                        section: rest.section ?? "",
+                        message: markdownToHtml(rest.message ?? ""),
+                        customFields: rest.customFields ?? {}
+                    });
+                    tx.oncomplete = ()=>{ importedCount++; resolve(); };
+                    tx.onerror = ()=>{ failedCount++; resolve(); };
+                });
+            }
+        }catch(err){
+            console.error("Failed to import file:", file.name, err);
+            failedCount++;
+        }
+    }
+
+    loadRecords();
+    e.target.value = ""; // reset input so the same file can be re-imported
+
+    alert(`Import complete. Added: ${importedCount}. Failed: ${failedCount}.`);
+});
+
+// ---------- Export CSV ----------
+
+function exportCSV(){
+    if(allRecords.length === 0){
+        alert("There are no records to export.");
+        return;
+    }
+
+    const baseHeaders = ["id","uuid","createdAt","name","age","section","message"];
+
+    const customKeys = Array.from(
+        allRecords.reduce((set, r)=>{
+            Object.keys(r.customFields || {}).forEach(k=>set.add(k));
+            return set;
+        }, new Set())
+    );
+
+    const headers = [...baseHeaders, ...customKeys];
+
+    const escapeCsvValue = (val)=>{
+        const str = String(val ?? "");
+        if(/[",\n]/.test(str)){
+            return `"${str.replace(/"/g,'""')}"`;
+        }
+        return str;
+    };
+
+    const rows = allRecords.map(r=>{
+        const plainRecord = { ...r, message: htmlToMarkdown(r.message) };
+        const baseValues = baseHeaders.map(h=>escapeCsvValue(plainRecord[h]));
+        const customValues = customKeys.map(k=>escapeCsvValue((r.customFields || {})[k]));
+        return [...baseValues, ...customValues].join(",");
+    });
+
+    const csvContent = [headers.join(","), ...rows].join("\n");
+
+    const blob = new Blob([csvContent], {type:"text/csv;charset=utf-8;"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "records.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+// ---------- Export Excel ----------
+// Builds a native Excel XML (SpreadsheetML 2003) file by hand, so no
+// external library or network access is required. Excel opens .xls
+// files in this format natively.
+
+function excelXmlEscape(str){
+    return String(str ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;");
+}
+
+function excelCell(value){
+    const isNumber = value !== "" && value !== null && !isNaN(value) && typeof value !== "boolean";
+    const type = isNumber ? "Number" : "String";
+    return `<Cell><Data ss:Type="${type}">${excelXmlEscape(value)}</Data></Cell>`;
+}
+
+function exportExcel(){
+    if(allRecords.length === 0){
+        alert("There are no records to export.");
+        return;
+    }
+
+    const baseHeaders = ["id","uuid","createdAt","name","age","section","message"];
+
+    const customKeys = Array.from(
+        allRecords.reduce((set, r)=>{
+            Object.keys(r.customFields || {}).forEach(k=>set.add(k));
+            return set;
+        }, new Set())
+    );
+
+    const headers = [...baseHeaders, ...customKeys];
+
+    const headerRow = `<Row>${headers.map(h=>excelCell(h)).join("")}</Row>`;
+
+    const dataRows = allRecords.map(r=>{
+        const plainRecord = { ...r, message: htmlToMarkdown(r.message) };
+        const baseCells = baseHeaders.map(h=>excelCell(plainRecord[h]));
+        const customCells = customKeys.map(k=>excelCell((r.customFields || {})[k]));
+        return `<Row>${[...baseCells, ...customCells].join("")}</Row>`;
+    }).join("");
+
+    const xml = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="header">
+   <Font ss:Bold="1"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Records">
+  <Table>
+   ${headerRow}
+   ${dataRows}
+  </Table>
+ </Worksheet>
+</Workbook>`;
+
+    const blob = new Blob([xml], {type:"application/vnd.ms-excel;charset=utf-8;"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "records.xls";
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+// ---------- Delete All Records ----------
+
+function deleteAllRecords(){
+    if(allRecords.length === 0){
+        alert("There are no records to delete.");
+        return;
+    }
+
+    if(!confirm(`Are you sure you want to delete all ${allRecords.length} record(s)? This action cannot be undone.`)){
+        return;
+    }
+
+    const tx = db.transaction("records", "readwrite");
+    const store = tx.objectStore("records");
+    const clearRequest = store.clear();
+
+    clearRequest.onsuccess = () => {
+        exitEditMode();
+        form.reset();
+        setMessageHtml("");
+        clearCustomFieldRows();
+        loadRecords();
+        alert("All records have been deleted successfully.");
+    };
+
+    clearRequest.onerror = (e) => {
+        alert("Failed to delete all records: " + e.target.error);
+    };
+}
+
+// ---------- View Current Database ----------
+
+function viewCurrentDatabase(){
+    if(allRecords.length === 0){
+        alert("The database is currently empty.");
+        return;
+    }
+
+    const dbContent = allRecords.map((r, index) => {
+        const customFieldsText = Object.entries(r.customFields || {})
+            .map(([k, v]) => `  ${k}: ${v}`)
+            .join("\n");
+
+        const messageText = stripHtml(r.message || "(no message)");
+
+        const createdAtFormatted = r.createdAt ? formatTimestamp(r.createdAt) : "N/A";
+        return `Record ${index + 1}:
+  ID: ${r.id}
+  UUID: ${r.uuid || "N/A"}
+  Created: ${createdAtFormatted}
+  Name: ${r.name}
+  Age: ${r.age}
+  Section: ${r.section}
+  Message: ${messageText}${customFieldsText ? "\n" + customFieldsText : ""}`;
+    }).join("\n\n");
+
+    const modal = document.createElement("div");
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+
+    const content = document.createElement("div");
+    content.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    `;
+
+    const title = document.createElement("h2");
+    title.textContent = "Current Database Contents";
+    title.style.marginTop = "0";
+    content.appendChild(title);
+
+    const pre = document.createElement("pre");
+    pre.textContent = dbContent;
+    pre.style.cssText = `
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-size: 13px;
+        line-height: 1.5;
+    `;
+    content.appendChild(pre);
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.cssText = `
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 16px;
+    `;
+
+    const copyBtn = document.createElement("button");
+    copyBtn.textContent = "Copy to Clipboard";
+    copyBtn.style.cssText = `
+        padding: 8px 16px;
+        background: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    `;
+    copyBtn.onclick = () => {
+        navigator.clipboard.writeText(dbContent).then(() => {
+            copyBtn.textContent = "Copied!";
+            setTimeout(() => { copyBtn.textContent = "Copy to Clipboard"; }, 2000);
+        }).catch(err => alert("Failed to copy: " + err));
+    };
+    buttonContainer.appendChild(copyBtn);
+
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "Close";
+    closeBtn.style.cssText = `
+        padding: 8px 16px;
+        background: #f44336;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    `;
+    closeBtn.onclick = () => modal.remove();
+    buttonContainer.appendChild(closeBtn);
+
+    content.appendChild(buttonContainer);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+
+    modal.onclick = (e) => {
+        if(e.target === modal) modal.remove();
+    };
+}
+
+// ---------- Utility ----------
+
+function escapeHtml(str){
+    return String(str ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#39;");
+}
+
+// ---------- Boot ----------
+
+initActiveDatabase();
+
+</script>
+
+</body>
+</html>

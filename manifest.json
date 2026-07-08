@@ -1,0 +1,26 @@
+{
+    "name": "Localized Database Form",
+    "short_name": "DB Form",
+    "description": "An offline-first, on-device database form for records — supports multiple databases, rich messages, and full backup/restore. All data stays on this device.",
+    "start_url": "./index.html",
+    "scope": "./",
+    "id": "./index.html",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#ffffff",
+    "theme_color": "#4a90d9",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
