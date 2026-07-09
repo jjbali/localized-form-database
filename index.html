@@ -22,6 +22,7 @@
         id="hljsDarkTheme" disabled>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         html {
@@ -559,6 +560,159 @@
         .btn-danger {
             background: var(--danger-bg);
             border-color: var(--danger-border);
+        }
+
+        /* ---- Kanban board ---- */
+
+        .kanban-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .kanban-toolbar select {
+            width: auto;
+            flex: 1 1 160px;
+            margin: 0;
+        }
+
+        .kanban-board {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            align-items: flex-start;
+        }
+
+        .kanban-column {
+            flex: 0 0 240px;
+            width: 240px;
+            background: var(--btn-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .kanban-column.drag-over {
+            border-color: var(--accent);
+            background: var(--editing-bg);
+        }
+
+        .kanban-column-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+
+        .kanban-column-title {
+            flex: 1;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 4px 5px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text);
+            cursor: text;
+        }
+
+        .kanban-column-title:hover,
+        .kanban-column-title:focus {
+            border-color: var(--border);
+            background: var(--input-bg);
+        }
+
+        .kanban-column-count {
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .kanban-column-actions {
+            display: flex;
+            gap: 2px;
+        }
+
+        .kanban-column-actions button {
+            padding: 2px 6px;
+            margin: 0;
+            font-size: 11px;
+        }
+
+        .kanban-cards {
+            min-height: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .kanban-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 6px 8px;
+            cursor: grab;
+        }
+
+        .kanban-card.dragging {
+            opacity: 0.4;
+        }
+
+        .kanban-card-title {
+            font-size: 13px;
+            font-weight: bold;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .kanban-card-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .kanban-card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 5px;
+        }
+
+        .kanban-card-actions button,
+        .kanban-card-actions select {
+            padding: 2px 5px;
+            margin: 0;
+            font-size: 11px;
+            width: auto;
+        }
+
+        .kanban-add-card-row {
+            margin-top: 6px;
+        }
+
+        .kanban-add-card-row textarea {
+            font-size: 12px;
+            padding: 5px 6px;
+            margin: 0 0 4px;
+            min-height: 40px;
+        }
+
+        .kanban-add-card-row button {
+            font-size: 12px;
+        }
+
+        .kanban-add-column {
+            flex: 0 0 200px;
+            width: 200px;
+        }
+
+        .kanban-add-column input {
+            margin: 0 0 5px;
         }
 
         /* ---- Terminal minigame ---- */
@@ -2635,6 +2789,8 @@
         </div>
         <div class="markdown-hint" id="activeDbHint"></div>
 
+        <div id="workspacePanel" style="margin-top:8px;"></div>
+
         <details class="hint-details">
             <summary>Admin Panel</summary>
             <div id="adminPanel" class="admin-panel" style="display:none;">
@@ -2718,6 +2874,7 @@
             <button type="button" id="tabSpreadsheetBtn" onclick="showTab('spreadsheet')">&#128202; Sheet</button>
             <button type="button" id="tabMathBtn" onclick="showTab('math')">&#128290; Math</button>
             <button type="button" id="tabLibraryBtn" onclick="showTab('library')">&#128218; Library</button>
+            <button type="button" id="tabKanbanBtn" onclick="showTab('kanban')">&#128203; Kanban</button>
             <button type="button" id="tabDrawingsBtn" onclick="showTab('drawings')">&#127912; Drawings</button>
             <button type="button" id="tabFilesBtn" onclick="showTab('files')">&#128193; Files</button>
             <button type="button" id="tabPublicBtn" onclick="showTab('public')">&#127760; Public</button>
@@ -2839,8 +2996,13 @@
                 <div class="markdown-hint">
                     Saved spreadsheets live in this database alongside your records and dictionary &mdash; open, edit,
                     or create as many as you like, and switch between them anytime. Type a formula starting with
-                    <code>=</code>, e.g. <code>=A1+B2</code> or <code>=SUM(A1:A5)</code> (also supports
-                    <code>AVERAGE</code>, <code>MIN</code>, <code>MAX</code>, <code>COUNT</code>).
+                    <code>=</code> &mdash; arithmetic (<code>=A1+B2*2</code>, <code>=2^10</code>), comparisons
+                    (<code>=A1&gt;10</code>), text concatenation (<code>=A1&amp;" "&amp;B1</code>), and functions like
+                    <code>SUM</code>, <code>AVERAGE</code>, <code>IF</code>, <code>AND</code>/<code>OR</code>,
+                    <code>VLOOKUP</code>, <code>INDEX</code>/<code>MATCH</code>, <code>SUMIF</code>/<code>COUNTIF</code>,
+                    and common text functions (<code>CONCATENATE</code>, <code>LEFT</code>/<code>RIGHT</code>/<code>MID</code>,
+                    <code>UPPER</code>/<code>LOWER</code>, <code>LEN</code>). Excel import/export preserves formula text,
+                    but any Excel function not in this list will show <code>#NAME?</code> until edited.
                 </div>
 
                 <div class="spreadsheet-toolbar">
@@ -2848,7 +3010,11 @@
                     <button type="button" onclick="createNewSpreadsheet()" class="btn-success">+ New Sheet</button>
                     <button type="button" onclick="duplicateCurrentSpreadsheet()">Duplicate</button>
                     <button type="button" onclick="exportCurrentSpreadsheetCSV()">Export CSV</button>
+                    <button type="button" onclick="exportCurrentSpreadsheetXLSX()">Export Excel</button>
+                    <button type="button" onclick="triggerSpreadsheetXLSXImport()">Import Excel</button>
                     <button type="button" onclick="deleteCurrentSpreadsheet()" class="btn-danger">Delete Sheet</button>
+                    <input type="file" id="spreadsheetImportInput" class="hidden-file-input" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                        onchange="if (this.files && this.files[0]) importSpreadsheetsFromXLSXFile(this.files[0]); this.value = '';">
                 </div>
 
                 <input type="text" id="spreadsheetNameInput" placeholder="Sheet name"
@@ -2991,6 +3157,29 @@
                 </div>
 
                 <div id="libraryItems"></div>
+            </div>
+
+            <div id="kanbanPanel" class="tab-panel tab-hidden">
+                <hr>
+                <h3 class="section-label" style="margin-top:0;">Kanban</h3>
+                <div class="markdown-hint">
+                    Boards live in this database alongside your records &mdash; create as many as you like and switch
+                    between them anytime. Each board has its own fully custom list of columns (call them
+                    "To Do / Doing / Done", or anything you want) &mdash; add, rename, reorder, or delete columns
+                    freely, then drag cards between them (or use each card's "Move to" dropdown).
+                </div>
+
+                <div class="kanban-toolbar">
+                    <select id="kanbanBoardSelect" onchange="switchKanbanBoard(this.value)"></select>
+                    <button type="button" onclick="createNewKanbanBoard()" class="btn-success">+ New Board</button>
+                    <button type="button" onclick="duplicateCurrentKanbanBoard()">Duplicate</button>
+                    <button type="button" onclick="deleteCurrentKanbanBoard()" class="btn-danger">Delete Board</button>
+                </div>
+
+                <input type="text" id="kanbanBoardNameInput" placeholder="Board name"
+                    onchange="renameCurrentKanbanBoard(this.value)">
+
+                <div class="kanban-board" id="kanbanBoard"></div>
             </div>
 
             <div id="drawingsPanel" class="tab-panel tab-hidden">
@@ -3289,6 +3478,8 @@
         const TERMINAL_SCORING_KEY = "localizedTerminalScoring"; // global (device-wide, admin-managed) point values
         const TERMINAL_SHOP_KEY = "localizedTerminalShopConfig"; // global (device-wide, admin-managed) shop prices/effects
         const TERMINAL_RANKS_KEY = "localizedTerminalRanks"; // global (device-wide, admin-managed) rank tiers + promotion thresholds
+        const WORKSPACES_KEY = "localizedWorkspaces"; // global (device-wide) registry of shared/collaborative databases + their membership
+        let deletingWorkspaceInProgress = false; // guards deleteCurrentDatabase() so deleteCurrentWorkspace() can re-enter it
 
         const DARK_MODE_KEY = "localizedDarkMode";
 
@@ -3452,8 +3643,10 @@
             allFolders = [];
             allFiles = [];
             allDrawings = [];
+            allKanbanBoards = [];
             currentSpreadsheet = null;
             currentDrawing = null;
+            currentKanbanBoard = null;
             selectedCellRef = "A1";
             editingId = null;
             editingKeywordId = null;
@@ -3471,7 +3664,7 @@
                 "records", "keywords", "spreadsheetGrid", "spreadsheetSelect",
                 "libraryItems", "filesList", "fileOverviewGrid", "fileBrowserList",
                 "drawingsList", "folderManageList", "folderParentSelect", "fileFolderSelect",
-                "fileFolderChips", "fileFolderBreadcrumb"
+                "fileFolderChips", "fileFolderBreadcrumb", "kanbanBoard", "kanbanBoardSelect"
             ];
             clearIds.forEach(id => {
                 const el = document.getElementById(id);
@@ -3981,6 +4174,7 @@
                 const drawings = await getAllDrawingsFromDbName(entry.dbName);
                 const files = await getAllFilesFromDbName(entry.dbName);
                 const folders = await getAllFoldersFromDbName(entry.dbName);
+                const kanbanBoards = await getAllKanbanBoardsFromDbName(entry.dbName);
                 return {
                     name: entry.name,
                     createdAt: entry.createdAt || null,
@@ -3997,7 +4191,9 @@
                     fileCount: files.length,
                     files: files.map(f => fileToPortableWithFolderPath(f, folders)),
                     folderCount: folders.length,
-                    folders: folders.map(fo => folderToPortableWithPath(fo, folders))
+                    folders: folders.map(fo => folderToPortableWithPath(fo, folders)),
+                    kanbanBoardCount: kanbanBoards.length,
+                    kanbanBoards: kanbanBoards.map(recordToPortable)
                 };
             });
 
@@ -4077,13 +4273,19 @@
                         createdAt: d.createdAt || getCurrentTimestamp(),
                         updatedAt: d.updatedAt || d.createdAt || getCurrentTimestamp()
                     }));
+                    await writeStore("kanbanBoards", dbData.kanbanBoards || [], b => ({
+                        name: b.name ?? "Board",
+                        columns: sanitizeKanbanColumnsForImport(b.columns),
+                        createdAt: b.createdAt || getCurrentTimestamp(),
+                        updatedAt: b.updatedAt || b.createdAt || getCurrentTimestamp()
+                    }));
                     newDb.close();
                     return entry;
                 };
 
                 if (data && data.exportFormat === "all-databases" && Array.isArray(data.databases)) {
                     for (const [index, dbData] of data.databases.entries()) {
-                        await importRecords({ name: dbData.name, createdAt: dbData.createdAt, records: dbData.records, keywords: dbData.keywords, spreadsheets: dbData.spreadsheets, libraryItems: dbData.libraryItems, drawings: dbData.drawings }, index);
+                        await importRecords({ name: dbData.name, createdAt: dbData.createdAt, records: dbData.records, keywords: dbData.keywords, spreadsheets: dbData.spreadsheets, libraryItems: dbData.libraryItems, drawings: dbData.drawings, kanbanBoards: dbData.kanbanBoards }, index);
                     }
                 } else if (data && Array.isArray(data.records)) {
                     await importRecords(data, 0);
@@ -4291,6 +4493,7 @@
             document.getElementById("spreadsheetPanel").classList.toggle("tab-hidden", tab !== "spreadsheet");
             document.getElementById("mathPanel").classList.toggle("tab-hidden", tab !== "math");
             document.getElementById("libraryPanel").classList.toggle("tab-hidden", tab !== "library");
+            document.getElementById("kanbanPanel").classList.toggle("tab-hidden", tab !== "kanban");
             document.getElementById("drawingsPanel").classList.toggle("tab-hidden", tab !== "drawings");
             document.getElementById("filesPanel").classList.toggle("tab-hidden", tab !== "files");
             document.getElementById("publicPanel").classList.toggle("tab-hidden", tab !== "public");
@@ -4301,6 +4504,7 @@
             document.getElementById("tabSpreadsheetBtn").classList.toggle("active", tab === "spreadsheet");
             document.getElementById("tabMathBtn").classList.toggle("active", tab === "math");
             document.getElementById("tabLibraryBtn").classList.toggle("active", tab === "library");
+            document.getElementById("tabKanbanBtn").classList.toggle("active", tab === "kanban");
             document.getElementById("tabDrawingsBtn").classList.toggle("active", tab === "drawings");
             document.getElementById("tabFilesBtn").classList.toggle("active", tab === "files");
             document.getElementById("tabPublicBtn").classList.toggle("active", tab === "public");
@@ -4445,7 +4649,7 @@
 
         function openDatabase(dbName) {
             return new Promise((resolve, reject) => {
-                const req = indexedDB.open(dbName, 6);
+                const req = indexedDB.open(dbName, 7);
 
                 req.onupgradeneeded = e => {
                     const upgradeDb = e.target.result;
@@ -4470,6 +4674,9 @@
                     if (!upgradeDb.objectStoreNames.contains("folders")) {
                         upgradeDb.createObjectStore("folders", { keyPath: "id", autoIncrement: true });
                     }
+                    if (!upgradeDb.objectStoreNames.contains("kanbanBoards")) {
+                        upgradeDb.createObjectStore("kanbanBoards", { keyPath: "id", autoIncrement: true });
+                    }
                 };
 
                 req.onblocked = () => {
@@ -4490,7 +4697,7 @@
             registry.forEach(entry => {
                 const option = document.createElement("option");
                 option.value = entry.id;
-                option.textContent = entry.name;
+                option.textContent = entry.isWorkspace ? `${entry.name} (Shared)` : entry.name;
                 if (entry.id === currentId) option.selected = true;
                 select.appendChild(option);
             });
@@ -4500,6 +4707,8 @@
                 `Currently viewing database "${current.name}". Records you save, edit, import, or delete only affect this database. Use the controls above to switch to, add, rename, or delete a database.`;
 
             document.getElementById("deleteDbBtn").disabled = registry.length <= 1;
+
+            renderWorkspacePanel();
         }
 
         function isIndexedDbAvailable() {
@@ -4535,6 +4744,7 @@
                 loadKeywords();
                 loadSpreadsheets();
                 loadLibraryItems();
+                loadKanbanBoards();
                 loadDrawings();
                 loadFolders();
                 loadFiles();
@@ -4575,6 +4785,7 @@
                 loadKeywords();
                 loadSpreadsheets();
                 loadLibraryItems();
+                loadKanbanBoards();
                 loadDrawings();
                 loadFolders();
                 loadFiles();
@@ -4601,6 +4812,7 @@
 
             localStorage.setItem(getDbCurrentKey(), chosenId);
             flushSpreadsheetSave();
+            flushKanbanSave();
             if (db) { try { db.close(); } catch (e) { } }
             initActiveDatabase();
         }
@@ -4674,7 +4886,23 @@
             const entry = registry.find(r => r.id === currentId);
             if (!entry) return;
 
-            if (!confirm(`Are you sure you want to permanently delete the database "${entry.name}" and ALL of its records? This action cannot be undone.`)) {
+            // Shared workspaces need their membership cleaned up too --
+            // route through the workspace-aware flows instead of a bare
+            // delete, unless we're already being called *from* one of them
+            // (deleteCurrentWorkspace re-enters here after doing that work).
+            if (entry.isWorkspace && !deletingWorkspaceInProgress) {
+                const workspace = getWorkspaceById(entry.id);
+                if (workspace) {
+                    if (isCurrentUserWorkspaceOwner(workspace)) {
+                        alert('This is a shared workspace. Use "Delete Workspace" below instead, which also removes it for every member.');
+                    } else {
+                        alert('This is a shared workspace you don\'t own. Use "Leave" below instead of deleting it.');
+                    }
+                    return;
+                }
+            }
+
+            if (!deletingWorkspaceInProgress && !confirm(`Are you sure you want to permanently delete the database "${entry.name}" and ALL of its records? This action cannot be undone.`)) {
                 return;
             }
 
@@ -4685,6 +4913,7 @@
             localStorage.setItem(getDbCurrentKey(), nextEntry.id);
 
             flushSpreadsheetSave();
+            flushKanbanSave();
             if (db) { try { db.close(); } catch (e) { } }
 
             const deleteRequest = indexedDB.deleteDatabase(entry.dbName);
@@ -4696,6 +4925,317 @@
                 alert("The database was removed from the list, but its underlying data could not be fully deleted.");
                 proceed();
             };
+        }
+
+        // ---------- Workspaces (shared/collaborative databases) ----------
+        //
+        // A "workspace" turns one of the current user's databases into a
+        // database shared with other accounts on this device/browser. Under
+        // the hood every database is just an IndexedDB store named by its
+        // `dbName` -- so sharing a database is done by pointing more than one
+        // account's personal registry entry at the exact same `dbName`. Once
+        // that's done, every member's copy of the app reads/writes the same
+        // underlying records, folders, kanban boards, etc: true collaboration,
+        // scoped to this device (there is no server, so this does not sync
+        // across separate devices/browsers -- only across accounts that live
+        // in this one browser's storage).
+        //
+        // Global membership metadata (name, owner, member list) lives in
+        // WORKSPACES_KEY, separate from any one user's personal registry, so
+        // it survives even if the owner renames or removes their own entry.
+
+        function loadWorkspaces() {
+            try {
+                const raw = localStorage.getItem(WORKSPACES_KEY);
+                const parsed = raw ? JSON.parse(raw) : [];
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.error("Failed to load workspaces:", e);
+                return [];
+            }
+        }
+
+        function saveWorkspaces(list) {
+            localStorage.setItem(WORKSPACES_KEY, JSON.stringify(list));
+        }
+
+        // Like loadDbRegistry(), but can target any user's registry and never
+        // creates/persists a bootstrap entry as a side effect -- callers that
+        // need to *write* a new entry into someone else's registry read with
+        // this first, push onto the result, then save with saveDbRegistryForUser().
+        function loadDbRegistryRaw(userId) {
+            try {
+                const raw = localStorage.getItem(getDbRegistryKey(userId));
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {
+                console.error("Failed to parse database registry for user:", userId, e);
+            }
+            return [{
+                id: "legacy",
+                name: "Default",
+                dbName: getUserDatabaseName(LEGACY_DB_NAME, userId)
+            }];
+        }
+
+        function saveDbRegistryForUser(userId, registry) {
+            localStorage.setItem(getDbRegistryKey(userId), JSON.stringify(registry));
+        }
+
+        function getWorkspaceById(id) {
+            return loadWorkspaces().find(w => w.id === id) || null;
+        }
+
+        // If the currently-open database is a shared workspace, returns its
+        // global membership record; otherwise returns null.
+        function getCurrentWorkspace() {
+            const entry = getCurrentDbEntry();
+            if (!entry || !entry.isWorkspace) return null;
+            return getWorkspaceById(entry.id);
+        }
+
+        function isCurrentUserWorkspaceOwner(workspace) {
+            return !!workspace && workspace.ownerId === getCurrentAuthUserId();
+        }
+
+        function renderWorkspacePanel() {
+            const panel = document.getElementById("workspacePanel");
+            if (!panel) return;
+
+            const entry = getCurrentDbEntry();
+            const currentUserId = getCurrentAuthUserId();
+
+            if (!entry || !entry.isWorkspace) {
+                panel.innerHTML = `
+                    <div class="markdown-hint">
+                        This database is private to your account.
+                        <button type="button" onclick="shareCurrentDatabaseAsWorkspace()">Share as Workspace</button>
+                    </div>`;
+                return;
+            }
+
+            const workspace = getWorkspaceById(entry.id);
+            if (!workspace) {
+                // Metadata missing (e.g. deleted by the owner elsewhere) --
+                // fall back to treating it as an ordinary private database.
+                panel.innerHTML = `<div class="markdown-hint">This database was shared, but its workspace record is gone. It's still yours to use privately.</div>`;
+                return;
+            }
+
+            const isOwner = isCurrentUserWorkspaceOwner(workspace);
+            const members = workspace.members || [];
+
+            const membersHtml = members.map(m => `
+                <div class="badge-def-row">
+                    <span><b>${escapeHtml(m.username)}</b>${m.userId === workspace.ownerId ? ' <span style="color:var(--text-muted); font-size:0.85em;">&mdash; Owner</span>' : ""}</span>
+                    <div class="badge-def-actions">
+                        ${isOwner && m.userId !== workspace.ownerId
+                            ? `<button type="button" onclick="removeMemberFromWorkspace('${workspace.id}','${m.userId}')" class="btn-danger">Remove</button>`
+                            : (!isOwner && m.userId === currentUserId
+                                ? `<button type="button" onclick="leaveCurrentWorkspace()" class="btn-danger">Leave</button>`
+                                : "")}
+                    </div>
+                </div>
+            `).join("");
+
+            panel.innerHTML = `
+                <div class="markdown-hint">
+                    &#129309; Shared workspace <b>"${escapeHtml(workspace.name)}"</b> &mdash; ${members.length} member${members.length === 1 ? "" : "s"}.
+                    Everyone below sees and edits the exact same records in real time (whenever their copy of the app is open on this device).
+                </div>
+                <div style="margin-top:4px;">${membersHtml}</div>
+                ${isOwner ? `
+                    <div class="admin-inline-fields" style="margin-top:6px;">
+                        <input type="text" id="workspaceInviteUsername" placeholder="Username to invite">
+                        <button type="button" onclick="inviteMemberToWorkspace('${workspace.id}')" class="btn-info">Invite</button>
+                        <button type="button" onclick="deleteCurrentWorkspace()" class="btn-danger">Delete Workspace</button>
+                    </div>
+                ` : ""}
+            `;
+        }
+
+        function shareCurrentDatabaseAsWorkspace() {
+            const entry = getCurrentDbEntry();
+            if (!entry) return;
+            if (entry.isWorkspace) {
+                alert("This database is already a shared workspace.");
+                return;
+            }
+
+            if (!confirm(`Share "${entry.name}" as a workspace? Any accounts you invite will see and be able to edit all of its records.`)) {
+                return;
+            }
+
+            const me = getCurrentAuthUser();
+            if (!me) return;
+
+            const workspace = {
+                id: entry.id,
+                name: entry.name,
+                dbName: entry.dbName,
+                ownerId: me.id,
+                ownerUsername: me.username,
+                members: [{ userId: me.id, username: me.username }],
+                createdAt: getCurrentTimestamp()
+            };
+
+            const workspaces = loadWorkspaces();
+            workspaces.push(workspace);
+            saveWorkspaces(workspaces);
+
+            const registry = loadDbRegistry();
+            const target = registry.find(r => r.id === entry.id);
+            if (target) target.isWorkspace = true;
+            saveDbRegistry(registry);
+
+            updateDatabaseUI();
+            renderWorkspacePanel();
+        }
+
+        function inviteMemberToWorkspace(workspaceId) {
+            const workspace = getWorkspaceById(workspaceId);
+            if (!workspace || !isCurrentUserWorkspaceOwner(workspace)) return;
+
+            const input = document.getElementById("workspaceInviteUsername");
+            const username = (input?.value || "").trim();
+            if (!username) {
+                alert("Enter a username to invite.");
+                return;
+            }
+
+            const users = loadAuthUsers();
+            const target = users.find(u => normalizeUsername(u.username) === normalizeUsername(username));
+            if (!target) {
+                alert(`No account named "${username}" exists on this device.`);
+                return;
+            }
+
+            if ((workspace.members || []).some(m => m.userId === target.id)) {
+                alert(`"${target.username}" is already a member of this workspace.`);
+                return;
+            }
+
+            workspace.members = workspace.members || [];
+            workspace.members.push({ userId: target.id, username: target.username });
+
+            const workspaces = loadWorkspaces();
+            const idx = workspaces.findIndex(w => w.id === workspace.id);
+            if (idx !== -1) workspaces[idx] = workspace; else workspaces.push(workspace);
+            saveWorkspaces(workspaces);
+
+            // Give the invited account a pointer at the same underlying database.
+            const theirRegistry = loadDbRegistryRaw(target.id);
+            if (!theirRegistry.some(r => r.id === workspace.id)) {
+                theirRegistry.push({
+                    id: workspace.id,
+                    name: workspace.name,
+                    dbName: workspace.dbName,
+                    isWorkspace: true,
+                    createdAt: getCurrentTimestamp()
+                });
+                saveDbRegistryForUser(target.id, theirRegistry);
+            }
+
+            if (input) input.value = "";
+            alert(`Invited "${target.username}" to workspace "${workspace.name}".`);
+            renderWorkspacePanel();
+        }
+
+        // Strips a workspace's registry entry out of one member's personal
+        // database list (used both for the owner removing someone, and for a
+        // member leaving on their own). Never deletes the underlying data --
+        // it just revokes that one account's pointer to it.
+        function stripWorkspaceEntryForUser(userId, workspaceId) {
+            const registry = loadDbRegistryRaw(userId);
+            const remaining = registry.filter(r => r.id !== workspaceId);
+            saveDbRegistryForUser(userId, remaining.length ? remaining : registry.filter(() => false));
+
+            // If that user is currently signed in and was looking at this
+            // workspace, bump them back to their first remaining database.
+            if (userId === getCurrentAuthUserId() && getCurrentDbId() === workspaceId) {
+                const fallback = loadDbRegistry()[0];
+                if (fallback) {
+                    localStorage.setItem(getDbCurrentKey(), fallback.id);
+                    flushSpreadsheetSave();
+                    flushKanbanSave();
+                    if (db) { try { db.close(); } catch (e) { } }
+                    initActiveDatabase();
+                }
+            }
+        }
+
+        function removeMemberFromWorkspace(workspaceId, userId) {
+            const workspace = getWorkspaceById(workspaceId);
+            if (!workspace || !isCurrentUserWorkspaceOwner(workspace)) return;
+            if (userId === workspace.ownerId) {
+                alert("The owner can't be removed -- delete the workspace instead.");
+                return;
+            }
+
+            const member = (workspace.members || []).find(m => m.userId === userId);
+            if (!member) return;
+            if (!confirm(`Remove "${member.username}" from workspace "${workspace.name}"? Their own copy of this database will be removed, but the shared data itself is unaffected.`)) {
+                return;
+            }
+
+            workspace.members = (workspace.members || []).filter(m => m.userId !== userId);
+            const workspaces = loadWorkspaces();
+            const idx = workspaces.findIndex(w => w.id === workspace.id);
+            if (idx !== -1) workspaces[idx] = workspace;
+            saveWorkspaces(workspaces);
+
+            stripWorkspaceEntryForUser(userId, workspace.id);
+            renderWorkspacePanel();
+        }
+
+        function leaveCurrentWorkspace() {
+            const workspace = getCurrentWorkspace();
+            if (!workspace) return;
+            const me = getCurrentAuthUser();
+            if (!me) return;
+            if (workspace.ownerId === me.id) {
+                alert("You own this workspace -- delete it instead of leaving.");
+                return;
+            }
+            if (!confirm(`Leave workspace "${workspace.name}"? You'll lose access to it unless someone invites you back.`)) {
+                return;
+            }
+
+            workspace.members = (workspace.members || []).filter(m => m.userId !== me.id);
+            const workspaces = loadWorkspaces();
+            const idx = workspaces.findIndex(w => w.id === workspace.id);
+            if (idx !== -1) workspaces[idx] = workspace;
+            saveWorkspaces(workspaces);
+
+            stripWorkspaceEntryForUser(me.id, workspace.id);
+        }
+
+        function deleteCurrentWorkspace() {
+            const workspace = getCurrentWorkspace();
+            if (!workspace || !isCurrentUserWorkspaceOwner(workspace)) return;
+
+            if (!confirm(`Permanently delete workspace "${workspace.name}" and ALL of its records for every member? This cannot be undone.`)) {
+                return;
+            }
+
+            (workspace.members || []).forEach(m => {
+                if (m.userId !== getCurrentAuthUserId()) {
+                    stripWorkspaceEntryForUser(m.userId, workspace.id);
+                }
+            });
+
+            saveWorkspaces(loadWorkspaces().filter(w => w.id !== workspace.id));
+
+            // Reuse the normal "delete database" flow for the owner's own
+            // registry entry + the underlying IndexedDB store.
+            deletingWorkspaceInProgress = true;
+            try {
+                deleteCurrentDatabase();
+            } finally {
+                deletingWorkspaceInProgress = false;
+            }
         }
 
         // ---------- Literal database export / import ----------
@@ -4844,13 +5384,24 @@
             });
         }
 
+        function getAllKanbanBoardsFromDbName(dbName) {
+            return openDatabase(dbName).then(tempDb => {
+                return new Promise((resolve, reject) => {
+                    const tx = tempDb.transaction("kanbanBoards", "readonly");
+                    const req = tx.objectStore("kanbanBoards").getAll();
+                    req.onsuccess = () => { resolve(req.result); tempDb.close(); };
+                    req.onerror = e => { tempDb.close(); reject(e.target.error); };
+                });
+            });
+        }
+
         function exportCurrentDatabaseLiteral() {
             const entry = getCurrentDbEntry();
 
             const payload = {
                 app: "localized-database-form",
                 exportFormat: "single-database",
-                schemaVersion: 4,
+                schemaVersion: 5,
                 exportedAt: getCurrentTimestamp(),
                 databaseName: entry.name,
                 databaseCreatedAt: entry.createdAt || null,
@@ -4867,7 +5418,9 @@
                 fileCount: allFiles.length,
                 files: allFiles.map(f => fileToPortableWithFolderPath(f, allFolders)),
                 folderCount: allFolders.length,
-                folders: allFolders.map(fo => folderToPortableWithPath(fo, allFolders))
+                folders: allFolders.map(fo => folderToPortableWithPath(fo, allFolders)),
+                kanbanBoardCount: allKanbanBoards.length,
+                kanbanBoards: allKanbanBoards.map(recordToPortable)
             };
 
             downloadJson(payload, sanitizeFilename(entry.name) + ".database.json");
@@ -4891,6 +5444,7 @@
                     const drawings = await getAllDrawingsFromDbName(entry.dbName);
                     const files = await getAllFilesFromDbName(entry.dbName);
                     const folders = await getAllFoldersFromDbName(entry.dbName);
+                    const kanbanBoards = await getAllKanbanBoardsFromDbName(entry.dbName);
                     databases.push({
                         name: entry.name,
                         createdAt: entry.createdAt || null,
@@ -4907,14 +5461,16 @@
                         fileCount: files.length,
                         files: files.map(f => fileToPortableWithFolderPath(f, folders)),
                         folderCount: folders.length,
-                        folders: folders.map(fo => folderToPortableWithPath(fo, folders))
+                        folders: folders.map(fo => folderToPortableWithPath(fo, folders)),
+                        kanbanBoardCount: kanbanBoards.length,
+                        kanbanBoards: kanbanBoards.map(recordToPortable)
                     });
                 }
 
                 const payload = {
                     app: "localized-database-form",
                     exportFormat: "all-databases",
-                    schemaVersion: 4,
+                    schemaVersion: 5,
                     exportedAt: getCurrentTimestamp(),
                     databaseCount: databases.length,
                     databases
@@ -4938,7 +5494,7 @@
             return `${base} (${n})`;
         }
 
-        async function importRecordsIntoNewDatabase(displayName, createdAt, records, keywords, spreadsheets, libraryItems, drawings, files, folders) {
+        async function importRecordsIntoNewDatabase(displayName, createdAt, records, keywords, spreadsheets, libraryItems, drawings, files, folders, kanbanBoards) {
             const registry = loadDbRegistry();
 
             const entry = {
@@ -5109,6 +5665,24 @@
                 tx.onerror = e => reject(e.target.error);
             });
 
+            await new Promise((resolve, reject) => {
+                const tx = newDb.transaction("kanbanBoards", "readwrite");
+                const store = tx.objectStore("kanbanBoards");
+
+                (kanbanBoards || []).forEach(b => {
+                    const createdAt = b.createdAt || getCurrentTimestamp();
+                    store.add({
+                        name: b.name ?? "Board",
+                        columns: sanitizeKanbanColumnsForImport(b.columns),
+                        createdAt: createdAt,
+                        updatedAt: b.updatedAt || createdAt
+                    });
+                });
+
+                tx.oncomplete = resolve;
+                tx.onerror = e => reject(e.target.error);
+            });
+
             newDb.close();
             return entry;
         }
@@ -5133,7 +5707,8 @@
                             dbData.libraryItems,
                             dbData.drawings,
                             dbData.files,
-                            dbData.folders
+                            dbData.folders,
+                            dbData.kanbanBoards
                         );
                         importedEntries.push(entry);
                     }
@@ -5148,7 +5723,8 @@
                         data.libraryItems,
                         data.drawings,
                         data.files,
-                        data.folders
+                        data.folders,
+                        data.kanbanBoards
                     );
                     importedEntries.push(entry);
                 } else {
@@ -5160,6 +5736,7 @@
                 if (importedEntries.length > 0) {
                     localStorage.setItem(getDbCurrentKey(), importedEntries[0].id);
                     flushSpreadsheetSave();
+                    flushKanbanSave();
                     if (db) { try { db.close(); } catch (err) { } }
                     initActiveDatabase();
                 }
@@ -6807,10 +7384,12 @@
 
         // ---- Formula evaluation ----
         // Cells are plain text unless they start with "=", in which case the rest is
-        // evaluated as a formula. Supports +, -, *, /, parentheses, other cell
-        // references (e.g. =A1+B2*2), and SUM/AVERAGE/MIN/MAX/COUNT over a range
-        // (e.g. =SUM(A1:A5)). The expression is sanitized to arithmetic characters
-        // only before being evaluated, so it can't execute arbitrary code.
+        // parsed as an Excel-style formula: +, -, *, /, ^, unary minus, comparisons
+        // (= <> < > <= >=), text concatenation (&), string literals ("like this"),
+        // parenthesized/nested expressions, cell references and A1:B5-style ranges,
+        // and a library of functions (math, logical, text, and lookup -- see
+        // FORMULA_FUNCTIONS below). Everything is parsed into an AST and evaluated
+        // directly -- nothing is ever handed to eval()/Function() with user input.
 
         function getCellRaw(ref) {
             return (currentSpreadsheet.cells[ref] || "");
@@ -6830,71 +7409,599 @@
             try {
                 result = evaluateFormula(raw.slice(1), visited);
             } catch (err) {
-                result = "#ERR!";
+                result = (err instanceof FormulaError) ? err.code : "#ERR!";
             }
             visited.delete(ref);
-            return result;
-        }
 
-        function getRangeValues(startRef, endRef, visited) {
-            const s = parseCellRef(startRef);
-            const e = parseCellRef(endRef);
-            if (!s || !e) return [];
-
-            const r1 = Math.min(s.row, e.row), r2 = Math.max(s.row, e.row);
-            const c1 = Math.min(s.col, e.col), c2 = Math.max(s.col, e.col);
-            const values = [];
-
-            for (let r = r1; r <= r2; r++) {
-                for (let c = c1; c <= c2; c++) {
-                    const v = getCellDisplayValue(cellRefAt(r, c), visited);
-                    const num = parseFloat(v);
-                    if (v !== "" && !isNaN(num)) values.push(num);
-                }
+            if (typeof result === "number") {
+                if (!isFinite(result)) return "#NUM!";
+                return Math.round(result * 1e10) / 1e10;
             }
-            return values;
+            if (typeof result === "boolean") return result ? "TRUE" : "FALSE";
+            return result; // string (incl. error codes like "#REF!")
         }
 
         function evaluateFormula(formula, visited) {
-            let expr = formula.toUpperCase();
+            const tokens = tokenizeFormula(formula);
+            const parser = { tokens, pos: 0 };
+            const ast = parseFormulaExpression(parser);
+            if (parser.tokens[parser.pos].type !== "EOF") throw new FormulaError("#ERR!");
+            return evalFormulaNode(ast, visited);
+        }
 
-            const funcRangeRe = /\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT)\(\s*([A-Z]+\d+)\s*:\s*([A-Z]+\d+)\s*\)/;
-            let guard = 0;
-            let match;
-            while ((match = funcRangeRe.exec(expr)) && guard < 100) {
-                guard++;
-                const [full, fn, startRef, endRef] = match;
-                const values = getRangeValues(startRef, endRef, visited);
-                let result;
-                switch (fn) {
-                    case "SUM": result = values.reduce((a, b) => a + b, 0); break;
-                    case "AVERAGE": case "AVG": result = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0; break;
-                    case "MIN": result = values.length ? Math.min(...values) : 0; break;
-                    case "MAX": result = values.length ? Math.max(...values) : 0; break;
-                    case "COUNT": result = values.length; break;
-                    default: result = 0;
+        // ---- Errors ----
+
+        function FormulaError(code) {
+            this.code = code;
+            this.message = code;
+        }
+        FormulaError.prototype = Object.create(Error.prototype);
+
+        function isErrorValue(v) {
+            return typeof v === "string" && /^#[A-Z0-9/!]+$/.test(v) &&
+                ["#ERR!", "#REF!", "#VALUE!", "#DIV/0!", "#NUM!", "#N/A", "#CYCLE!", "#NAME?"].includes(v);
+        }
+        function throwIfError(v) {
+            if (isErrorValue(v)) throw new FormulaError(v);
+            return v;
+        }
+
+        // ---- Tokenizer ----
+        // A cell reference like "A1" is scanned as one IDENT token (letters then
+        // digits) so it's naturally distinguished from a bare function name like
+        // "SUM" (letters only, followed by "(").
+
+        function tokenizeFormula(text) {
+            const tokens = [];
+            let i = 0;
+            const n = text.length;
+
+            while (i < n) {
+                const ch = text[i];
+
+                if (/\s/.test(ch)) { i++; continue; }
+
+                if (ch === '"') {
+                    let j = i + 1, str = "";
+                    while (j < n) {
+                        if (text[j] === '"') {
+                            if (text[j + 1] === '"') { str += '"'; j += 2; continue; }
+                            j++; break;
+                        }
+                        str += text[j]; j++;
+                    }
+                    tokens.push({ type: "STRING", value: str });
+                    i = j;
+                    continue;
                 }
-                expr = expr.slice(0, match.index) + "(" + result + ")" + expr.slice(match.index + full.length);
+
+                if (/[0-9]/.test(ch) || (ch === "." && /[0-9]/.test(text[i + 1] || ""))) {
+                    let j = i, numStr = "";
+                    while (j < n && /[0-9.]/.test(text[j])) { numStr += text[j]; j++; }
+                    if (text[j] === "E" || text[j] === "e") {
+                        let k = j + 1, exp = "";
+                        if (text[k] === "+" || text[k] === "-") { exp += text[k]; k++; }
+                        while (k < n && /[0-9]/.test(text[k])) { exp += text[k]; k++; }
+                        if (exp && /[0-9]$/.test(exp)) { numStr += "e" + exp; j = k; }
+                    }
+                    const num = parseFloat(numStr);
+                    tokens.push({ type: "NUMBER", value: num });
+                    i = j;
+                    continue;
+                }
+
+                if (/[A-Za-z_]/.test(ch)) {
+                    let j = i, letters = "";
+                    while (j < n && /[A-Za-z_]/.test(text[j])) { letters += text[j]; j++; }
+                    let digits = "";
+                    while (j < n && /[0-9]/.test(text[j])) { digits += text[j]; j++; }
+                    tokens.push({ type: "IDENT", value: (letters + digits).toUpperCase() });
+                    i = j;
+                    continue;
+                }
+
+                const two = text.substr(i, 2);
+                if (two === "<=" || two === ">=" || two === "<>") {
+                    tokens.push({ type: "OP", value: two });
+                    i += 2;
+                    continue;
+                }
+
+                if ("+-*/^&=<>(),:%".includes(ch)) {
+                    tokens.push({ type: "OP", value: ch });
+                    i++;
+                    continue;
+                }
+
+                throw new FormulaError("#ERR!");
             }
 
-            expr = expr.replace(/\b([A-Z]+\d+)\b/g, (m, ref) => {
-                const v = getCellDisplayValue(ref, visited);
-                const num = parseFloat(v);
-                return "(" + (isNaN(num) ? 0 : num) + ")";
+            tokens.push({ type: "EOF" });
+            return tokens;
+        }
+
+        // ---- Parser (recursive descent, precedence low -> high) ----
+        // comparison  ( = <> < > <= >= )
+        // concat      ( & )
+        // additive    ( + - )
+        // multiplic.  ( * / )
+        // unary       ( leading - or + )
+        // exponent    ( ^ , right-assoc )
+        // postfix     ( trailing % )
+        // primary     ( number, string, TRUE/FALSE, ref, range, function call, parens )
+
+        function peekTok(p) { return p.tokens[p.pos]; }
+        function nextTok(p) { return p.tokens[p.pos++]; }
+        function isOp(tok, value) { return tok.type === "OP" && tok.value === value; }
+
+        function parseFormulaExpression(p) { return parseComparison(p); }
+
+        function parseComparison(p) {
+            let left = parseConcat(p);
+            while (true) {
+                const t = peekTok(p);
+                if (t.type === "OP" && ["=", "<>", "<", ">", "<=", ">="].includes(t.value)) {
+                    nextTok(p);
+                    const right = parseConcat(p);
+                    left = { type: "binary", op: t.value, left, right };
+                } else break;
+            }
+            return left;
+        }
+
+        function parseConcat(p) {
+            let left = parseAdditive(p);
+            while (isOp(peekTok(p), "&")) {
+                nextTok(p);
+                const right = parseAdditive(p);
+                left = { type: "binary", op: "&", left, right };
+            }
+            return left;
+        }
+
+        function parseAdditive(p) {
+            let left = parseMultiplicative(p);
+            while (isOp(peekTok(p), "+") || isOp(peekTok(p), "-")) {
+                const op = nextTok(p).value;
+                const right = parseMultiplicative(p);
+                left = { type: "binary", op, left, right };
+            }
+            return left;
+        }
+
+        function parseMultiplicative(p) {
+            let left = parseUnary(p);
+            while (isOp(peekTok(p), "*") || isOp(peekTok(p), "/")) {
+                const op = nextTok(p).value;
+                const right = parseUnary(p);
+                left = { type: "binary", op, left, right };
+            }
+            return left;
+        }
+
+        function parseUnary(p) {
+            if (isOp(peekTok(p), "-") || isOp(peekTok(p), "+")) {
+                const op = nextTok(p).value;
+                const node = parseUnary(p);
+                return { type: "unary", op, node };
+            }
+            return parseExponent(p);
+        }
+
+        function parseExponent(p) {
+            const base = parsePostfix(p);
+            if (isOp(peekTok(p), "^")) {
+                nextTok(p);
+                const exp = parseUnary(p); // right-assoc, allows =2^-1
+                return { type: "binary", op: "^", left: base, right: exp };
+            }
+            return base;
+        }
+
+        function parsePostfix(p) {
+            let node = parsePrimary(p);
+            while (isOp(peekTok(p), "%")) {
+                nextTok(p);
+                node = { type: "percent", node };
+            }
+            return node;
+        }
+
+        function parsePrimary(p) {
+            const t = peekTok(p);
+
+            if (t.type === "NUMBER") { nextTok(p); return { type: "num", value: t.value }; }
+            if (t.type === "STRING") { nextTok(p); return { type: "str", value: t.value }; }
+
+            if (isOp(t, "(")) {
+                nextTok(p);
+                const inner = parseFormulaExpression(p);
+                if (!isOp(peekTok(p), ")")) throw new FormulaError("#ERR!");
+                nextTok(p);
+                return inner;
+            }
+
+            if (t.type === "IDENT") {
+                nextTok(p);
+                const name = t.value;
+
+                if (name === "TRUE") return { type: "bool", value: true };
+                if (name === "FALSE") return { type: "bool", value: false };
+
+                // Function call: IDENT immediately followed by "("
+                if (isOp(peekTok(p), "(")) {
+                    nextTok(p);
+                    const args = [];
+                    if (!isOp(peekTok(p), ")")) {
+                        args.push(parseFormulaExpression(p));
+                        while (isOp(peekTok(p), ",")) {
+                            nextTok(p);
+                            args.push(parseFormulaExpression(p));
+                        }
+                    }
+                    if (!isOp(peekTok(p), ")")) throw new FormulaError("#ERR!");
+                    nextTok(p);
+                    return { type: "call", name, args };
+                }
+
+                // Cell reference (optionally the start of an A1:B5 range)
+                if (!/^[A-Z]+[0-9]+$/.test(name)) throw new FormulaError("#NAME?");
+                if (isOp(peekTok(p), ":")) {
+                    nextTok(p);
+                    const endTok = nextTok(p);
+                    if (endTok.type !== "IDENT" || !/^[A-Z]+[0-9]+$/.test(endTok.value)) throw new FormulaError("#ERR!");
+                    return { type: "range", start: name, end: endTok.value };
+                }
+                return { type: "ref", ref: name };
+            }
+
+            throw new FormulaError("#ERR!");
+        }
+
+        // ---- Evaluation ----
+
+        function toNumber(v) {
+            throwIfError(v);
+            if (typeof v === "number") return v;
+            if (typeof v === "boolean") return v ? 1 : 0;
+            if (v === "" || v === undefined || v === null) return 0;
+            const n = parseFloat(v);
+            if (isNaN(n)) throw new FormulaError("#VALUE!");
+            return n;
+        }
+
+        function toDisplayString(v) {
+            throwIfError(v);
+            if (typeof v === "boolean") return v ? "TRUE" : "FALSE";
+            return String(v);
+        }
+
+        function toBoolean(v) {
+            throwIfError(v);
+            if (typeof v === "boolean") return v;
+            if (typeof v === "number") return v !== 0;
+            if (v === "TRUE") return true;
+            if (v === "FALSE") return false;
+            throw new FormulaError("#VALUE!");
+        }
+
+        function resolveCellValue(ref, visited) {
+            const pos = parseCellRef(ref);
+            if (!pos) throw new FormulaError("#REF!");
+            const v = getCellDisplayValue(ref, visited);
+            if (isErrorValue(v)) throw new FormulaError(v);
+            if (v === "") return "";
+            const num = Number(v);
+            return (v !== "" && !isNaN(num)) ? num : v;
+        }
+
+        // Returns a 2D array (rows of cells) of resolved values for a range,
+        // preserving shape -- needed for VLOOKUP/INDEX/MATCH.
+        function resolveRangeGrid(startRef, endRef, visited) {
+            const s = parseCellRef(startRef), e = parseCellRef(endRef);
+            if (!s || !e) throw new FormulaError("#REF!");
+            const r1 = Math.min(s.row, e.row), r2 = Math.max(s.row, e.row);
+            const c1 = Math.min(s.col, e.col), c2 = Math.max(s.col, e.col);
+            const grid = [];
+            for (let r = r1; r <= r2; r++) {
+                const row = [];
+                for (let c = c1; c <= c2; c++) row.push(resolveCellValue(cellRefAt(r, c), visited));
+                grid.push(row);
+            }
+            return grid;
+        }
+
+        function flattenGrid(grid) {
+            return grid.reduce((acc, row) => acc.concat(row), []);
+        }
+
+        // Expands one *unevaluated* argument node into a flat list of resolved
+        // values -- a range becomes every cell in it, anything else becomes a
+        // single-item list. Used by variadic aggregate functions (SUM, COUNT...).
+        function expandArgToValues(node, visited) {
+            if (node.type === "range") return flattenGrid(resolveRangeGrid(node.start, node.end, visited));
+            return [evalFormulaNode(node, visited)];
+        }
+
+        function evalFormulaNode(node, visited) {
+            switch (node.type) {
+                case "num": return node.value;
+                case "str": return node.value;
+                case "bool": return node.value;
+                case "ref": return resolveCellValue(node.ref, visited);
+                case "range": throw new FormulaError("#VALUE!"); // bare range with no aggregating function around it
+                case "percent": return toNumber(evalFormulaNode(node.node, visited)) / 100;
+                case "unary": {
+                    const v = toNumber(evalFormulaNode(node.node, visited));
+                    return node.op === "-" ? -v : v;
+                }
+                case "binary": return evalBinaryNode(node, visited);
+                case "call": return evalFunctionCall(node, visited);
+                default: throw new FormulaError("#ERR!");
+            }
+        }
+
+        function evalBinaryNode(node, visited) {
+            const { op } = node;
+
+            if (op === "&") {
+                const l = toDisplayString(evalFormulaNode(node.left, visited));
+                const r = toDisplayString(evalFormulaNode(node.right, visited));
+                return l + r;
+            }
+
+            if (["=", "<>", "<", ">", "<=", ">="].includes(op)) {
+                let l = evalFormulaNode(node.left, visited);
+                let r = evalFormulaNode(node.right, visited);
+                throwIfError(l); throwIfError(r);
+                let cmp;
+                if (typeof l === "number" && typeof r === "number") {
+                    cmp = l < r ? -1 : l > r ? 1 : 0;
+                } else if (typeof l === "boolean" || typeof r === "boolean") {
+                    const lb = toBoolean(l), rb = toBoolean(r);
+                    cmp = lb === rb ? 0 : (lb ? 1 : -1);
+                } else {
+                    const ls = toDisplayString(l).toUpperCase(), rs = toDisplayString(r).toUpperCase();
+                    cmp = ls < rs ? -1 : ls > rs ? 1 : 0;
+                }
+                switch (op) {
+                    case "=": return cmp === 0;
+                    case "<>": return cmp !== 0;
+                    case "<": return cmp < 0;
+                    case ">": return cmp > 0;
+                    case "<=": return cmp <= 0;
+                    case ">=": return cmp >= 0;
+                }
+            }
+
+            const l = toNumber(evalFormulaNode(node.left, visited));
+            const r = toNumber(evalFormulaNode(node.right, visited));
+            switch (op) {
+                case "+": return l + r;
+                case "-": return l - r;
+                case "*": return l * r;
+                case "/": if (r === 0) throw new FormulaError("#DIV/0!"); return l / r;
+                case "^": return Math.pow(l, r);
+                default: throw new FormulaError("#ERR!");
+            }
+        }
+
+        // ---- Criteria matching for SUMIF/COUNTIF/AVERAGEIF ----
+        // Supports plain equality (numbers or text, case-insensitive), and a
+        // leading operator: ">10", "<=5", "<>0", "=Done".
+
+        function matchesCriteria(value, criteria) {
+            if (typeof criteria === "boolean") return toBoolean(value) === criteria;
+            const critStr = String(criteria).trim();
+            const m = /^(<=|>=|<>|=|<|>)(.*)$/.exec(critStr);
+            const op = m ? m[1] : "=";
+            const rhsRaw = m ? m[2] : critStr;
+            const rhsNum = parseFloat(rhsRaw);
+            const rhsIsNum = rhsRaw !== "" && !isNaN(rhsNum);
+
+            let cmp;
+            if (rhsIsNum && typeof value === "number") {
+                cmp = value < rhsNum ? -1 : value > rhsNum ? 1 : 0;
+            } else {
+                const vs = (value === "" || value === undefined) ? "" : toDisplayString(value).toUpperCase();
+                const rs = rhsRaw.toUpperCase();
+                cmp = vs < rs ? -1 : vs > rs ? 1 : 0;
+            }
+            switch (op) {
+                case "=": return cmp === 0;
+                case "<>": return cmp !== 0;
+                case "<": return cmp < 0;
+                case ">": return cmp > 0;
+                case "<=": return cmp <= 0;
+                case ">=": return cmp >= 0;
+                default: return cmp === 0;
+            }
+        }
+
+        function evalConditionalAgg(mode, args, visited) {
+            if (args.length < 2) throw new FormulaError("#VALUE!");
+            if (args[0].type !== "range") throw new FormulaError("#VALUE!");
+            const rangeGrid = resolveRangeGrid(args[0].start, args[0].end, visited);
+            const criteria = evalFormulaNode(args[1], visited);
+
+            let sumGrid = rangeGrid;
+            if (args[2]) {
+                if (args[2].type !== "range") throw new FormulaError("#VALUE!");
+                sumGrid = resolveRangeGrid(args[2].start, args[2].end, visited);
+            }
+
+            const rangeFlat = flattenGrid(rangeGrid);
+            const sumFlat = flattenGrid(sumGrid);
+            if (mode !== "COUNTIF" && sumFlat.length !== rangeFlat.length) throw new FormulaError("#VALUE!");
+
+            let matchCount = 0, total = 0;
+            rangeFlat.forEach((v, i) => {
+                if (matchesCriteria(v, criteria)) {
+                    matchCount++;
+                    const n = Number(sumFlat[i]);
+                    if (sumFlat[i] !== "" && !isNaN(n)) total += n;
+                }
             });
 
-            if (expr.trim() === "") return "";
-            if (!/^[0-9+\-*/().\s]*$/.test(expr)) return "#ERR!";
+            if (mode === "COUNTIF") return matchCount;
+            if (mode === "SUMIF") return total;
+            if (mode === "AVERAGEIF") { if (!matchCount) throw new FormulaError("#DIV/0!"); return total / matchCount; }
+        }
 
-            let result;
-            try {
-                result = Function('"use strict"; return (' + expr + ');')();
-            } catch (err) {
-                return "#ERR!";
+        // ---- Function library ----
+        // `args` here are unevaluated AST nodes -- each function decides for
+        // itself which arguments may be ranges vs. plain scalar expressions.
+
+        function evalFunctionCall(node, visited) {
+            const { name, args } = node;
+            const scalar = (i) => evalFormulaNode(args[i], visited);
+            const num = (i) => toNumber(scalar(i));
+            const str = (i) => toDisplayString(scalar(i));
+            const values = () => args.reduce((acc, a) => acc.concat(expandArgToValues(a, visited)), []);
+            const numericValues = () => values().filter(v => typeof v === "number" || (v !== "" && !isNaN(Number(v)))).map(Number);
+
+            switch (name) {
+                // -- Aggregates --
+                case "SUM": return numericValues().reduce((a, b) => a + b, 0);
+                case "AVERAGE": case "AVG": {
+                    const vs = numericValues();
+                    if (!vs.length) throw new FormulaError("#DIV/0!");
+                    return vs.reduce((a, b) => a + b, 0) / vs.length;
+                }
+                case "MIN": { const vs = numericValues(); return vs.length ? Math.min(...vs) : 0; }
+                case "MAX": { const vs = numericValues(); return vs.length ? Math.max(...vs) : 0; }
+                case "COUNT": return numericValues().length;
+                case "COUNTA": return values().filter(v => v !== "").length;
+                case "SUMIF": return evalConditionalAgg("SUMIF", args, visited);
+                case "COUNTIF": return evalConditionalAgg("COUNTIF", args, visited);
+                case "AVERAGEIF": return evalConditionalAgg("AVERAGEIF", args, visited);
+
+                // -- Math --
+                case "ABS": return Math.abs(num(0));
+                case "ROUND": return roundTo(num(0), args[1] ? num(1) : 0);
+                case "ROUNDUP": return roundTo(num(0), args[1] ? num(1) : 0, Math.ceil);
+                case "ROUNDDOWN": return roundTo(num(0), args[1] ? num(1) : 0, Math.floor);
+                case "INT": return Math.floor(num(0));
+                case "MOD": { const b = num(1); if (b === 0) throw new FormulaError("#DIV/0!"); return num(0) - b * Math.floor(num(0) / b); }
+                case "POWER": return Math.pow(num(0), num(1));
+                case "SQRT": if (num(0) < 0) throw new FormulaError("#NUM!"); return Math.sqrt(num(0));
+                case "PI": return Math.PI;
+
+                // -- Logical --
+                case "IF": {
+                    const cond = toBoolean(scalar(0));
+                    if (cond) return args[1] ? scalar(1) : true;
+                    return args[2] ? scalar(2) : false;
+                }
+                case "AND": return args.every((a, i) => toBoolean(scalar(i)));
+                case "OR": return args.some((a, i) => toBoolean(scalar(i)));
+                case "NOT": return !toBoolean(scalar(0));
+                case "IFERROR": {
+                    try { return throwIfError(scalar(0)); }
+                    catch (e) { return args[1] ? scalar(1) : ""; }
+                }
+                case "ISBLANK": { try { return scalar(0) === ""; } catch (e) { return false; } }
+                case "ISNUMBER": { try { return typeof scalar(0) === "number"; } catch (e) { return false; } }
+                case "ISTEXT": { try { return typeof scalar(0) === "string"; } catch (e) { return false; } }
+                case "ISERROR": { try { throwIfError(scalar(0)); return false; } catch (e) { return true; } }
+
+                // -- Text --
+                case "CONCATENATE": case "CONCAT": return args.map((a, i) => str(i)).join("");
+                case "LEN": return str(0).length;
+                case "UPPER": return str(0).toUpperCase();
+                case "LOWER": return str(0).toLowerCase();
+                case "TRIM": return str(0).trim().replace(/\s+/g, " ");
+                case "LEFT": return str(0).slice(0, args[1] ? num(1) : 1);
+                case "RIGHT": { const s = str(0), n = args[1] ? num(1) : 1; return n >= s.length ? s : s.slice(s.length - n); }
+                case "MID": return str(0).substr(Math.max(0, num(1) - 1), num(2));
+                case "TEXT": return str(0);
+
+                // -- Lookup --
+                case "VLOOKUP": return evalVlookup(args, visited);
+                case "INDEX": return evalIndex(args, visited);
+                case "MATCH": return evalMatch(args, visited);
+
+                // -- Date (no arguments) --
+                case "TODAY": return getCurrentTimestamp().slice(0, 10);
+                case "NOW": return getCurrentTimestamp();
+
+                default: throw new FormulaError("#NAME?");
+            }
+        }
+
+        function roundTo(value, digits, roundFn) {
+            const factor = Math.pow(10, digits);
+            if (roundFn) return roundFn(value * factor) / factor;
+            return Math.round(value * factor) / factor;
+        }
+
+        function evalVlookup(args, visited) {
+            if (args.length < 3 || args[1].type !== "range") throw new FormulaError("#VALUE!");
+            const lookupValue = evalFormulaNode(args[0], visited);
+            const grid = resolveRangeGrid(args[1].start, args[1].end, visited);
+            const colIndex = Math.round(toNumber(evalFormulaNode(args[2], visited)));
+            const exact = args[3] ? !toBoolean(evalFormulaNode(args[3], visited)) : false;
+            if (colIndex < 1 || !grid.length || colIndex > grid[0].length) throw new FormulaError("#REF!");
+
+            if (exact) {
+                const row = grid.find(r => valuesEqual(r[0], lookupValue));
+                if (!row) throw new FormulaError("#N/A");
+                return row[colIndex - 1];
             }
 
-            if (typeof result !== "number" || !isFinite(result)) return "#ERR!";
-            return Math.round(result * 1e10) / 1e10;
+            // Approximate match: table assumed ascending-sorted on first column;
+            // returns the row for the largest first-column value <= lookupValue.
+            let best = null;
+            for (const row of grid) {
+                if (compareForMatch(row[0], lookupValue) <= 0) best = row; else break;
+            }
+            if (!best) throw new FormulaError("#N/A");
+            return best[colIndex - 1];
+        }
+
+        function evalIndex(args, visited) {
+            if (!args.length || args[0].type !== "range") throw new FormulaError("#VALUE!");
+            const grid = resolveRangeGrid(args[0].start, args[0].end, visited);
+            const rowNum = args[1] ? Math.round(toNumber(evalFormulaNode(args[1], visited))) : 1;
+            const colNum = args[2] ? Math.round(toNumber(evalFormulaNode(args[2], visited))) : 1;
+            if (rowNum < 1 || rowNum > grid.length || colNum < 1 || colNum > (grid[0] || []).length) throw new FormulaError("#REF!");
+            return grid[rowNum - 1][colNum - 1];
+        }
+
+        function evalMatch(args, visited) {
+            if (args.length < 2 || args[1].type !== "range") throw new FormulaError("#VALUE!");
+            const lookupValue = evalFormulaNode(args[0], visited);
+            const grid = resolveRangeGrid(args[1].start, args[1].end, visited);
+            const flat = flattenGrid(grid);
+            const matchType = args[2] ? Math.round(toNumber(evalFormulaNode(args[2], visited))) : 1;
+
+            if (matchType === 0) {
+                const idx = flat.findIndex(v => valuesEqual(v, lookupValue));
+                if (idx === -1) throw new FormulaError("#N/A");
+                return idx + 1;
+            }
+
+            let bestIdx = -1;
+            if (matchType > 0) {
+                flat.forEach((v, i) => { if (compareForMatch(v, lookupValue) <= 0) bestIdx = i; });
+            } else {
+                for (let i = flat.length - 1; i >= 0; i--) {
+                    if (compareForMatch(flat[i], lookupValue) >= 0) bestIdx = i;
+                }
+            }
+            if (bestIdx === -1) throw new FormulaError("#N/A");
+            return bestIdx + 1;
+        }
+
+        function valuesEqual(a, b) {
+            if (typeof a === "number" && typeof b === "number") return a === b;
+            return toDisplayString(a).toUpperCase() === toDisplayString(b).toUpperCase();
+        }
+
+        function compareForMatch(a, b) {
+            if (typeof a === "number" && typeof b === "number") return a < b ? -1 : a > b ? 1 : 0;
+            const as = toDisplayString(a).toUpperCase(), bs = toDisplayString(b).toUpperCase();
+            return as < bs ? -1 : as > bs ? 1 : 0;
         }
 
         // ---- Grid rendering + interaction ----
@@ -7050,6 +8157,160 @@
             a.download = sanitizeFilename(currentSpreadsheet.name) + ".csv";
             a.click();
             URL.revokeObjectURL(a.href);
+        }
+
+        // Excel sheet names can't contain : \ / ? * [ ] and are capped at 31 chars.
+        function sanitizeExcelSheetName(name) {
+            const cleaned = (name || "Sheet1").replace(/[:\\/?*\[\]]/g, " ").trim();
+            return (cleaned || "Sheet1").slice(0, 31);
+        }
+
+        // Exports the open sheet as a real .xlsx workbook. Plain values are written
+        // as numbers/strings; cells starting with "=" are written as live Excel
+        // formulas (so they keep recalculating in Excel), using the cell's current
+        // computed value as the cached display value until Excel recalculates it.
+        function exportCurrentSpreadsheetXLSX() {
+            if (!currentSpreadsheet) return;
+            if (typeof XLSX === "undefined") {
+                alert("The Excel export library failed to load. Check your internet connection and try again.");
+                return;
+            }
+
+            const rows = Math.max(currentSpreadsheet.rows, 1);
+            const cols = Math.max(currentSpreadsheet.cols, 1);
+            const ws = {};
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const ref = cellRefAt(r, c);
+                    const raw = getCellRaw(ref).trim();
+                    if (raw === "") continue;
+
+                    const addr = XLSX.utils.encode_cell({ r, c });
+
+                    if (raw[0] === "=") {
+                        const formula = raw.slice(1).replace(/\bAVG\(/g, "AVERAGE(");
+                        const display = getCellDisplayValue(ref);
+                        const num = parseFloat(display);
+                        const isNum = display !== "" && !isNaN(num) && typeof display === "number";
+                        ws[addr] = isNum
+                            ? { t: "n", f: formula, v: num }
+                            : { t: "s", f: formula, v: String(display) };
+                    } else {
+                        const num = Number(raw);
+                        ws[addr] = (raw !== "" && !isNaN(num))
+                            ? { t: "n", v: num }
+                            : { t: "s", v: raw };
+                    }
+                }
+            }
+
+            ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: rows - 1, c: cols - 1 } });
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, sanitizeExcelSheetName(currentSpreadsheet.name));
+            XLSX.writeFile(wb, sanitizeFilename(currentSpreadsheet.name) + ".xlsx");
+        }
+
+        function triggerSpreadsheetXLSXImport() {
+            if (!currentSpreadsheet && allSpreadsheets.length === 0) {
+                alert("The database isn't ready yet. Please wait a moment and try again.");
+                return;
+            }
+            document.getElementById("spreadsheetImportInput").click();
+        }
+
+        // Imports every sheet in the chosen .xlsx/.xls file as a new saved
+        // spreadsheet in the current database (existing sheets are never
+        // overwritten). Formulas are carried over as this app's own "=..."
+        // formula text; anything beyond the +,-,*,/ and SUM/AVERAGE/MIN/MAX/COUNT
+        // this app understands will show as #ERR! until edited, but the original
+        // formula text is preserved either way.
+        async function importSpreadsheetsFromXLSXFile(file) {
+            if (!file) return;
+            if (typeof XLSX === "undefined") {
+                alert("The Excel import library failed to load. Check your internet connection and try again.");
+                return;
+            }
+            if (!db) {
+                alert("The database isn't ready yet. Please wait a moment and try again.");
+                return;
+            }
+
+            try {
+                const buf = await file.arrayBuffer();
+                const wb = XLSX.read(buf, { type: "array", cellFormula: true });
+
+                if (!wb.SheetNames || !wb.SheetNames.length) {
+                    alert("That Excel file doesn't contain any sheets.");
+                    return;
+                }
+
+                let firstImportedId = null;
+                let importedCount = 0;
+
+                for (const sheetName of wb.SheetNames) {
+                    const sheet = wb.Sheets[sheetName];
+                    const ref = sheet && sheet["!ref"];
+                    const range = ref ? XLSX.utils.decode_range(ref) : { s: { r: 0, c: 0 }, e: { r: 0, c: 0 } };
+
+                    const numRows = Math.max(range.e.r - range.s.r + 1, DEFAULT_SHEET_ROWS);
+                    const numCols = Math.max(range.e.c - range.s.c + 1, DEFAULT_SHEET_COLS);
+                    const cells = {};
+
+                    for (let r = range.s.r; r <= range.e.r; r++) {
+                        for (let c = range.s.c; c <= range.e.c; c++) {
+                            const addr = XLSX.utils.encode_cell({ r, c });
+                            const cell = sheet[addr];
+                            if (!cell) continue;
+
+                            const appRef = cellRefAt(r - range.s.r, c - range.s.c);
+                            if (cell.f) {
+                                cells[appRef] = "=" + cell.f;
+                            } else if (cell.v !== undefined && cell.v !== null && String(cell.v) !== "") {
+                                cells[appRef] = String(cell.v);
+                            }
+                        }
+                    }
+
+                    let name = (sheetName || "Imported Sheet").trim() || "Imported Sheet";
+                    const base = name;
+                    let n = 2;
+                    while (allSpreadsheets.some(s => s.name === name)) {
+                        name = `${base} (${n})`;
+                        n++;
+                    }
+
+                    const now = getCurrentTimestamp();
+                    const newSheet = {
+                        name,
+                        rows: numRows,
+                        cols: numCols,
+                        cells,
+                        createdAt: now,
+                        updatedAt: now
+                    };
+
+                    const id = await new Promise((resolve, reject) => {
+                        const tx = db.transaction("spreadsheets", "readwrite");
+                        const req = tx.objectStore("spreadsheets").add(newSheet);
+                        tx.oncomplete = () => resolve(req.result);
+                        tx.onerror = e => reject(e.target.error);
+                    });
+
+                    newSheet.id = id;
+                    allSpreadsheets.push(newSheet);
+                    importedCount++;
+                    if (firstImportedId === null) firstImportedId = id;
+                }
+
+                renderSpreadsheetSelect();
+                if (firstImportedId !== null) openSpreadsheet(firstImportedId);
+                alert(`Imported ${importedCount} sheet${importedCount === 1 ? "" : "s"} from "${file.name}" as new spreadsheet${importedCount === 1 ? "" : "s"}.`);
+            } catch (err) {
+                console.error("Excel import failed:", err);
+                alert("Failed to import that Excel file: " + err.message);
+            }
         }
 
         // Plain-text record format:
@@ -7337,6 +8598,493 @@
                 renderLibraryItems();
             }
         });
+
+        // ---------- Kanban ----------
+        //
+        // Boards live in this database alongside records/spreadsheets/etc, and are
+        // included in the literal database export/import (see the "Literal database
+        // export / import" section above). A board is { id, name, columns, createdAt,
+        // updatedAt } where `columns` is a fully custom, user-defined ordered list:
+        // [{ id, name, cards: [{ id, title, desc, createdAt, updatedAt }] }, ...].
+        // Column/card ids are short client-generated strings (not autoIncrement --
+        // they only need to be unique within their own board) so drag/drop and
+        // export/import don't have to worry about IndexedDB key reassignment.
+
+        let allKanbanBoards = [];      // in-memory cache of this database's boards
+        let currentKanbanBoard = null; // the board object currently shown
+        let kanbanSaveTimer = null;    // debounce handle for autosave
+        let kanbanDragCardId = null;   // id of the card currently being dragged
+        let kanbanDragFromColumnId = null;
+
+        function kanbanGenId() {
+            return "k" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        }
+
+        function defaultKanbanColumns() {
+            return [
+                { id: kanbanGenId(), name: "To Do", cards: [] },
+                { id: kanbanGenId(), name: "In Progress", cards: [] },
+                { id: kanbanGenId(), name: "Done", cards: [] }
+            ];
+        }
+
+        // Defensively normalizes a `columns` value coming from an import (or any
+        // other source outside this app's own control) into the well-formed shape
+        // this code relies on elsewhere, so a malformed/foreign JSON file can't
+        // produce broken boards or throw deep in the render code.
+        function sanitizeKanbanColumnsForImport(columns) {
+            if (!Array.isArray(columns) || columns.length === 0) return defaultKanbanColumns();
+            return columns.map(col => ({
+                id: (col && typeof col.id === "string" && col.id) ? col.id : kanbanGenId(),
+                name: (col && typeof col.name === "string" && col.name.trim()) ? col.name : "Column",
+                cards: Array.isArray(col && col.cards) ? col.cards.map(c => ({
+                    id: (c && typeof c.id === "string" && c.id) ? c.id : kanbanGenId(),
+                    title: (c && typeof c.title === "string") ? c.title : "",
+                    desc: (c && typeof c.desc === "string") ? c.desc : "",
+                    createdAt: (c && c.createdAt) || getCurrentTimestamp(),
+                    updatedAt: (c && c.updatedAt) || (c && c.createdAt) || getCurrentTimestamp()
+                })) : []
+            }));
+        }
+
+        function loadKanbanBoards() {
+            if (!db) return;
+            const tx = db.transaction("kanbanBoards", "readonly");
+            const req = tx.objectStore("kanbanBoards").getAll();
+
+            req.onsuccess = () => {
+                allKanbanBoards = req.result.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+                if (allKanbanBoards.length === 0) {
+                    createNewKanbanBoard("Board 1");
+                    return;
+                }
+
+                renderKanbanBoardSelect();
+
+                const stillExists = currentKanbanBoard && allKanbanBoards.some(b => b.id === currentKanbanBoard.id);
+                openKanbanBoard(stillExists ? currentKanbanBoard.id : allKanbanBoards[0].id);
+            };
+
+            req.onerror = e => {
+                console.error("Failed to load kanban boards:", e.target.error);
+            };
+        }
+
+        function renderKanbanBoardSelect() {
+            const select = document.getElementById("kanbanBoardSelect");
+            if (!select) return;
+            const currentId = currentKanbanBoard ? currentKanbanBoard.id : null;
+            select.innerHTML = "";
+            allKanbanBoards.forEach(b => {
+                const option = document.createElement("option");
+                option.value = b.id;
+                option.textContent = b.name;
+                if (b.id === currentId) option.selected = true;
+                select.appendChild(option);
+            });
+        }
+
+        function openKanbanBoard(id) {
+            const found = allKanbanBoards.find(b => b.id === id);
+            if (!found) return;
+
+            if (currentKanbanBoard && currentKanbanBoard.id !== id) flushKanbanSave();
+
+            currentKanbanBoard = found;
+            const nameInput = document.getElementById("kanbanBoardNameInput");
+            if (nameInput) nameInput.value = currentKanbanBoard.name;
+            renderKanbanBoardSelect();
+            renderKanbanBoard();
+        }
+
+        function switchKanbanBoard(idStr) {
+            openKanbanBoard(parseInt(idStr, 10));
+        }
+
+        function createNewKanbanBoard(presetName) {
+            if (!db) {
+                alert("The database isn't ready yet. Please wait a moment and try again.");
+                return;
+            }
+
+            const name = presetName || (() => {
+                let n = allKanbanBoards.length + 1;
+                let candidate = `Board ${n}`;
+                while (allKanbanBoards.some(b => b.name === candidate)) {
+                    n++;
+                    candidate = `Board ${n}`;
+                }
+                return candidate;
+            })();
+
+            const now = getCurrentTimestamp();
+            const board = {
+                name,
+                columns: defaultKanbanColumns(),
+                createdAt: now,
+                updatedAt: now
+            };
+
+            try {
+                const tx = db.transaction("kanbanBoards", "readwrite");
+                const req = tx.objectStore("kanbanBoards").add(board);
+                tx.oncomplete = () => {
+                    board.id = req.result;
+                    allKanbanBoards.push(board);
+                    openKanbanBoard(board.id);
+                };
+                tx.onerror = e => alert("Failed to create new board: " + e.target.error);
+            } catch (err) {
+                console.error("createNewKanbanBoard failed:", err);
+                alert("Failed to create new board: " + err.message);
+            }
+        }
+
+        function duplicateCurrentKanbanBoard() {
+            if (!currentKanbanBoard) return;
+            if (!db) {
+                alert("The database isn't ready yet. Please wait a moment and try again.");
+                return;
+            }
+
+            let n = 2;
+            let candidate = `${currentKanbanBoard.name} (copy)`;
+            while (allKanbanBoards.some(b => b.name === candidate)) {
+                candidate = `${currentKanbanBoard.name} (copy ${n})`;
+                n++;
+            }
+
+            const now = getCurrentTimestamp();
+            const board = {
+                name: candidate,
+                columns: currentKanbanBoard.columns.map(col => ({
+                    id: kanbanGenId(),
+                    name: col.name,
+                    cards: col.cards.map(c => ({ ...c, id: kanbanGenId() }))
+                })),
+                createdAt: now,
+                updatedAt: now
+            };
+
+            try {
+                const tx = db.transaction("kanbanBoards", "readwrite");
+                const req = tx.objectStore("kanbanBoards").add(board);
+                tx.oncomplete = () => {
+                    board.id = req.result;
+                    allKanbanBoards.push(board);
+                    openKanbanBoard(board.id);
+                };
+                tx.onerror = e => alert("Failed to duplicate board: " + e.target.error);
+            } catch (err) {
+                console.error("duplicateCurrentKanbanBoard failed:", err);
+                alert("Failed to duplicate board: " + err.message);
+            }
+        }
+
+        function renameCurrentKanbanBoard(newName) {
+            if (!currentKanbanBoard) return;
+            const trimmed = (newName || "").trim();
+            if (!trimmed) {
+                document.getElementById("kanbanBoardNameInput").value = currentKanbanBoard.name;
+                return;
+            }
+            currentKanbanBoard.name = trimmed;
+            saveCurrentKanbanBoard(() => renderKanbanBoardSelect());
+        }
+
+        function deleteCurrentKanbanBoard() {
+            if (!currentKanbanBoard) return;
+            if (!db) return;
+
+            if (!confirm(`Delete the board "${currentKanbanBoard.name}"? This cannot be undone.`)) {
+                return;
+            }
+
+            const idToDelete = currentKanbanBoard.id;
+            const tx = db.transaction("kanbanBoards", "readwrite");
+            tx.objectStore("kanbanBoards").delete(idToDelete);
+            tx.oncomplete = () => {
+                allKanbanBoards = allKanbanBoards.filter(b => b.id !== idToDelete);
+                currentKanbanBoard = null;
+                if (allKanbanBoards.length === 0) {
+                    createNewKanbanBoard("Board 1");
+                } else {
+                    openKanbanBoard(allKanbanBoards[0].id);
+                }
+            };
+            tx.onerror = e => alert("Failed to delete board: " + e.target.error);
+        }
+
+        function saveCurrentKanbanBoard(onComplete) {
+            if (!currentKanbanBoard || !db) return;
+            currentKanbanBoard.updatedAt = getCurrentTimestamp();
+
+            try {
+                const tx = db.transaction("kanbanBoards", "readwrite");
+                tx.objectStore("kanbanBoards").put(currentKanbanBoard);
+                tx.oncomplete = () => { if (onComplete) onComplete(); };
+                tx.onerror = e => console.error("Failed to save board:", e.target.error);
+            } catch (err) {
+                console.error("saveCurrentKanbanBoard failed:", err);
+            }
+        }
+
+        function scheduleKanbanSave() {
+            if (kanbanSaveTimer) clearTimeout(kanbanSaveTimer);
+            kanbanSaveTimer = setTimeout(() => {
+                kanbanSaveTimer = null;
+                saveCurrentKanbanBoard();
+            }, 400);
+        }
+
+        // Immediately writes any pending debounced change (mirrors flushSpreadsheetSave)
+        // so switching boards/databases or closing the tab right after an edit can't
+        // silently lose the last change.
+        function flushKanbanSave() {
+            if (kanbanSaveTimer) {
+                clearTimeout(kanbanSaveTimer);
+                kanbanSaveTimer = null;
+                saveCurrentKanbanBoard();
+            }
+        }
+
+        window.addEventListener("beforeunload", flushKanbanSave);
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") flushKanbanSave();
+        });
+
+        function renderKanbanBoard() {
+            const wrap = document.getElementById("kanbanBoard");
+            if (!wrap) return;
+
+            if (!currentKanbanBoard) {
+                wrap.innerHTML = `<p class="empty-msg">No board selected.</p>`;
+                return;
+            }
+
+            const columnsHtml = currentKanbanBoard.columns.map(col => `
+        <div class="kanban-column" data-column-id="${col.id}"
+            ondragover="kanbanColumnDragOver(event, '${col.id}')"
+            ondragleave="kanbanColumnDragLeave(event)"
+            ondrop="kanbanColumnDrop(event, '${col.id}')">
+            <div class="kanban-column-header">
+                <input class="kanban-column-title" value="${escapeHtml(col.name)}"
+                    onchange="renameKanbanColumn('${col.id}', this.value)"
+                    aria-label="Column name">
+                <span class="kanban-column-count">${col.cards.length}</span>
+                <div class="kanban-column-actions">
+                    <button type="button" title="Move column left" onclick="moveKanbanColumn('${col.id}', -1)">&larr;</button>
+                    <button type="button" title="Move column right" onclick="moveKanbanColumn('${col.id}', 1)">&rarr;</button>
+                    <button type="button" title="Delete column" class="btn-danger" onclick="deleteKanbanColumn('${col.id}')">&times;</button>
+                </div>
+            </div>
+            <div class="kanban-cards">
+                ${col.cards.map(card => renderKanbanCardHtml(card, col.id)).join("") || ""}
+            </div>
+            <div class="kanban-add-card-row">
+                <textarea placeholder="New card title..." id="kanbanNewCardInput_${col.id}"
+                    onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); addKanbanCard('${col.id}');}"></textarea>
+                <button type="button" onclick="addKanbanCard('${col.id}')" class="btn-success">+ Add Card</button>
+            </div>
+        </div>
+    `).join("");
+
+            const addColumnHtml = `
+        <div class="kanban-column kanban-add-column">
+            <div class="kanban-column-header"><b>+ Add Column</b></div>
+            <input type="text" id="kanbanNewColumnInput" placeholder="Column name"
+                onkeydown="if(event.key==='Enter'){event.preventDefault(); addKanbanColumn();}">
+            <button type="button" onclick="addKanbanColumn()" class="btn-success">Add Column</button>
+        </div>
+    `;
+
+            wrap.innerHTML = columnsHtml + addColumnHtml;
+        }
+
+        function renderKanbanCardHtml(card, columnId) {
+            const moveOptions = currentKanbanBoard.columns
+                .map(c => `<option value="${c.id}" ${c.id === columnId ? "selected" : ""}>${escapeHtml(c.name)}</option>`)
+                .join("");
+
+            return `
+        <div class="kanban-card" draggable="true" data-card-id="${card.id}"
+            ondragstart="kanbanCardDragStart(event, '${card.id}', '${columnId}')"
+            ondragend="kanbanCardDragEnd(event)">
+            <div class="kanban-card-title">${escapeHtml(card.title)}</div>
+            ${card.desc ? `<div class="kanban-card-desc">${escapeHtml(card.desc)}</div>` : ""}
+            <div class="kanban-card-actions">
+                <select onchange="moveKanbanCardToColumn('${card.id}', '${columnId}', this.value)" aria-label="Move to column">
+                    ${moveOptions}
+                </select>
+                <button type="button" onclick="editKanbanCard('${card.id}', '${columnId}')">Edit</button>
+                <button type="button" onclick="deleteKanbanCard('${card.id}', '${columnId}')" class="btn-danger">Delete</button>
+            </div>
+        </div>
+    `;
+        }
+
+        function findKanbanColumn(columnId) {
+            return currentKanbanBoard ? currentKanbanBoard.columns.find(c => c.id === columnId) : null;
+        }
+
+        function addKanbanColumn() {
+            if (!currentKanbanBoard) return;
+            const input = document.getElementById("kanbanNewColumnInput");
+            const name = (input.value || "").trim();
+            if (!name) {
+                input.focus();
+                return;
+            }
+            currentKanbanBoard.columns.push({ id: kanbanGenId(), name, cards: [] });
+            input.value = "";
+            saveCurrentKanbanBoard();
+            renderKanbanBoard();
+        }
+
+        function renameKanbanColumn(columnId, newName) {
+            const col = findKanbanColumn(columnId);
+            if (!col) return;
+            const trimmed = (newName || "").trim();
+            col.name = trimmed || col.name;
+            saveCurrentKanbanBoard();
+            renderKanbanBoard();
+        }
+
+        function moveKanbanColumn(columnId, direction) {
+            if (!currentKanbanBoard) return;
+            const cols = currentKanbanBoard.columns;
+            const idx = cols.findIndex(c => c.id === columnId);
+            const newIdx = idx + direction;
+            if (idx === -1 || newIdx < 0 || newIdx >= cols.length) return;
+            [cols[idx], cols[newIdx]] = [cols[newIdx], cols[idx]];
+            saveCurrentKanbanBoard();
+            renderKanbanBoard();
+        }
+
+        function deleteKanbanColumn(columnId) {
+            if (!currentKanbanBoard) return;
+            const col = findKanbanColumn(columnId);
+            if (!col) return;
+            if (currentKanbanBoard.columns.length <= 1) {
+                alert("Can't delete the only remaining column.");
+                return;
+            }
+            const cardWarning = col.cards.length
+                ? ` This will also delete its ${col.cards.length} card(s).`
+                : "";
+            if (!confirm(`Delete column "${col.name}"?${cardWarning}`)) return;
+            currentKanbanBoard.columns = currentKanbanBoard.columns.filter(c => c.id !== columnId);
+            saveCurrentKanbanBoard();
+            renderKanbanBoard();
+        }
+
+        function addKanbanCard(columnId) {
+            const col = findKanbanColumn(columnId);
+            if (!col) return;
+            const input = document.getElementById(`kanbanNewCardInput_${columnId}`);
+            const title = (input.value || "").trim();
+            if (!title) {
+                input.focus();
+                return;
+            }
+            const now = getCurrentTimestamp();
+            col.cards.push({ id: kanbanGenId(), title, desc: "", createdAt: now, updatedAt: now });
+            input.value = "";
+            saveCurrentKanbanBoard();
+            renderKanbanBoard();
+        }
+
+        function editKanbanCard(cardId, columnId) {
+            const col = findKanbanColumn(columnId);
+            if (!col) return;
+            const card = col.cards.find(c => c.id === cardId);
+            if (!card) return;
+
+            const newTitle = prompt("Card title:", card.title);
+            if (newTitle === null) return;
+            const trimmedTitle = newTitle.trim();
+            if (!trimmedTitle) {
+                alert("Card title can't be empty.");
+                return;
+            }
+            const newDesc = prompt("Card description (optional):", card.desc || "");
+            if (newDesc === null) return;
+
+            card.title = trimmedTitle;
+            card.desc = newDesc.trim();
+            card.updatedAt = getCurrentTimestamp();
+            saveCurrentKanbanBoard();
+            renderKanbanBoard();
+        }
+
+        function deleteKanbanCard(cardId, columnId) {
+            const col = findKanbanColumn(columnId);
+            if (!col) return;
+            const card = col.cards.find(c => c.id === cardId);
+            if (!card) return;
+            if (!confirm(`Delete card "${card.title}"?`)) return;
+            col.cards = col.cards.filter(c => c.id !== cardId);
+            saveCurrentKanbanBoard();
+            renderKanbanBoard();
+        }
+
+        function moveKanbanCardToColumn(cardId, fromColumnId, toColumnId) {
+            if (fromColumnId === toColumnId) return;
+            const fromCol = findKanbanColumn(fromColumnId);
+            const toCol = findKanbanColumn(toColumnId);
+            if (!fromCol || !toCol) return;
+            const idx = fromCol.cards.findIndex(c => c.id === cardId);
+            if (idx === -1) return;
+            const [card] = fromCol.cards.splice(idx, 1);
+            toCol.cards.push(card);
+            saveCurrentKanbanBoard();
+            renderKanbanBoard();
+        }
+
+        // ---- Drag and drop between columns ----
+
+        function kanbanCardDragStart(e, cardId, columnId) {
+            kanbanDragCardId = cardId;
+            kanbanDragFromColumnId = columnId;
+            e.dataTransfer.effectAllowed = "move";
+            try { e.dataTransfer.setData("text/plain", cardId); } catch (err) { }
+            requestAnimationFrame(() => {
+                const el = e.target.closest && e.target.closest(".kanban-card");
+                if (el) el.classList.add("dragging");
+            });
+        }
+
+        function kanbanCardDragEnd(e) {
+            const el = e.target.closest && e.target.closest(".kanban-card");
+            if (el) el.classList.remove("dragging");
+            kanbanDragCardId = null;
+            kanbanDragFromColumnId = null;
+            document.querySelectorAll(".kanban-column.drag-over").forEach(c => c.classList.remove("drag-over"));
+        }
+
+        function kanbanColumnDragOver(e, columnId) {
+            if (!kanbanDragCardId) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            const el = e.currentTarget;
+            if (el) el.classList.add("drag-over");
+        }
+
+        function kanbanColumnDragLeave(e) {
+            const el = e.currentTarget;
+            if (el) el.classList.remove("drag-over");
+        }
+
+        function kanbanColumnDrop(e, toColumnId) {
+            e.preventDefault();
+            const el = e.currentTarget;
+            if (el) el.classList.remove("drag-over");
+            if (!kanbanDragCardId || !kanbanDragFromColumnId) return;
+            moveKanbanCardToColumn(kanbanDragCardId, kanbanDragFromColumnId, toColumnId);
+            kanbanDragCardId = null;
+            kanbanDragFromColumnId = null;
+        }
 
         // ---------- Folders ----------
         // Named, colored groups used to organize the freestanding Files store
