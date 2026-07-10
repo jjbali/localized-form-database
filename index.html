@@ -946,6 +946,85 @@
             transform: translateX(20px);
         }
 
+        /* ---- Typing test minigame ---- */
+
+        .typing-passage {
+            font-family: "Courier New", Consolas, monospace;
+            font-size: 16px;
+            line-height: 1.8;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .typing-char-pending {
+            color: var(--text-muted);
+        }
+
+        .typing-char-correct {
+            color: var(--success-border);
+        }
+
+        .typing-char-incorrect {
+            color: var(--danger-border);
+            background: var(--danger-bg);
+            text-decoration: underline;
+        }
+
+        .typing-char-current {
+            outline: 2px solid var(--accent);
+            border-radius: 2px;
+        }
+
+        .typing-input {
+            width: 100%;
+            box-sizing: border-box;
+            font-family: "Courier New", Consolas, monospace;
+            font-size: 15px;
+            resize: vertical;
+        }
+
+        .typing-leaderboard-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
+            background: var(--code-bg);
+            font-size: 0.9em;
+        }
+
+        .typing-leaderboard-row.typing-leaderboard-me {
+            border-color: var(--accent);
+            font-weight: bold;
+        }
+
+        .typing-leaderboard-rank {
+            flex: 0 0 26px;
+            color: var(--text-muted);
+        }
+
+        .typing-leaderboard-name {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .typing-leaderboard-stats {
+            flex: 0 0 auto;
+            white-space: nowrap;
+            color: var(--text-muted);
+        }
+
         /* ---- Mobile navigation: hamburger menu, slide-in sidebar, editor/records tabs ---- */
 
         .auth-screen {
@@ -1112,6 +1191,25 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+        }
+
+        .page-title-block {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .page-title-block h2 {
+            margin: 0;
+        }
+
+        .live-clock {
+            font-family: "Courier New", Consolas, monospace;
+            font-size: 13px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow-wrap: anywhere;
         }
 
         #mobileMenuBtn {
@@ -2505,6 +2603,11 @@
                 min-width: 0;
             }
 
+            .live-clock {
+                font-size: 11px;
+                white-space: normal;
+            }
+
             .markdown-hint {
                 font-size: 11px;
                 margin: 2px 0 8px;
@@ -2921,7 +3024,10 @@
 
     <div id="appShell" style="display:none;">
         <div class="page-header">
-        <h2>Localized Database Form</h2>
+        <div class="page-title-block">
+            <h2>Localized Database Form</h2>
+            <div id="liveClock" class="live-clock" aria-live="off"></div>
+        </div>
         <button type="button" id="mobileMenuBtn" onclick="openSidebar()" title="Menu"
             aria-label="Open menu">&#9776;</button>
     </div>
@@ -3086,6 +3192,8 @@
             <button type="button" id="tabFilesBtn" onclick="showTab('files')">&#128193; Files</button>
             <button type="button" id="tabPublicBtn" onclick="showTab('public')">&#127760; Public</button>
             <button type="button" id="tabTerminalBtn" onclick="showTab('terminal')">&#128187; Terminal</button>
+            <button type="button" id="tabTypingBtn" onclick="showTab('typing')">&#8987; Typing</button>
+            <button type="button" id="tabGeneratorBtn" onclick="showTab('generator')">&#127922; Generator</button>
         </div>
 
         <div class="main-layout">
@@ -3772,6 +3880,172 @@
                 </div>
             </div>
 
+            <div id="typingPanel" class="tab-panel tab-hidden">
+                <hr>
+                <h3 class="section-label" style="margin-top:0;">Typing Test</h3>
+                <div class="markdown-hint">
+                    Type the passage below as fast and accurately as you can. Timing starts on your first keystroke
+                    and stops the moment you finish. This has its own separate score and leaderboard &mdash;
+                    completely unrelated to the Terminal game's score, rank, or Battle Pass.
+                </div>
+
+                <div class="toolbar" style="margin-top:0;">
+                    <span id="typingPersonalBest" style="font-weight:bold;">Your best: &ndash;</span>
+                    <button type="button" onclick="startTypingTest()" id="typingStartBtn">New Passage</button>
+                    <button type="button" onclick="resetTypingTest()" id="typingResetBtn" style="display:none;">Restart</button>
+                </div>
+
+                <div id="typingStats" class="toolbar" style="margin-top:0;">
+                    <span id="typingWpmDisplay">WPM: 0</span>
+                    <span id="typingAccuracyDisplay">Accuracy: 100%</span>
+                    <span id="typingTimeDisplay">Time: 0.0s</span>
+                </div>
+
+                <div id="typingPassageDisplay" class="typing-passage"></div>
+
+                <textarea id="typingInput" class="typing-input" rows="3"
+                    placeholder="Click here and start typing to begin..." autocomplete="off" autocapitalize="off"
+                    autocorrect="off" spellcheck="false" oninput="handleTypingInput()"
+                    onpaste="event.preventDefault();" ondrop="event.preventDefault();"></textarea>
+
+                <div id="typingResultBox" style="display:none; margin-top:10px;"></div>
+
+                <details class="record" style="margin:12px 0 0;" open>
+                    <summary style="cursor:pointer; font-weight:bold;">Leaderboard</summary>
+                    <div class="markdown-hint" style="margin-top:6px;">
+                        Best run per player, ranked by WPM (ties broken by accuracy). Only finished passages with at
+                        least 80% accuracy are saved.
+                    </div>
+                    <div id="typingLeaderboardList" style="margin-top:6px;"></div>
+                </details>
+            </div>
+
+            <div id="generatorPanel" class="tab-panel tab-hidden">
+                <hr>
+                <h3 class="section-label" style="margin-top:0;">Generator</h3>
+                <div class="markdown-hint">
+                    Generates UUIDs, hexadecimal strings, and random numbers entirely in-app using your browser's
+                    cryptographic random number generator &mdash; nothing is sent anywhere.
+                </div>
+
+                <details class="record" open>
+                    <summary style="cursor:pointer; font-weight:bold;">UUID</summary>
+
+                    <div class="math-config" style="margin-top:8px;">
+                        <div class="math-config-group">
+                            <h4>Settings</h4>
+                            <label for="genUuidVersion" style="font-weight:normal;">Version</label>
+                            <select id="genUuidVersion" onchange="updateGenUuidNameFieldsVisibility()">
+                                <option value="1">Version 1 (time-based)</option>
+                                <option value="3">Version 3 (name-based, MD5)</option>
+                                <option value="4" selected>Version 4 (random)</option>
+                                <option value="5">Version 5 (name-based, SHA-1)</option>
+                                <option value="7">Version 7 (time-ordered, random)</option>
+                            </select>
+
+                            <div id="genUuidNameFields" style="display:none;">
+                                <label for="genUuidNamespace" style="font-weight:normal;">Namespace</label>
+                                <select id="genUuidNamespace">
+                                    <option value="6ba7b810-9dad-11d1-80b4-00c04fd430c8">DNS</option>
+                                    <option value="6ba7b811-9dad-11d1-80b4-00c04fd430c8">URL</option>
+                                    <option value="6ba7b812-9dad-11d1-80b4-00c04fd430c8">OID</option>
+                                    <option value="6ba7b814-9dad-11d1-80b4-00c04fd430c8">X.500 DN</option>
+                                    <option value="custom">Custom UUID&hellip;</option>
+                                </select>
+                                <input type="text" id="genUuidNamespaceCustom" placeholder="Custom namespace UUID"
+                                    style="display:none;">
+
+                                <label for="genUuidName" style="font-weight:normal;">Name</label>
+                                <input type="text" id="genUuidName" placeholder="e.g. example.com">
+                            </div>
+
+                            <label for="genUuidCount" style="font-weight:normal;">Quantity</label>
+                            <input type="number" id="genUuidCount" value="5" min="1" max="500">
+
+                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal; margin-top:8px;">
+                                <input type="checkbox" id="genUuidUppercase" style="width:auto; margin:0;">
+                                Uppercase
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+                                <input type="checkbox" id="genUuidHyphens" style="width:auto; margin:0;" checked>
+                                Include hyphens
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="toolbar">
+                        <button type="button" onclick="generateGenUuids()" class="btn-success">Generate</button>
+                        <button type="button" onclick="copyGenOutput('genUuidOutput')">Copy All</button>
+                        <button type="button" onclick="downloadGenOutput('genUuidOutput', 'uuids.txt')">Download</button>
+                    </div>
+
+                    <textarea id="genUuidOutput" rows="8" readonly placeholder="Generated UUIDs will appear here&hellip;"></textarea>
+                </details>
+
+                <details class="record" style="margin-top:10px;">
+                    <summary style="cursor:pointer; font-weight:bold;">Hexadecimal</summary>
+
+                    <div class="math-config" style="margin-top:8px;">
+                        <div class="math-config-group">
+                            <h4>Settings</h4>
+                            <label for="genHexLength" style="font-weight:normal;">Length (hex characters)</label>
+                            <input type="number" id="genHexLength" value="16" min="1" max="10000">
+
+                            <label for="genHexCount" style="font-weight:normal;">Quantity</label>
+                            <input type="number" id="genHexCount" value="5" min="1" max="500">
+
+                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal; margin-top:8px;">
+                                <input type="checkbox" id="genHexUppercase" style="width:auto; margin:0;">
+                                Uppercase
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+                                <input type="checkbox" id="genHexPrefix" style="width:auto; margin:0;">
+                                Prefix with 0x
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="toolbar">
+                        <button type="button" onclick="generateGenHex()" class="btn-success">Generate</button>
+                        <button type="button" onclick="copyGenOutput('genHexOutput')">Copy All</button>
+                        <button type="button" onclick="downloadGenOutput('genHexOutput', 'hex.txt')">Download</button>
+                    </div>
+
+                    <textarea id="genHexOutput" rows="8" readonly placeholder="Generated hex values will appear here&hellip;"></textarea>
+                </details>
+
+                <details class="record" style="margin-top:10px;">
+                    <summary style="cursor:pointer; font-weight:bold;">Number</summary>
+
+                    <div class="math-config" style="margin-top:8px;">
+                        <div class="math-config-group">
+                            <h4>Settings</h4>
+                            <label for="genNumberLength" style="font-weight:normal;">Length (digits)</label>
+                            <input type="number" id="genNumberLength" value="6" min="1" max="1000">
+
+                            <label for="genNumberCount" style="font-weight:normal;">Quantity</label>
+                            <input type="number" id="genNumberCount" value="5" min="1" max="500">
+
+                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal; margin-top:8px;">
+                                <input type="checkbox" id="genNumberLeadingZero" style="width:auto; margin:0;" checked>
+                                Allow leading zero
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+                                <input type="checkbox" id="genNumberUnique" style="width:auto; margin:0;">
+                                No duplicates
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="toolbar">
+                        <button type="button" onclick="generateGenNumbers()" class="btn-success">Generate</button>
+                        <button type="button" onclick="copyGenOutput('genNumberOutput')">Copy All</button>
+                        <button type="button" onclick="downloadGenOutput('genNumberOutput', 'numbers.txt')">Download</button>
+                    </div>
+
+                    <textarea id="genNumberOutput" rows="8" readonly placeholder="Generated numbers will appear here&hellip;"></textarea>
+                </details>
+            </div>
 
         </div>
     </div>
@@ -4832,6 +5106,8 @@
             document.getElementById("filesPanel").classList.toggle("tab-hidden", tab !== "files");
             document.getElementById("publicPanel").classList.toggle("tab-hidden", tab !== "public");
             document.getElementById("terminalPanel").classList.toggle("tab-hidden", tab !== "terminal");
+            document.getElementById("typingPanel").classList.toggle("tab-hidden", tab !== "typing");
+            document.getElementById("generatorPanel").classList.toggle("tab-hidden", tab !== "generator");
             document.getElementById("tabEditorBtn").classList.toggle("active", tab === "editor");
             document.getElementById("tabDictionaryBtn").classList.toggle("active", tab === "dictionary");
             document.getElementById("tabRecordsBtn").classList.toggle("active", tab === "records");
@@ -4843,11 +5119,14 @@
             document.getElementById("tabFilesBtn").classList.toggle("active", tab === "files");
             document.getElementById("tabPublicBtn").classList.toggle("active", tab === "public");
             document.getElementById("tabTerminalBtn").classList.toggle("active", tab === "terminal");
+            document.getElementById("tabTypingBtn").classList.toggle("active", tab === "typing");
+            document.getElementById("tabGeneratorBtn").classList.toggle("active", tab === "generator");
 
             if (tab === "drawings") requestAnimationFrame(redrawCurrentDrawingCanvas);
             if (tab === "files") renderFileOverview();
             if (tab === "public") loadPublicRecords();
             if (tab === "terminal") initTerminalTab();
+            if (tab === "typing") initTypingTab();
         }
 
         // ---------- PWA install + offline support ----------
@@ -12449,6 +12728,290 @@ ${recordsHtml}
         renderMathVarChips();
         renderMathQuestions();
 
+        // ---------- Generator tab (UUID / hex / number) ----------
+        //
+        // Everything here runs locally using crypto.getRandomValues (with the Web
+        // Crypto subtle.digest() SHA-1 hash for name-based v5 UUIDs, and a small
+        // self-contained MD5 implementation for name-based v3 UUIDs, since MD5
+        // isn't exposed by the Web Crypto API). Nothing is sent anywhere.
+
+        function updateGenUuidNameFieldsVisibility() {
+            const version = document.getElementById("genUuidVersion").value;
+            const needsName = version === "3" || version === "5";
+            document.getElementById("genUuidNameFields").style.display = needsName ? "" : "none";
+        }
+
+        document.getElementById("genUuidNamespace").addEventListener("change", function () {
+            document.getElementById("genUuidNamespaceCustom").style.display =
+                this.value === "custom" ? "" : "none";
+        });
+
+        function genRandomBytes(count) {
+            const bytes = new Uint8Array(count);
+            crypto.getRandomValues(bytes);
+            return bytes;
+        }
+
+        function genBytesToHex(bytes) {
+            return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        function genFormatUuidFromHex(hex32, uppercase, hyphens) {
+            // hex32 is a 32-character hex string (no hyphens); this just adds the
+            // standard 8-4-4-4-12 grouping (or not) and applies case.
+            let out = hex32;
+            if (hyphens) {
+                out = `${hex32.slice(0, 8)}-${hex32.slice(8, 12)}-${hex32.slice(12, 16)}-${hex32.slice(16, 20)}-${hex32.slice(20)}`;
+            }
+            return uppercase ? out.toUpperCase() : out.toLowerCase();
+        }
+
+        // ---- Version 4: fully random ----
+        function genUuidV4Hex() {
+            const b = genRandomBytes(16);
+            b[6] = (b[6] & 0x0f) | 0x40; // version 4
+            b[8] = (b[8] & 0x3f) | 0x80; // RFC 4122 variant
+            return genBytesToHex(b);
+        }
+
+        // ---- Version 1: time-based (timestamp + random clock sequence/node,
+        // since real MAC addresses aren't available to a browser) ----
+        let genUuidV1LastTimestamp = null;
+        let genUuidV1Node = null;
+        function genUuidV1Hex() {
+            // 100-ns intervals since the UUID epoch (1582-10-15), approximated
+            // from the JS millisecond clock plus a sub-millisecond counter so
+            // consecutively generated UUIDs stay ordered.
+            const GREGORIAN_OFFSET = 122192928000000000n;
+            let now = BigInt(Date.now()) * 10000n + GREGORIAN_OFFSET;
+            if (genUuidV1LastTimestamp !== null && now <= genUuidV1LastTimestamp) {
+                now = genUuidV1LastTimestamp + 1n;
+            }
+            genUuidV1LastTimestamp = now;
+
+            const timeLow = (now & 0xffffffffn).toString(16).padStart(8, "0");
+            const timeMid = ((now >> 32n) & 0xffffn).toString(16).padStart(4, "0");
+            const timeHiAndVersion = (((now >> 48n) & 0x0fffn) | 0x1000n).toString(16).padStart(4, "0");
+
+            if (genUuidV1Node === null) {
+                const nodeBytes = genRandomBytes(6);
+                nodeBytes[0] |= 0x01; // multicast bit set, marking this as a random/local node id, not a real MAC
+                genUuidV1Node = genBytesToHex(nodeBytes);
+            }
+            const clockSeqBytes = genRandomBytes(2);
+            clockSeqBytes[0] = (clockSeqBytes[0] & 0x3f) | 0x80; // RFC 4122 variant
+            const clockSeq = genBytesToHex(clockSeqBytes);
+
+            return `${timeLow}${timeMid}${timeHiAndVersion}${clockSeq}${genUuidV1Node}`;
+        }
+
+        // ---- Version 7: unix-timestamp-ms + random, sorts in creation order ----
+        function genUuidV7Hex() {
+            const ms = BigInt(Date.now());
+            const timeHex = ms.toString(16).padStart(12, "0");
+            const rand = genRandomBytes(10);
+            rand[0] = (rand[0] & 0x0f) | 0x40; // version 7
+            rand[2] = (rand[2] & 0x3f) | 0x80; // RFC 4122 variant
+            return timeHex + genBytesToHex(rand);
+        }
+
+        // ---- Version 3/5: name-based (namespace UUID + name), hashed with
+        // MD5 (v3) or SHA-1 (v5) per RFC 4122 ----
+        function genUuidNamespaceToBytes(uuidStr) {
+            const hex = uuidStr.replace(/-/g, "").toLowerCase();
+            const bytes = new Uint8Array(16);
+            for (let i = 0; i < 16; i++) bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+            return bytes;
+        }
+
+        function genConcatBytes(a, b) {
+            const out = new Uint8Array(a.length + b.length);
+            out.set(a, 0);
+            out.set(b, a.length);
+            return out;
+        }
+
+        // Minimal, self-contained MD5 implementation (RFC 1321) used only for
+        // v3 UUID generation, since Web Crypto's subtle.digest() does not
+        // support MD5.
+        function genMd5(bytes) {
+            function rotl(x, c) { return (x << c) | (x >>> (32 - c)); }
+            const s = [7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,
+                5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
+                4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,
+                6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+            const K = [];
+            for (let i = 0; i < 64; i++) K[i] = Math.floor(Math.abs(Math.sin(i + 1)) * 4294967296) | 0;
+
+            const msgLen = bytes.length;
+            const withOne = new Uint8Array(((msgLen + 8) >> 6 << 6) + 64);
+            withOne.set(bytes);
+            withOne[msgLen] = 0x80;
+            const bitLen = BigInt(msgLen) * 8n;
+            const dv = new DataView(withOne.buffer);
+            dv.setUint32(withOne.length - 8, Number(bitLen & 0xffffffffn), true);
+            dv.setUint32(withOne.length - 4, Number((bitLen >> 32n) & 0xffffffffn), true);
+
+            let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+
+            for (let chunkStart = 0; chunkStart < withOne.length; chunkStart += 64) {
+                const M = [];
+                for (let j = 0; j < 16; j++) M[j] = dv.getUint32(chunkStart + j * 4, true);
+
+                let A = a0, B = b0, C = c0, D = d0;
+                for (let i = 0; i < 64; i++) {
+                    let F, g;
+                    if (i < 16) { F = (B & C) | (~B & D); g = i; }
+                    else if (i < 32) { F = (D & B) | (~D & C); g = (5 * i + 1) % 16; }
+                    else if (i < 48) { F = B ^ C ^ D; g = (3 * i + 5) % 16; }
+                    else { F = C ^ (B | ~D); g = (7 * i) % 16; }
+                    F = (F + A + K[i] + M[g]) | 0;
+                    A = D; D = C; C = B;
+                    B = (B + rotl(F, s[i])) | 0;
+                }
+                a0 = (a0 + A) | 0; b0 = (b0 + B) | 0; c0 = (c0 + C) | 0; d0 = (d0 + D) | 0;
+            }
+
+            const out = new Uint8Array(16);
+            const outDv = new DataView(out.buffer);
+            outDv.setUint32(0, a0, true);
+            outDv.setUint32(4, b0, true);
+            outDv.setUint32(8, c0, true);
+            outDv.setUint32(12, d0, true);
+            return out;
+        }
+
+        function genUuidNameBasedHex(version, namespaceUuid, name) {
+            const nsBytes = genUuidNamespaceToBytes(namespaceUuid);
+            const nameBytes = new TextEncoder().encode(name);
+            const combined = genConcatBytes(nsBytes, nameBytes);
+
+            let hashPromise;
+            if (version === "3") {
+                hashPromise = Promise.resolve(genMd5(combined));
+            } else {
+                hashPromise = crypto.subtle.digest("SHA-1", combined).then(buf => new Uint8Array(buf));
+            }
+
+            return hashPromise.then(hash => {
+                const b = hash.slice(0, 16);
+                b[6] = (b[6] & 0x0f) | (version === "3" ? 0x30 : 0x50);
+                b[8] = (b[8] & 0x3f) | 0x80;
+                return genBytesToHex(b);
+            });
+        }
+
+        function generateGenUuids() {
+            const version = document.getElementById("genUuidVersion").value;
+            const uppercase = document.getElementById("genUuidUppercase").checked;
+            const hyphens = document.getElementById("genUuidHyphens").checked;
+            const count = Math.max(1, Math.min(500, Math.round(Number(document.getElementById("genUuidCount").value)) || 1));
+            const output = document.getElementById("genUuidOutput");
+
+            if (version === "3" || version === "5") {
+                const nsSelect = document.getElementById("genUuidNamespace").value;
+                const namespaceUuid = nsSelect === "custom"
+                    ? document.getElementById("genUuidNamespaceCustom").value.trim()
+                    : nsSelect;
+                const name = document.getElementById("genUuidName").value;
+
+                if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(namespaceUuid)) {
+                    alert("Enter a valid namespace UUID (e.g. 6ba7b810-9dad-11d1-80b4-00c04fd430c8).");
+                    return;
+                }
+                if (!name) {
+                    alert("Enter a name to hash for a version 3 or 5 UUID.");
+                    return;
+                }
+
+                output.value = "Generating\u2026";
+                const jobs = [];
+                for (let i = 0; i < count; i++) jobs.push(genUuidNameBasedHex(version, namespaceUuid, name));
+                Promise.all(jobs).then(hexList => {
+                    output.value = hexList.map(hex => genFormatUuidFromHex(hex, uppercase, hyphens)).join("\n");
+                });
+                return;
+            }
+
+            const hexFn = version === "1" ? genUuidV1Hex : version === "7" ? genUuidV7Hex : genUuidV4Hex;
+            const lines = [];
+            for (let i = 0; i < count; i++) lines.push(genFormatUuidFromHex(hexFn(), uppercase, hyphens));
+            output.value = lines.join("\n");
+        }
+
+        function generateGenHex() {
+            const length = Math.max(1, Math.min(10000, Math.round(Number(document.getElementById("genHexLength").value)) || 1));
+            const count = Math.max(1, Math.min(500, Math.round(Number(document.getElementById("genHexCount").value)) || 1));
+            const uppercase = document.getElementById("genHexUppercase").checked;
+            const prefix = document.getElementById("genHexPrefix").checked;
+
+            const lines = [];
+            for (let i = 0; i < count; i++) {
+                const byteCount = Math.ceil(length / 2);
+                let hex = genBytesToHex(genRandomBytes(byteCount)).slice(0, length);
+                if (uppercase) hex = hex.toUpperCase();
+                lines.push((prefix ? "0x" : "") + hex);
+            }
+            document.getElementById("genHexOutput").value = lines.join("\n");
+        }
+
+        function generateGenNumbers() {
+            const length = Math.max(1, Math.min(1000, Math.round(Number(document.getElementById("genNumberLength").value)) || 1));
+            const count = Math.max(1, Math.min(500, Math.round(Number(document.getElementById("genNumberCount").value)) || 1));
+            const allowLeadingZero = document.getElementById("genNumberLeadingZero").checked;
+            const noDuplicates = document.getElementById("genNumberUnique").checked;
+
+            function randomDigitString() {
+                const digitBytes = genRandomBytes(length);
+                let digits = Array.from(digitBytes).map(b => (b % 10).toString());
+                if (!allowLeadingZero && digits[0] === "0" && length > 1) {
+                    digits[0] = String(1 + (digitBytes[0] % 9));
+                }
+                return digits.join("");
+            }
+
+            const seen = new Set();
+            const lines = [];
+            const maxAttempts = count * 200 + 1000; // generous ceiling so a small range with "no duplicates" doesn't hang the tab
+            let attempts = 0;
+            while (lines.length < count && attempts < maxAttempts) {
+                attempts++;
+                const value = randomDigitString();
+                if (noDuplicates) {
+                    if (seen.has(value)) continue;
+                    seen.add(value);
+                }
+                lines.push(value);
+            }
+            if (lines.length < count) {
+                alert(`Could only generate ${lines.length} unique value(s) at this length \u2014 showing what was found.`);
+            }
+            document.getElementById("genNumberOutput").value = lines.join("\n");
+        }
+
+        function copyGenOutput(textareaId) {
+            const el = document.getElementById(textareaId);
+            if (!el.value) return;
+            navigator.clipboard.writeText(el.value).catch(() => {
+                el.select();
+                document.execCommand("copy");
+            });
+        }
+
+        function downloadGenOutput(textareaId, filename) {
+            const el = document.getElementById(textareaId);
+            if (!el.value) {
+                alert("Nothing to download yet \u2014 generate some values first.");
+                return;
+            }
+            const blob = new Blob([el.value], { type: "text/plain;charset=utf-8;" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
         // ---------- Terminal minigame (never-ending, admin-scored, per-account progress) ----------
         //
         // Round 1 is a single device-wide JSON tree stored under TERMINAL_CONFIG_KEY,
@@ -13596,6 +14159,229 @@ ${recordsHtml}
             if (input) input.value = "";
         }
 
+        // ==================== Typing Test minigame ====================
+        //
+        // A standalone typing speed/accuracy game with its own leaderboard.
+        // Deliberately independent of the Terminal game -- no shared state,
+        // no shared score, no shared storage keys.
+
+        const TYPING_LEADERBOARD_KEY = "localizedTypingLeaderboard"; // shared (device-wide) leaderboard of finished runs
+
+        let typingState = null; // { text, startTime, timerHandle, finished }
+
+        function typingPassages() {
+            return [
+                "The quick brown fox jumps over the lazy dog while the sun sets behind the old stone bridge.",
+                "Typing quickly is a skill that improves with steady, deliberate practice every single day.",
+                "A calm mind and steady hands will always type faster than a rushed and anxious one.",
+                "Programmers often spend more time reading code than writing it, so clarity matters most.",
+                "The old lighthouse keeper watched the waves crash against the rocks long after midnight.",
+                "Coffee brewed slowly in the morning light always tastes better than coffee made in a hurry.",
+                "Every keystroke counts when you are racing against the clock to finish the passage in time.",
+                "Mountains rise sharply from the valley floor, their peaks hidden behind drifting clouds.",
+                "She organized her notes carefully before the meeting, hoping to impress the new manager.",
+                "Small daily habits, repeated consistently, tend to produce the biggest long term results.",
+                "The library was silent except for the soft rustle of pages turning one after another.",
+                "Practice does not make perfect, but it does make permanent, so practice the right way.",
+                "A gentle breeze drifted through the open window, carrying the scent of fresh cut grass.",
+                "Good typists rarely look down at the keyboard, trusting their fingers to find the right keys.",
+                "The train rumbled through the quiet countryside as farmers waved from their sunlit fields."
+            ];
+        }
+
+        function loadTypingLeaderboard() {
+            try {
+                const raw = localStorage.getItem(TYPING_LEADERBOARD_KEY);
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.error("Failed to load typing leaderboard, using empty list:", e);
+                return [];
+            }
+        }
+
+        function saveTypingLeaderboard(entries) {
+            localStorage.setItem(TYPING_LEADERBOARD_KEY, JSON.stringify(entries));
+        }
+
+        function initTypingTab() {
+            renderTypingPersonalBest();
+            renderTypingLeaderboard();
+            if (!typingState) resetTypingTest();
+        }
+
+        function startTypingTest() {
+            resetTypingTest();
+        }
+
+        function resetTypingTest() {
+            if (typingState && typingState.timerHandle) clearInterval(typingState.timerHandle);
+            const passages = typingPassages();
+            const text = passages[Math.floor(Math.random() * passages.length)];
+            typingState = { text, startTime: null, timerHandle: null, finished: false };
+
+            const input = document.getElementById("typingInput");
+            if (input) {
+                input.value = "";
+                input.disabled = false;
+            }
+            const resetBtn = document.getElementById("typingResetBtn");
+            if (resetBtn) resetBtn.style.display = "none";
+            const resultBox = document.getElementById("typingResultBox");
+            if (resultBox) resultBox.style.display = "none";
+
+            renderTypingPassage("");
+            updateTypingStatsDisplay(0, 100, 0);
+            if (input) input.focus();
+        }
+
+        function renderTypingPassage(typed) {
+            const el = document.getElementById("typingPassageDisplay");
+            if (!el || !typingState) return;
+            el.innerHTML = typingState.text.split("").map((ch, i) => {
+                let cls = "typing-char-pending";
+                if (i < typed.length) cls = typed[i] === ch ? "typing-char-correct" : "typing-char-incorrect";
+                else if (i === typed.length) cls += " typing-char-current";
+                return `<span class="${cls}">${escapeHtml(ch)}</span>`;
+            }).join("");
+        }
+
+        function typingAccuracyAndWpm(typed, elapsedSec) {
+            let correct = 0;
+            for (let i = 0; i < typed.length; i++) {
+                if (typed[i] === typingState.text[i]) correct++;
+            }
+            const accuracy = typed.length > 0 ? Math.round((correct / typed.length) * 100) : 100;
+            const wpm = elapsedSec > 0 ? Math.round((correct / 5) / (elapsedSec / 60)) : 0;
+            return { correct, accuracy, wpm };
+        }
+
+        function updateTypingStatsDisplay(wpm, accuracy, elapsedSec) {
+            const wpmEl = document.getElementById("typingWpmDisplay");
+            const accEl = document.getElementById("typingAccuracyDisplay");
+            const timeEl = document.getElementById("typingTimeDisplay");
+            if (wpmEl) wpmEl.textContent = `WPM: ${wpm}`;
+            if (accEl) accEl.textContent = `Accuracy: ${accuracy}%`;
+            if (timeEl) timeEl.textContent = `Time: ${elapsedSec.toFixed(1)}s`;
+        }
+
+        function typingTick() {
+            if (!typingState || !typingState.startTime || typingState.finished) return;
+            const input = document.getElementById("typingInput");
+            const typed = input ? input.value : "";
+            const elapsedSec = (Date.now() - typingState.startTime) / 1000;
+            const { accuracy, wpm } = typingAccuracyAndWpm(typed, elapsedSec);
+            updateTypingStatsDisplay(wpm, accuracy, elapsedSec);
+        }
+
+        function handleTypingInput() {
+            if (!typingState || typingState.finished) return;
+            const input = document.getElementById("typingInput");
+            if (!input) return;
+            let typed = input.value;
+            if (typed.length > typingState.text.length) {
+                typed = typed.slice(0, typingState.text.length);
+                input.value = typed;
+            }
+            if (!typingState.startTime && typed.length > 0) {
+                typingState.startTime = Date.now();
+                typingState.timerHandle = setInterval(typingTick, 200);
+                const resetBtn = document.getElementById("typingResetBtn");
+                if (resetBtn) resetBtn.style.display = "";
+            }
+            renderTypingPassage(typed);
+            typingTick();
+            if (typed.length === typingState.text.length) {
+                finishTypingTest(typed);
+            }
+        }
+
+        function finishTypingTest(typed) {
+            typingState.finished = true;
+            if (typingState.timerHandle) clearInterval(typingState.timerHandle);
+            const elapsedSec = Math.max(0.1, (Date.now() - typingState.startTime) / 1000);
+            const { accuracy, wpm } = typingAccuracyAndWpm(typed, elapsedSec);
+            updateTypingStatsDisplay(wpm, accuracy, elapsedSec);
+
+            const input = document.getElementById("typingInput");
+            if (input) input.disabled = true;
+
+            const currentUser = getCurrentAuthUser();
+            const username = currentUser ? currentUser.username : "guest";
+            const userId = currentUser ? currentUser.id : "guest";
+
+            let saved = false;
+            if (accuracy >= 80) {
+                const entries = loadTypingLeaderboard();
+                entries.push({
+                    id: "tt-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                    userId,
+                    username,
+                    wpm,
+                    accuracy,
+                    chars: typed.length,
+                    seconds: Math.round(elapsedSec * 10) / 10,
+                    date: Date.now()
+                });
+                entries.sort((a, b) => b.date - a.date);
+                saveTypingLeaderboard(entries.slice(0, 500)); // cap growth, keep most recent
+                saved = true;
+            }
+
+            const resultBox = document.getElementById("typingResultBox");
+            if (resultBox) {
+                resultBox.style.display = "";
+                resultBox.innerHTML = `<div class="markdown-hint" style="font-size:1em;">
+                    <b>Finished!</b> ${wpm} WPM, ${accuracy}% accuracy, ${elapsedSec.toFixed(1)}s.
+                    ${saved ? "Saved to the leaderboard." : "Not saved to the leaderboard &mdash; accuracy needs to be at least 80%."}
+                </div>`;
+            }
+            renderTypingPersonalBest();
+            renderTypingLeaderboard();
+        }
+
+        function renderTypingPersonalBest() {
+            const el = document.getElementById("typingPersonalBest");
+            if (!el) return;
+            const currentUser = getCurrentAuthUser();
+            const userId = currentUser ? currentUser.id : "guest";
+            const mine = loadTypingLeaderboard().filter(e => e.userId === userId);
+            if (mine.length === 0) {
+                el.textContent = "Your best: \u2013";
+                return;
+            }
+            const best = mine.reduce((a, b) => (b.wpm > a.wpm ? b : a));
+            el.textContent = `Your best: ${best.wpm} WPM (${best.accuracy}% accuracy)`;
+        }
+
+        function renderTypingLeaderboard() {
+            const box = document.getElementById("typingLeaderboardList");
+            if (!box) return;
+            const entries = loadTypingLeaderboard();
+            if (entries.length === 0) {
+                box.innerHTML = `<div style="color:var(--text-muted); font-size:0.88em;">No runs yet -- finish a passage to be the first on the board!</div>`;
+                return;
+            }
+            const bestByUser = new Map();
+            entries.forEach(e => {
+                const existing = bestByUser.get(e.userId);
+                if (!existing || e.wpm > existing.wpm || (e.wpm === existing.wpm && e.accuracy > existing.accuracy)) {
+                    bestByUser.set(e.userId, e);
+                }
+            });
+            const ranked = Array.from(bestByUser.values())
+                .sort((a, b) => b.wpm - a.wpm || b.accuracy - a.accuracy)
+                .slice(0, 20);
+            const currentUser = getCurrentAuthUser();
+            const myId = currentUser ? currentUser.id : "guest";
+            box.innerHTML = ranked.map((e, i) => `<div class="typing-leaderboard-row${e.userId === myId ? " typing-leaderboard-me" : ""}">
+                <span class="typing-leaderboard-rank">#${i + 1}</span>
+                <span class="typing-leaderboard-name">${escapeHtml(e.username || "unknown")}</span>
+                <span class="typing-leaderboard-stats">${e.wpm} WPM &middot; ${e.accuracy}% &middot; ${new Date(e.date).toLocaleDateString()}</span>
+            </div>`).join("");
+        }
+
         function terminalListing(node) {
             if (!node.children || node.children.length === 0) return "(empty)";
             return node.children.map(c => {
@@ -14650,10 +15436,23 @@ ${recordsHtml}
 
 
 
+        // ---------- Live clock ----------
+
+        function updateLiveClock() {
+            const el = document.getElementById("liveClock");
+            if (!el) return;
+            const now = new Date();
+            const datePart = now.toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" });
+            const timePart = now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+            el.textContent = `${datePart} \u2022 ${timePart}`;
+        }
+
         // ---------- Boot ----------
 
         refreshFileEditorHighlight();
         initAuth();
+        updateLiveClock();
+        setInterval(updateLiveClock, 1000);
 
     </script>
 
