@@ -2492,12 +2492,17 @@
 
             .terminal-prompt {
                 font-size: 12px;
+                white-space: normal;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                flex: 1 1 100%;
+                min-width: 0;
             }
 
             .terminal-input {
                 font-size: 12px !important;
-                flex: 1 1 60px;
-                min-width: 100px;
+                flex: 1 1 100%;
+                min-width: 0;
             }
 
             .markdown-hint {
@@ -3601,6 +3606,24 @@
                     <div id="terminalBpUpcoming" style="margin-top:8px;"></div>
                 </details>
 
+                <details class="record" style="margin:0 0 10px;">
+                    <summary style="cursor:pointer; font-weight:bold;">Community Levels &mdash; build &amp; play custom levels</summary>
+                    <div class="markdown-hint" style="margin-top:6px;">
+                        Anyone can design their own fake filesystem &mdash; directories, files, locked vaults,
+                        flags &mdash; and publish it here for everyone else to explore. Playing (or building) a
+                        community level is purely for fun: it never touches your score, rank, or Battle Pass.
+                        Type <code>newlevel &lt;name&gt;</code> below or in the terminal to start building (then
+                        <code>mkdir</code>/<code>touch</code>/<code>write</code>/<code>flag</code>/<code>lockdir</code>/
+                        <code>motd</code> to shape it and <code>savelevel</code> to publish), or just pick one from
+                        the list and jump in with <code>playlevel &lt;id&gt;</code>.
+                    </div>
+                    <div class="toolbar" style="margin-top:6px;">
+                        <input type="text" id="terminalNewLevelName" placeholder="New level name...">
+                        <button type="button" onclick="terminalCreateLevelFromForm()">Create &amp; Start Building</button>
+                    </div>
+                    <div id="terminalCommunityLevelsList" style="margin-top:6px;"></div>
+                </details>
+
                 <div class="terminal-window">
                     <div class="terminal-output" id="terminalOutput"></div>
                     <div class="terminal-input-row">
@@ -3788,6 +3811,7 @@
         const TERMINAL_RANKS_KEY = "localizedTerminalRanks"; // global (device-wide, admin-managed) rank tiers + promotion thresholds
         const TERMINAL_BP_CONFIG_KEY = "localizedTerminalBpConfig"; // global (device-wide, admin-managed) Battle Pass XP-per-level + reward formula
         const TERMINAL_BP_TITLES_KEY = "localizedTerminalBpTitles"; // global (device-wide, admin-managed) Battle Pass level titles, in order
+        const TERMINAL_COMMUNITY_LEVELS_KEY = "localizedTerminalCommunityLevels"; // shared (device-wide) player-built levels -- pure gameplay, never touches score/rank/Battle Pass
         const WORKSPACES_KEY = "localizedWorkspaces"; // global (device-wide) registry of shared/collaborative databases + their membership
         let deletingWorkspaceInProgress = false; // guards deleteCurrentDatabase() so deleteCurrentWorkspace() can re-enter it
 
@@ -12461,16 +12485,21 @@ ${recordsHtml}
                             name: "var", type: "dir", children: [
                                 {
                                     name: "log", type: "dir", children: [
-                                        { name: "access.log", type: "file", content: "03:14 login failed (root)\n03:15 login failed (root)\n03:16 login ok (guest)\n03:20 vault directory sealed by admin" },
+                                        { name: "access.log", type: "file", content: "03:14 login failed (root)\n03:15 login failed (root)\n03:16 login ok (guest)\n03:20 vault directory sealed by admin and moved out of the top level" },
                                         { name: "notes.txt", type: "file", content: "Cron job output, mostly noise. Nothing useful here." }
                                     ]
                                 },
-                                { name: "changelog.txt", type: "file", content: "v0.9 -- sealed the vault\nv0.8 -- added guest account\nv0.7 -- initial setup, forgot to remove test passwords" }
-                            ]
-                        },
-                        {
-                            name: "vault", type: "dir", locked: true, password: "hunter2", children: [
-                                { name: "flag.txt", type: "file", flag: true, content: "GG -- you cracked the vault.\nFLAG{welcome_to_the_mainframe}" }
+                                { name: "changelog.txt", type: "file", content: "v0.9 -- sealed the vault and tucked it away in backups/\nv0.8 -- added guest account\nv0.7 -- initial setup, forgot to remove test passwords" },
+                                {
+                                    name: "backups", type: "dir", children: [
+                                        { name: "manifest.txt", type: "file", content: "Nightly backup manifest. Nothing interesting -- except whatever's in the subfolder." },
+                                        {
+                                            name: "vault", type: "dir", locked: true, password: "hunter2", children: [
+                                                { name: "flag.txt", type: "file", flag: true, content: "GG -- you cracked the vault.\nFLAG{welcome_to_the_mainframe}" }
+                                            ]
+                                        }
+                                    ]
+                                }
                             ]
                         }
                     ]
@@ -12494,6 +12523,26 @@ ${recordsHtml}
 
         function saveTerminalWorld(world) {
             localStorage.setItem(TERMINAL_CONFIG_KEY, JSON.stringify(world));
+        }
+
+        // ---- Community Levels: player-built filesystems anyone can play, purely for fun ----
+        // Stored device-wide, same as the round-1 template, but with no admin gate and no
+        // link whatsoever to score/rank/Battle Pass -- these exist for gameplay only.
+
+        function loadTerminalCommunityLevels() {
+            try {
+                const raw = localStorage.getItem(TERMINAL_COMMUNITY_LEVELS_KEY);
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.error("Failed to load community terminal levels, using empty list:", e);
+                return [];
+            }
+        }
+
+        function saveTerminalCommunityLevels(levels) {
+            localStorage.setItem(TERMINAL_COMMUNITY_LEVELS_KEY, JSON.stringify(levels));
         }
 
         // ---- Admin-configurable point values (no filesystem JSON required) ----
@@ -13155,14 +13204,36 @@ ${recordsHtml}
                 }
             });
 
+            // Every directory (outer, nested, and doubly-nested) is fair game for
+            // hosting a vault -- vaults are never placed directly in the root
+            // listing, so finding one takes some actual exploring first.
+            const placeableDirs = [];
+            outerDirs.forEach(dir => {
+                placeableDirs.push(dir);
+                (dir.children || []).forEach(child => {
+                    if (child.type === "dir") {
+                        placeableDirs.push(child);
+                        (child.children || []).forEach(grandchild => {
+                            if (grandchild.type === "dir") placeableDirs.push(grandchild);
+                        });
+                    }
+                });
+            });
+
             // Guarantee every vault's password hint is scattered somewhere among the outer
             // directories -- never left out just because there were fewer outer dirs than vaults.
+            // File names come from the same mundane pool as ordinary flavor files, so a hint
+            // doesn't stick out just by being called "hint_1.txt".
             if (outerDirs.length === 0) outerDirs.push({ name: "hints", type: "dir", children: [] });
             const hintDirOrder = terminalShuffle(outerDirs.map((_, idx) => idx));
             for (let i = 0; i < passwords.length; i++) {
                 const dirIdx = hintDirOrder[i % hintDirOrder.length];
-                outerDirs[dirIdx].children.push({
-                    name: `hint_${i + 1}.txt`,
+                const hostChildren = outerDirs[dirIdx].children;
+                const usedNames = new Set(hostChildren.map(c => c.name));
+                const available = flavorFilePool.filter(n => !usedNames.has(n));
+                const hintFileName = terminalRandomChoice(available.length ? available : flavorFilePool);
+                hostChildren.push({
+                    name: hintFileName,
                     type: "file",
                     content: `Found scribbled on a whiteboard: password for vault #${i + 1} might be "${passwords[i]}".`
                 });
@@ -13182,7 +13253,12 @@ ${recordsHtml}
                 }
             }
 
-            const vaults = [];
+            // Vaults get tucked inside a randomly chosen directory (outer or nested)
+            // instead of sitting at the top level. Round-robin across the available
+            // directories first so they don't all pile into just one -- a directory
+            // ending up with more than one locked vault is fine (and expected; see
+            // the "unlock" command, which already checks every locked child at once).
+            const vaultHostOrder = terminalShuffle(placeableDirs.map((_, idx) => idx));
             for (let i = 0; i < vaultCount; i++) {
                 const vaultName = vaultPool[i % vaultPool.length] + (i >= vaultPool.length ? `_${i}` : "");
                 const flagFileName = flagFilePool[i % flagFilePool.length];
@@ -13196,18 +13272,21 @@ ${recordsHtml}
                     }
                 ];
                 if (Math.random() < 0.4) vaultChildren.push(terminalRandomFlavorFile(vaultUsed)); // occasional decoy file
-                vaults.push({
+                const vault = {
                     name: vaultName,
                     type: "dir",
                     locked: true,
                     password: passwords[i],
                     children: vaultChildren
-                });
+                };
+                const hostIdx = vaultHostOrder[i % vaultHostOrder.length];
+                const hostDir = placeableDirs[hostIdx] || outerDirs[0];
+                hostDir.children.push(vault);
             }
 
             return {
                 motd: `MAINFRAME v${round}.0 -- the system regenerated itself overnight.\n${vaultCount} vault${vaultCount > 1 ? "s" : ""} detected this round. Passwords are hidden somewhere in these directories.\nType 'help' to get started.`,
-                root: { name: "", type: "dir", children: [...outerDirs, ...vaults] }
+                root: { name: "", type: "dir", children: outerDirs }
             };
         }
 
@@ -13219,6 +13298,10 @@ ${recordsHtml}
         let terminalHistoryIdx = -1;
         let terminalInitialized = false;
         let terminalAdminEditMode = false; // admin is live-editing the shared round-1 filesystem
+        let terminalCommunityMode = null;      // null | "edit" | "play" -- building or playing a community level
+        let terminalCommunityLevelId = null;   // id of the community level being edited/played (null = new unsaved draft)
+        let terminalCommunityLevelName = null; // display name of that level, for the prompt/messages
+        let terminalCommunitySession = null;   // play-mode only: { read: [], unlocked: [], flags: [] } -- ephemeral, never saved, never touches real progress/score
 
         function terminalPathString() {
             return "/" + terminalCwdPath.join("/");
@@ -13241,7 +13324,17 @@ ${recordsHtml}
 
         function terminalIsUnlocked(node, path) {
             if (!node.locked) return true;
+            if (terminalCommunityMode === "play") {
+                return !!(terminalCommunitySession && terminalCommunitySession.unlocked.includes(terminalDirKey(path)));
+            }
             return terminalProgress.unlockedDirs.includes(terminalDirKey(path));
+        }
+
+        // True whenever mkdir/touch/write/rm/flag/lockdir/unlockdir/motd are allowed to touch
+        // terminalWorld right now -- either an admin editing the shared round-1 template, or
+        // anyone (admin included) building/editing their own community level.
+        function terminalCanEditFs() {
+            return (terminalAdminEditMode && isCurrentUserAdmin()) || terminalCommunityMode === "edit";
         }
 
         function terminalPrint(text, cls) {
@@ -13258,17 +13351,22 @@ ${recordsHtml}
             const currentUser = getCurrentAuthUser();
             const username = currentUser ? currentUser.username : "guest";
             const label = document.getElementById("terminalPromptLabel");
-            if (label) label.textContent = terminalAdminEditMode
-                ? `[EDIT MODE] ${username}@mainframe:${terminalPathString()}$`
-                : `${username}@mainframe:${terminalPathString()}$`;
+            let prefix = "";
+            if (terminalAdminEditMode) prefix = "[EDIT MODE] ";
+            else if (terminalCommunityMode === "edit") prefix = `[LEVEL EDITOR: ${terminalCommunityLevelName || "untitled"}] `;
+            else if (terminalCommunityMode === "play") prefix = `[PLAYING: ${terminalCommunityLevelName || "?"}] `;
+            if (label) label.textContent = `${prefix}${username}@mainframe:${terminalPathString()}$`;
             const scoreEl = document.getElementById("terminalScoreDisplay");
             if (scoreEl && terminalProgress) {
                 const rankInfo = terminalRankForScore(terminalCareerScoreFromProgress(terminalProgress));
                 const bp = terminalBpProgress(terminalProgress);
-                scoreEl.textContent = `Score: ${formatCompactNumber(terminalScoreFromProgress(terminalProgress))} | Rank: ${rankInfo.rank.name} | BP Lvl ${bp.level} (${bp.title}) | Round ${terminalProgress.round} | Total flags: ${terminalProgress.totalFlags}`;
+                scoreEl.textContent = terminalCommunityMode
+                    ? `Score: ${formatCompactNumber(terminalScoreFromProgress(terminalProgress))} (unaffected while in a community level)`
+                    : `Score: ${formatCompactNumber(terminalScoreFromProgress(terminalProgress))} | Rank: ${rankInfo.rank.name} | BP Lvl ${bp.level} (${bp.title}) | Round ${terminalProgress.round} | Total flags: ${terminalProgress.totalFlags}`;
             }
             renderTerminalShop();
             renderTerminalBattlepass();
+            renderTerminalCommunityLevelsList();
         }
 
         // ---- Battle Pass UI: XP bar + a short preview of upcoming levels ----
@@ -13335,6 +13433,169 @@ ${recordsHtml}
             terminalUpdatePrompt();
         }
 
+        // ---- Community Levels: anyone can build a filesystem and anyone can play it ----
+        // These never award score, rank progress, or Battle Pass XP -- pure gameplay.
+
+        function renderTerminalCommunityLevelsList() {
+            const box = document.getElementById("terminalCommunityLevelsList");
+            if (!box) return;
+            const levels = loadTerminalCommunityLevels();
+            if (levels.length === 0) {
+                box.innerHTML = `<div style="color:var(--text-muted); font-size:0.88em;">No community levels yet -- be the first to build one!</div>`;
+                return;
+            }
+            const currentUser = getCurrentAuthUser();
+            const myId = currentUser ? currentUser.id : null;
+            box.innerHTML = levels.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).map(lvl => {
+                const flags = terminalCountFlags(lvl.world.root);
+                const mine = lvl.authorId != null && (lvl.authorId === myId || isCurrentUserAdmin());
+                const isActive = terminalCommunityLevelId === lvl.id && terminalCommunityMode;
+                return `<div class="admin-user-card">
+                    <div><b>${escapeHtml(lvl.name)}</b> <span style="color:var(--text-muted); font-size:0.85em;">by ${escapeHtml(lvl.author || "unknown")} &middot; ${flags} flag${flags === 1 ? "" : "s"} &middot; ${escapeHtml(lvl.id)}</span></div>
+                    <div class="admin-user-actions">
+                        <button type="button" onclick="terminalStartPlayLevel('${lvl.id}')" ${isActive ? "disabled" : ""}>Play</button>
+                        ${mine ? `<button type="button" onclick="terminalStartEditLevel('${lvl.id}')" ${isActive ? "disabled" : ""}>Edit</button>` : ""}
+                        ${mine ? `<button type="button" class="btn-danger" onclick="terminalDeleteLevel('${lvl.id}')">Delete</button>` : ""}
+                    </div>
+                </div>`;
+            }).join("");
+        }
+
+        // Returns a reason the player can't switch into another level right now, or null if
+        // it's fine -- used by every entry point (commands and UI buttons) so they agree.
+        function terminalCommunityBusyMessage() {
+            if (terminalAdminEditMode) return "Leave round 1 edit mode first (run \"stopedit\" in the terminal).";
+            if (terminalCommunityMode === "edit") return `Still editing "${terminalCommunityLevelName || "untitled"}". Run "stoplevel" first (or "savelevel" to publish it).`;
+            if (terminalCommunityMode === "play") return `Still playing "${terminalCommunityLevelName || "a level"}". Run "stoplevel" first.`;
+            return null;
+        }
+
+        function terminalStartNewLevel(rawName) {
+            const busy = terminalCommunityBusyMessage();
+            if (busy) { terminalPrint(busy, "term-line-error"); return; }
+            const name = (rawName || "").trim().slice(0, 60);
+            if (!name) { terminalPrint("Usage: newlevel <name...>", "term-line-error"); return; }
+            terminalWorld = { motd: `Welcome to "${name}" -- a custom level.\nType 'help' to get started.`, root: { name: "", type: "dir", children: [] } };
+            terminalCwdPath = [];
+            terminalCommunityMode = "edit";
+            terminalCommunityLevelId = null;
+            terminalCommunityLevelName = name;
+            terminalPrint(`Started a new level draft: "${name}".`, "term-line-flag");
+            terminalPrint("Use mkdir/touch/write/flag/lockdir/motd (see \"help\") to build it, then \"savelevel\" to publish, or \"stoplevel\" to discard.", "term-line-info");
+            terminalUpdatePrompt();
+        }
+
+        function terminalStartEditLevel(id) {
+            const busy = terminalCommunityBusyMessage();
+            if (busy) { terminalPrint(busy, "term-line-error"); return; }
+            const lvl = loadTerminalCommunityLevels().find(l => l.id === id);
+            if (!lvl) { terminalPrint(`editlevel: no such level: ${id}`, "term-line-error"); return; }
+            const currentUser = getCurrentAuthUser();
+            const myId = currentUser ? currentUser.id : null;
+            if (lvl.authorId !== myId && !isCurrentUserAdmin()) { terminalPrint("You can only edit levels you created (admins can edit any).", "term-line-error"); return; }
+            terminalWorld = JSON.parse(JSON.stringify(lvl.world));
+            terminalCwdPath = [];
+            terminalCommunityMode = "edit";
+            terminalCommunityLevelId = lvl.id;
+            terminalCommunityLevelName = lvl.name;
+            terminalPrint(`Editing level "${lvl.name}" (${lvl.id}).`, "term-line-flag");
+            terminalPrint("Use mkdir/touch/write/flag/lockdir/motd (see \"help\") to edit, \"savelevel\" to publish changes, or \"stoplevel\" to discard them.", "term-line-info");
+            terminalUpdatePrompt();
+        }
+
+        function terminalStartPlayLevel(id) {
+            const busy = terminalCommunityBusyMessage();
+            if (busy) { terminalPrint(busy, "term-line-error"); return; }
+            const lvl = loadTerminalCommunityLevels().find(l => l.id === id);
+            if (!lvl) { terminalPrint(`playlevel: no such level: ${id}`, "term-line-error"); return; }
+            terminalWorld = JSON.parse(JSON.stringify(lvl.world));
+            terminalCwdPath = [];
+            terminalCommunityMode = "play";
+            terminalCommunityLevelId = lvl.id;
+            terminalCommunityLevelName = lvl.name;
+            terminalCommunitySession = { read: [], unlocked: [], flags: [] };
+            terminalPrint(`Now playing "${lvl.name}" by ${lvl.author} -- just for fun, your score and Battle Pass are untouched here.`, "term-line-flag");
+            (lvl.world.motd || "").split("\n").forEach(line => terminalPrint(line, "term-line-info"));
+            terminalPrint("Type \"stoplevel\" any time to head back to your own game.", "term-line-info");
+            terminalUpdatePrompt();
+        }
+
+        function terminalPublishLevel() {
+            if (terminalCommunityMode !== "edit") { terminalPrint("Not editing a level. Run \"newlevel <name>\" or \"editlevel <id>\" first.", "term-line-error"); return; }
+            const levels = loadTerminalCommunityLevels();
+            const currentUser = getCurrentAuthUser();
+            const authorName = currentUser ? currentUser.username : "guest";
+            const authorId = currentUser ? currentUser.id : null;
+            if (terminalCommunityLevelId) {
+                const idx = levels.findIndex(l => l.id === terminalCommunityLevelId);
+                if (idx !== -1) {
+                    levels[idx].world = { motd: terminalWorld.motd || "", root: terminalWorld.root };
+                    levels[idx].updatedAt = Date.now();
+                    saveTerminalCommunityLevels(levels);
+                    terminalPrint(`Saved changes to "${levels[idx].name}" (${levels[idx].id}).`, "term-line-flag");
+                    terminalUpdatePrompt();
+                    return;
+                }
+                terminalCommunityLevelId = null; // original vanished (deleted elsewhere) -- publish as new below
+            }
+            const id = "lvl-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+            levels.push({
+                id, name: terminalCommunityLevelName || "Untitled level", author: authorName, authorId,
+                world: { motd: terminalWorld.motd || "", root: terminalWorld.root },
+                createdAt: Date.now(), updatedAt: Date.now()
+            });
+            saveTerminalCommunityLevels(levels);
+            terminalCommunityLevelId = id;
+            terminalPrint(`Published "${terminalCommunityLevelName}" as a community level (id: ${id}). Anyone can play it with "playlevel ${id}".`, "term-line-flag");
+            terminalUpdatePrompt();
+        }
+
+        function terminalDeleteLevel(id) {
+            const levels = loadTerminalCommunityLevels();
+            const idx = levels.findIndex(l => l.id === id);
+            if (idx === -1) { terminalPrint(`dellevel: no such level: ${id}`, "term-line-error"); return; }
+            const currentUser = getCurrentAuthUser();
+            const myId = currentUser ? currentUser.id : null;
+            if (levels[idx].authorId !== myId && !isCurrentUserAdmin()) { terminalPrint("You can only delete levels you created (admins can delete any).", "term-line-error"); return; }
+            if (!confirm(`Delete level "${levels[idx].name}"? This can't be undone.`)) return;
+            const removed = levels.splice(idx, 1)[0];
+            saveTerminalCommunityLevels(levels);
+            if (terminalCommunityLevelId === removed.id) {
+                terminalCommunityMode = null;
+                terminalCommunityLevelId = null;
+                terminalCommunityLevelName = null;
+                terminalCommunitySession = null;
+                terminalProgress = loadTerminalProgress();
+                terminalWorld = terminalProgress.world || loadTerminalWorld();
+                terminalCwdPath = [];
+            }
+            terminalPrint(`Deleted level "${removed.name}".`, "term-line-flag");
+            terminalUpdatePrompt();
+        }
+
+        function terminalStopLevel() {
+            if (!terminalCommunityMode) { terminalPrint("You're not in a community level right now.", "term-line-error"); return; }
+            const wasEdit = terminalCommunityMode === "edit";
+            terminalCommunityMode = null;
+            terminalCommunityLevelId = null;
+            terminalCommunityLevelName = null;
+            terminalCommunitySession = null;
+            terminalProgress = loadTerminalProgress();
+            terminalWorld = terminalProgress.world || loadTerminalWorld();
+            terminalCwdPath = [];
+            terminalPrint(wasEdit
+                ? "Left the level editor. Unpublished changes were discarded (run \"savelevel\" first next time to keep them)."
+                : "Left the community level. Back to your own game.", "term-line-info");
+            terminalUpdatePrompt();
+        }
+
+        function terminalCreateLevelFromForm() {
+            const input = document.getElementById("terminalNewLevelName");
+            const name = input ? input.value : "";
+            terminalStartNewLevel(name);
+            if (input) input.value = "";
+        }
+
         function terminalListing(node) {
             if (!node.children || node.children.length === 0) return "(empty)";
             return node.children.map(c => {
@@ -13368,7 +13629,28 @@ ${recordsHtml}
                 "  nextround           skip to the next round early (needs at least 1 flag captured)",
                 "",
                 "Clear every flag in a round and the mainframe regenerates a brand new,",
-                "harder layout just for you -- the game never ends."
+                "harder layout just for you -- the game never ends.",
+                "",
+                "Community Levels -- anyone can build a filesystem and publish it for anyone",
+                "else to play. Purely for fun: none of this ever touches score, rank, or",
+                "Battle Pass, for the builder or the player.",
+                "  levels                     list every published community level",
+                "  playlevel <id>             play one (see \"levels\" for ids)",
+                "  newlevel <name...>         start building a brand new level",
+                "  editlevel <id>             resume building a level you created",
+                "  savelevel                  publish your current draft for everyone",
+                "  dellevel <id>              delete a level you created",
+                "  stoplevel                  leave the level you're playing/building",
+                "",
+                "While building a level (or, for admins, editing round 1 -- see below):",
+                "  mkdir / md <name>          create a directory in the current dir",
+                "  touch <name> [flag]        create an empty file (optionally a flag file)",
+                "  write <name> <text...>     set a file's content (use \\n for newlines)",
+                "  rm / del / rd <name>       delete a file or directory here",
+                "  flag <name> on|off         mark/unmark a file as a flag",
+                "  lockdir <name> <password>  lock a directory behind a password",
+                "  unlockdir <name>           remove a directory's lock",
+                "  motd <text...>             set the level's boot message"
             ];
             if (isCurrentUserAdmin()) {
                 lines.push(
@@ -13378,14 +13660,6 @@ ${recordsHtml}
                     "",
                     "Admin -- edit the shared round 1 filesystem live, right here:",
                     "  editfs                        enter edit mode on the round 1 template",
-                    "  mkdir / md <name>             create a directory in the current dir",
-                    "  touch <name> [flag]           create an empty file (optionally a flag file)",
-                    "  write <name> <text...>        set a file's content (use \\n for newlines)",
-                    "  rm / del / rd <name>          delete a file or directory here",
-                    "  flag <name> on|off            mark/unmark a file as a flag",
-                    "  lockdir <name> <password>     lock a directory behind a password",
-                    "  unlockdir <name>              remove a directory's lock",
-                    "  motd <text...>                set the round 1 boot message",
                     "  savefs                        publish the edited tree as round 1",
                     "  stopedit                      leave edit mode, back to your own game"
                 );
@@ -13568,9 +13842,15 @@ ${recordsHtml}
                     if (lockedChildren.length > 0) {
                         const lockedChild = lockedChildren.find(c => c.password === password);
                         if (lockedChild) {
-                            if (terminalAdminEditMode) {
+                            if (terminalAdminEditMode || terminalCommunityMode === "edit") {
                                 lockedChild.locked = false; // just previewing -- open it directly, no progress side effects
                                 terminalPrint(`Unlocked "${lockedChild.name}/" for preview (edit mode).`, "term-line-flag");
+                                terminalUpdatePrompt();
+                                break;
+                            }
+                            if (terminalCommunityMode === "play") {
+                                terminalCommunitySession.unlocked.push(terminalDirKey([...terminalCwdPath, lockedChild.name]));
+                                terminalPrint(`Unlocked "${lockedChild.name}/" (just for fun -- no score here).`, "term-line-flag");
                                 terminalUpdatePrompt();
                                 break;
                             }
@@ -13601,7 +13881,22 @@ ${recordsHtml}
                         break;
                     }
                     terminalPrint(file.content || "(empty file)");
-                    if (terminalAdminEditMode) break; // just previewing while building -- don't touch admin's own progress
+                    if (terminalAdminEditMode || terminalCommunityMode === "edit") break; // just previewing while building
+                    if (terminalCommunityMode === "play") {
+                        const fileKey = terminalDirKey([...terminalCwdPath, file.name]);
+                        if (!terminalCommunitySession.read.includes(fileKey)) {
+                            terminalCommunitySession.read.push(fileKey);
+                            if (file.flag && !terminalCommunitySession.flags.includes(fileKey)) {
+                                terminalCommunitySession.flags.push(fileKey);
+                                const flagsInLevel = terminalCountFlags(terminalWorld.root);
+                                terminalPrint(`*** FLAG CAPTURED! (${terminalCommunitySession.flags.length}/${flagsInLevel} in this level -- just for fun, no score awarded) ***`, "term-line-flag");
+                                if (flagsInLevel > 0 && terminalCommunitySession.flags.length >= flagsInLevel) {
+                                    terminalPrint(`*** LEVEL CLEARED! You found every flag in "${terminalCommunityLevelName}". Type "stoplevel" to head back, or keep exploring. ***`, "term-line-flag");
+                                }
+                            }
+                        }
+                        break;
+                    }
                     const fileKey = terminalDirKey([...terminalCwdPath, file.name]);
                     if (!terminalProgress.readFiles.includes(fileKey)) {
                         terminalProgress.readFiles.push(fileKey);
@@ -13650,6 +13945,10 @@ ${recordsHtml}
                         terminalPrint("Can't advance rounds while editing the filesystem. Run \"stopedit\" first.", "term-line-error");
                         break;
                     }
+                    if (terminalCommunityMode) {
+                        terminalPrint("Leave the community level first (run \"stoplevel\").", "term-line-error");
+                        break;
+                    }
                     if (terminalProgress.flagsFoundThisRound.length < 1) {
                         terminalPrint("Capture at least one flag this round before you can skip ahead.", "term-line-error");
                         break;
@@ -13662,6 +13961,10 @@ ${recordsHtml}
                     if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
                     if (terminalAdminEditMode) {
                         terminalPrint("Can't generate a round while editing the filesystem. Run \"stopedit\" first.", "term-line-error");
+                        break;
+                    }
+                    if (terminalCommunityMode) {
+                        terminalPrint("Leave the community level first (run \"stoplevel\").", "term-line-error");
                         break;
                     }
                     let targetRound = terminalProgress.round + 1;
@@ -13690,6 +13993,10 @@ ${recordsHtml}
 
                 case "editfs": {
                     if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
+                    if (terminalCommunityMode) {
+                        terminalPrint("Leave the community level first (run \"stoplevel\").", "term-line-error");
+                        break;
+                    }
                     const world = loadTerminalWorld();
                     terminalWorld = JSON.parse(JSON.stringify(world)); // work on a private copy until savefs
                     terminalCwdPath = [];
@@ -13711,10 +14018,58 @@ ${recordsHtml}
                     break;
                 }
 
+                case "levels": {
+                    const levels = loadTerminalCommunityLevels();
+                    if (levels.length === 0) {
+                        terminalPrint("No community levels yet. Create one with \"newlevel <name>\".", "term-line-info");
+                        break;
+                    }
+                    terminalPrint(`Community levels (${levels.length}):`);
+                    levels.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).forEach(lvl => {
+                        const flags = terminalCountFlags(lvl.world.root);
+                        terminalPrint(`  ${lvl.id}  "${lvl.name}"  by ${lvl.author || "unknown"}  (${flags} flag${flags === 1 ? "" : "s"})`);
+                    });
+                    terminalPrint("Play one with \"playlevel <id>\", or build your own with \"newlevel <name>\".", "term-line-info");
+                    break;
+                }
+
+                case "newlevel": {
+                    terminalStartNewLevel(args.join(" "));
+                    break;
+                }
+
+                case "editlevel": {
+                    if (args.length === 0) { terminalPrint("Usage: editlevel <id>", "term-line-error"); break; }
+                    terminalStartEditLevel(args[0]);
+                    break;
+                }
+
+                case "playlevel": {
+                    if (args.length === 0) { terminalPrint("Usage: playlevel <id> (see \"levels\" for the list)", "term-line-error"); break; }
+                    terminalStartPlayLevel(args[0]);
+                    break;
+                }
+
+                case "savelevel": {
+                    terminalPublishLevel();
+                    break;
+                }
+
+                case "dellevel": {
+                    if (args.length === 0) { terminalPrint("Usage: dellevel <id>", "term-line-error"); break; }
+                    terminalDeleteLevel(args[0]);
+                    break;
+                }
+
+                case "stoplevel": {
+                    terminalStopLevel();
+                    break;
+                }
+
+
                 case "md":
                 case "mkdir": {
-                    if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
-                    if (!terminalAdminEditMode) { terminalPrint("Not in edit mode. Run \"editfs\" first.", "term-line-error"); break; }
+                    if (!terminalCanEditFs()) { terminalPrint("Not in edit mode. Admins: run \"editfs\". Everyone: run \"newlevel <name>\" or \"editlevel <id>\".", "term-line-error"); break; }
                     if (args.length === 0) { terminalPrint(`Usage: ${cmd} <name>`, "term-line-error"); break; }
                     const node = terminalResolveNode(terminalCwdPath);
                     if (!node.children) node.children = [];
@@ -13725,8 +14080,7 @@ ${recordsHtml}
                 }
 
                 case "touch": {
-                    if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
-                    if (!terminalAdminEditMode) { terminalPrint("Not in edit mode. Run \"editfs\" first.", "term-line-error"); break; }
+                    if (!terminalCanEditFs()) { terminalPrint("Not in edit mode. Admins: run \"editfs\". Everyone: run \"newlevel <name>\" or \"editlevel <id>\".", "term-line-error"); break; }
                     if (args.length === 0) { terminalPrint("Usage: touch <name> [flag]", "term-line-error"); break; }
                     const node = terminalResolveNode(terminalCwdPath);
                     if (!node.children) node.children = [];
@@ -13739,8 +14093,7 @@ ${recordsHtml}
                 }
 
                 case "write": {
-                    if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
-                    if (!terminalAdminEditMode) { terminalPrint("Not in edit mode. Run \"editfs\" first.", "term-line-error"); break; }
+                    if (!terminalCanEditFs()) { terminalPrint("Not in edit mode. Admins: run \"editfs\". Everyone: run \"newlevel <name>\" or \"editlevel <id>\".", "term-line-error"); break; }
                     if (args.length < 1) { terminalPrint("Usage: write <name> <text...>", "term-line-error"); break; }
                     const node = terminalResolveNode(terminalCwdPath);
                     const file = node.children && node.children.find(c => c.name === args[0]);
@@ -13755,8 +14108,7 @@ ${recordsHtml}
                 case "rd":
                 case "rmdir":
                 case "rm": {
-                    if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
-                    if (!terminalAdminEditMode) { terminalPrint("Not in edit mode. Run \"editfs\" first.", "term-line-error"); break; }
+                    if (!terminalCanEditFs()) { terminalPrint("Not in edit mode. Admins: run \"editfs\". Everyone: run \"newlevel <name>\" or \"editlevel <id>\".", "term-line-error"); break; }
                     if (args.length === 0) { terminalPrint(`Usage: ${cmd} <name>`, "term-line-error"); break; }
                     const node = terminalResolveNode(terminalCwdPath);
                     const idx = node.children ? node.children.findIndex(c => c.name === args[0]) : -1;
@@ -13767,8 +14119,7 @@ ${recordsHtml}
                 }
 
                 case "flag": {
-                    if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
-                    if (!terminalAdminEditMode) { terminalPrint("Not in edit mode. Run \"editfs\" first.", "term-line-error"); break; }
+                    if (!terminalCanEditFs()) { terminalPrint("Not in edit mode. Admins: run \"editfs\". Everyone: run \"newlevel <name>\" or \"editlevel <id>\".", "term-line-error"); break; }
                     if (args.length < 2) { terminalPrint("Usage: flag <name> on|off", "term-line-error"); break; }
                     const node = terminalResolveNode(terminalCwdPath);
                     const file = node.children && node.children.find(c => c.name === args[0]);
@@ -13779,8 +14130,7 @@ ${recordsHtml}
                 }
 
                 case "lockdir": {
-                    if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
-                    if (!terminalAdminEditMode) { terminalPrint("Not in edit mode. Run \"editfs\" first.", "term-line-error"); break; }
+                    if (!terminalCanEditFs()) { terminalPrint("Not in edit mode. Admins: run \"editfs\". Everyone: run \"newlevel <name>\" or \"editlevel <id>\".", "term-line-error"); break; }
                     if (args.length < 2) { terminalPrint("Usage: lockdir <name> <password>", "term-line-error"); break; }
                     const node = terminalResolveNode(terminalCwdPath);
                     const dir = node.children && node.children.find(c => c.name === args[0]);
@@ -13792,8 +14142,7 @@ ${recordsHtml}
                 }
 
                 case "unlockdir": {
-                    if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
-                    if (!terminalAdminEditMode) { terminalPrint("Not in edit mode. Run \"editfs\" first.", "term-line-error"); break; }
+                    if (!terminalCanEditFs()) { terminalPrint("Not in edit mode. Admins: run \"editfs\". Everyone: run \"newlevel <name>\" or \"editlevel <id>\".", "term-line-error"); break; }
                     if (args.length === 0) { terminalPrint("Usage: unlockdir <name>", "term-line-error"); break; }
                     const node = terminalResolveNode(terminalCwdPath);
                     const dir = node.children && node.children.find(c => c.name === args[0]);
@@ -13805,8 +14154,7 @@ ${recordsHtml}
                 }
 
                 case "motd": {
-                    if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
-                    if (!terminalAdminEditMode) { terminalPrint("Not in edit mode. Run \"editfs\" first.", "term-line-error"); break; }
+                    if (!terminalCanEditFs()) { terminalPrint("Not in edit mode. Admins: run \"editfs\". Everyone: run \"newlevel <name>\" or \"editlevel <id>\".", "term-line-error"); break; }
                     if (args.length === 0) { terminalPrint("Usage: motd <text...>", "term-line-error"); break; }
                     terminalWorld.motd = args.join(" ").split("\\n").join("\n");
                     terminalPrint("Boot message updated.", "term-line-flag");
@@ -13829,8 +14177,9 @@ ${recordsHtml}
         }
 
         function initTerminalTab() {
-            if (terminalAdminEditMode) {
-                // Don't clobber the admin's in-progress filesystem edits just because they
+            if (terminalAdminEditMode || terminalCommunityMode) {
+                // Don't clobber in-progress filesystem edits -- the admin's round-1 template,
+                // or someone's community level draft/play session -- just because they
                 // switched tabs and came back.
                 terminalUpdatePrompt();
                 renderTerminalAdminBox();
