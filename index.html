@@ -655,10 +655,24 @@
             border-radius: 6px;
             padding: 6px 8px;
             cursor: grab;
+            touch-action: pan-y;
         }
 
         .kanban-card.dragging {
             opacity: 0.4;
+        }
+
+        .kanban-card.kanban-touch-dragging {
+            opacity: 0.9;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+            border-color: var(--accent);
+        }
+
+        .kanban-card-placeholder {
+            border: 2px dashed var(--accent);
+            border-radius: 6px;
+            background: var(--editing-bg);
+            box-sizing: border-box;
         }
 
         .kanban-card-title {
@@ -674,6 +688,31 @@
             margin-top: 3px;
             word-break: break-word;
             white-space: pre-wrap;
+        }
+
+        .kanban-card-desc-editor {
+            margin-top: 5px;
+        }
+
+        .kanban-card-desc-editor textarea {
+            font-size: 12px;
+            padding: 5px 6px;
+            margin: 0 0 4px;
+            min-height: 50px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .kanban-card-desc-editor-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .kanban-card-desc-editor-actions button {
+            padding: 2px 8px;
+            margin: 0;
+            font-size: 11px;
+            width: auto;
         }
 
         .kanban-card-actions {
@@ -789,12 +828,13 @@
             font-size: 13px;
             color: #6bffb0;
             white-space: nowrap;
+            overflow-wrap: anywhere;
             flex-shrink: 0;
         }
 
         .terminal-input {
             flex: 1 1 100px;
-            min-width: 0;
+            min-width: 120px;
             width: auto;
             border: none !important;
             background: transparent !important;
@@ -804,6 +844,39 @@
             padding: 2px 0 !important;
             margin: 0 !important;
             outline: none;
+        }
+
+        .terminal-bp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-size: 0.9em;
+            flex-wrap: wrap;
+        }
+
+        .terminal-bp-bar-track {
+            width: 100%;
+            height: 14px;
+            border-radius: 7px;
+            background: var(--btn-bg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .terminal-bp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+            transition: width 0.3s ease;
+        }
+
+        .terminal-bp-upcoming-row {
+            font-size: 0.85em;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
         }
 
         .char-sheet-box {
@@ -1353,8 +1426,8 @@
         table.spreadsheet-grid td {
             border: 1px solid var(--border);
             padding: 0;
-            min-width: 90px;
-            width: 90px;
+            min-width: 32px;
+            position: relative;
         }
 
         table.spreadsheet-grid th {
@@ -1380,7 +1453,6 @@
             z-index: 1;
             text-align: center;
             min-width: 54px;
-            width: 54px;
         }
 
         table.spreadsheet-grid th.corner-head {
@@ -1390,6 +1462,83 @@
             z-index: 3;
             min-width: 54px;
             width: 54px;
+        }
+
+        .col-resize-handle {
+            position: absolute;
+            top: 0;
+            right: -3px;
+            width: 6px;
+            height: 100%;
+            cursor: col-resize;
+            z-index: 4;
+            touch-action: none;
+        }
+
+        .row-resize-handle {
+            position: absolute;
+            left: 0;
+            bottom: -3px;
+            width: 100%;
+            height: 6px;
+            cursor: row-resize;
+            z-index: 4;
+            touch-action: none;
+        }
+
+        .fill-handle {
+            position: absolute;
+            right: -4px;
+            bottom: -4px;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-dark);
+            border: 1px solid var(--bg);
+            border-radius: 1px;
+            cursor: crosshair;
+            z-index: 5;
+            touch-action: none;
+        }
+
+        /* Invisible, larger hit area layered over the (visually tiny) handles --
+           makes them easy to grab with a finger without changing how they look. */
+        .col-resize-handle::before,
+        .row-resize-handle::before,
+        .fill-handle::before {
+            content: "";
+            position: absolute;
+            top: -9px;
+            left: -9px;
+            right: -9px;
+            bottom: -9px;
+        }
+
+        .col-resize-handle:hover,
+        .col-resize-handle.resizing {
+            background: var(--accent);
+            opacity: 0.5;
+        }
+
+        .row-resize-handle:hover,
+        .row-resize-handle.resizing {
+            background: var(--accent);
+            opacity: 0.5;
+        }
+
+        table.spreadsheet-grid td.cell-wrap.range-selected {
+            background: var(--editing-bg);
+            outline: 1px solid var(--accent);
+            outline-offset: -1px;
+        }
+
+        table.spreadsheet-grid td.cell-wrap.range-anchor {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+
+        table.spreadsheet-grid td.cell-wrap.fill-preview {
+            outline: 2px dashed var(--accent-dark);
+            outline-offset: -2px;
         }
 
         .grid-head-inner {
@@ -1458,6 +1607,60 @@
             margin: 6px 0 2px;
             color: var(--text-muted);
             font-size: 12px;
+        }
+
+        .format-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            margin: 6px 0;
+            padding: 6px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--btn-bg);
+        }
+
+        .format-toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding-right: 6px;
+            border-right: 1px solid var(--border);
+        }
+
+        .format-toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .format-btn {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            line-height: 1;
+        }
+
+        .format-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent-dark);
+        }
+
+        .format-toolbar input[type="color"] {
+            width: 28px;
+            height: 28px;
+            padding: 2px;
+            margin: 0;
+        }
+
+        .format-toolbar select {
+            margin: 0;
+            max-width: 140px;
         }
 
         /* ---- Math question generator: config controls + locally-rendered
@@ -2289,13 +2492,12 @@
 
             .terminal-prompt {
                 font-size: 12px;
-                max-width: 100%;
-                overflow-x: auto;
             }
 
             .terminal-input {
                 font-size: 12px !important;
-                flex-basis: 100%;
+                flex: 1 1 60px;
+                min-width: 100px;
             }
 
             .markdown-hint {
@@ -3026,6 +3228,45 @@
                         autocomplete="off">
                 </div>
 
+                <div class="format-toolbar">
+                    <div class="format-toolbar-group">
+                        <button type="button" id="fmtBoldBtn" class="format-btn" onclick="toggleCellFormat('bold')" title="Bold"><b>B</b></button>
+                        <button type="button" id="fmtItalicBtn" class="format-btn" onclick="toggleCellFormat('italic')" title="Italic"><i>I</i></button>
+                        <button type="button" id="fmtUnderlineBtn" class="format-btn" onclick="toggleCellFormat('underline')" title="Underline"><u>U</u></button>
+                    </div>
+                    <div class="format-toolbar-group">
+                        <button type="button" id="fmtAlignLeftBtn" class="format-btn" onclick="setCellAlign('left')" title="Align left">&#8676;</button>
+                        <button type="button" id="fmtAlignCenterBtn" class="format-btn" onclick="setCellAlign('center')" title="Align center">&#8596;</button>
+                        <button type="button" id="fmtAlignRightBtn" class="format-btn" onclick="setCellAlign('right')" title="Align right">&#8677;</button>
+                    </div>
+                    <div class="format-toolbar-group">
+                        <label style="font-weight:normal; font-size:12px; margin:0;" title="Text color">Text
+                            <input type="color" id="fmtTextColor" value="#1a1a1a" onchange="setCellTextColor(this.value)">
+                        </label>
+                        <label style="font-weight:normal; font-size:12px; margin:0;" title="Fill color">Fill
+                            <input type="color" id="fmtBgColor" value="#ffffff" onchange="setCellBgColor(this.value)">
+                        </label>
+                    </div>
+                    <div class="format-toolbar-group">
+                        <select id="fmtNumberFormat" onchange="setCellNumberFormat(this.value)" title="Number format">
+                            <option value="general">General</option>
+                            <option value="int">Integer (0)</option>
+                            <option value="dec2">Decimal (0.00)</option>
+                            <option value="percent">Percent</option>
+                            <option value="currency">Currency ($)</option>
+                        </select>
+                    </div>
+                    <div class="format-toolbar-group">
+                        <button type="button" onclick="clearCellFormatting()" title="Clear formatting">Clear Format</button>
+                    </div>
+                </div>
+                <div class="markdown-hint" style="margin-top:0;">
+                    Click a cell, or click-and-drag (or shift+click) to select a range, then use the toolbar above to
+                    format it. Drag the small square at the bottom-right corner of a selection to autofill &mdash;
+                    numeric sequences continue the pattern, formulas adjust their relative references, and anything
+                    else repeats. Drag the thin edge on a column or row header to resize it.
+                </div>
+
                 <div class="spreadsheet-grid-wrap" id="spreadsheetGridWrap">
                     <table class="spreadsheet-grid" id="spreadsheetGrid"></table>
                 </div>
@@ -3054,7 +3295,9 @@
                     square roots are formatted with plain HTML/CSS locally, so it works fully offline. The chosen
                     difficulty
                     &mdash; including a <b>Custom</b> min/max range &mdash; applies to every question type, with no
-                    hidden caps.
+                    hidden caps. Statistics topics (Mean, Median, Mode, Range, Quartile, Decile, Percentile) generate
+                    a random data set and ask you to compute the requested value; quartiles use the median-of-halves
+                    method and percentiles/deciles use the nearest-rank method, both common classroom conventions.
                 </div>
 
                 <div class="math-config">
@@ -3070,6 +3313,13 @@
                             <label><input type="checkbox" class="mathTopic" value="sqrt"> Square Roots</label>
                             <label><input type="checkbox" class="mathTopic" value="alg" id="mathTopicAlg"
                                     onchange="toggleMathAlgAdvancedVisibility()"> Simple Equations</label>
+                            <label><input type="checkbox" class="mathTopic" value="mean"> Mean</label>
+                            <label><input type="checkbox" class="mathTopic" value="median"> Median</label>
+                            <label><input type="checkbox" class="mathTopic" value="mode"> Mode</label>
+                            <label><input type="checkbox" class="mathTopic" value="statrange"> Range (Statistics)</label>
+                            <label><input type="checkbox" class="mathTopic" value="quartile"> Quartile</label>
+                            <label><input type="checkbox" class="mathTopic" value="decile"> Decile</label>
+                            <label><input type="checkbox" class="mathTopic" value="percentile"> Percentile</label>
                         </div>
                     </div>
 
@@ -3319,8 +3569,8 @@
                     <code>cd</code>, and <code>cat</code>, find passwords hidden in files to unlock locked
                     directories, and track down the flags. Clear every flag in a round and the mainframe regenerates
                     a brand new, harder layout just for you &mdash; it never ends. Your round, total flags collected,
-                    and score are saved to your account. Everything is simulated locally; no real files or network
-                    are touched. Type <code>help</code> to see every command.
+                    score, and Battle Pass are saved to your account. Everything is simulated locally; no real files
+                    or network are touched. Type <code>help</code> to see every command.
                 </div>
 
                 <div class="toolbar" style="margin-top:0;">
@@ -3335,6 +3585,20 @@
                         upgrade again.
                     </div>
                     <div id="terminalShopItems" style="margin-top:6px;"></div>
+                </details>
+
+                <details class="record" style="margin:0 0 10px;" open>
+                    <summary style="cursor:pointer; font-weight:bold;">Battle Pass</summary>
+                    <div class="markdown-hint" style="margin-top:6px;">
+                        Every point you earn anywhere in the terminal &mdash; reading files, unlocking directories,
+                        capturing flags, clearing rounds &mdash; also earns that many Battle Pass XP. Leveling up
+                        pays out a one-time bonus of spendable score and a rank like "Recruit 1". Each tier (e.g.
+                        Recruit, Initiate, Operative...) spans several levels before you're promoted to the next
+                        one. It never caps out; once every tier's been used it starts over at a higher numeral
+                        (e.g. "Legend II 1").
+                    </div>
+                    <div id="terminalBpSummary" style="margin-top:8px;"></div>
+                    <div id="terminalBpUpcoming" style="margin-top:8px;"></div>
                 </details>
 
                 <div class="terminal-window">
@@ -3413,8 +3677,52 @@
                     <input type="number" id="terminalAdminShopLuckMin" step="1">
                     <label for="terminalAdminShopLuckMax" style="font-weight:normal;">Lucky Break: max bonus points</label>
                     <input type="number" id="terminalAdminShopLuckMax" step="1">
+                    <label for="terminalAdminShopBountyCost" style="font-weight:normal;">Flag Bounty: base cost</label>
+                    <input type="number" id="terminalAdminShopBountyCost" step="1">
+                    <label for="terminalAdminShopBountyPerLevel" style="font-weight:normal;">Flag Bounty: bonus points per level</label>
+                    <input type="number" id="terminalAdminShopBountyPerLevel" step="1">
+                    <label for="terminalAdminShopRushCost" style="font-weight:normal;">XP Rush: base cost</label>
+                    <input type="number" id="terminalAdminShopRushCost" step="1">
+                    <label for="terminalAdminShopRushPct" style="font-weight:normal;">XP Rush: % extra Battle Pass XP per level</label>
+                    <input type="number" id="terminalAdminShopRushPct" step="1">
                     <div class="admin-inline-fields" style="margin-top:8px;">
                         <button type="button" onclick="saveTerminalShopPricingConfig()" class="btn-success">Save Shop Pricing</button>
+                    </div>
+
+                    <h4>Battle Pass</h4>
+                    <div class="markdown-hint">
+                        Every point a player earns anywhere in the game also earns that much Battle Pass XP. Set how
+                        much XP level 1 costs and, optionally, a % by which the XP cost grows every level after that
+                        (0% keeps every level the same cost; e.g. 10% means level 2 costs 10% more XP than level 1,
+                        level 3 costs 10% more than level 2, and so on) &mdash; plus the one-time score bonus paid
+                        out per level-up (base + this much extra per level). Tiers are awarded in order, one per line
+                        below &mdash; once the list runs out it repeats with a higher numeral tier (e.g. "Legend II 1").
+                    </div>
+                    <label for="terminalAdminBpXpPerLevel" style="font-weight:normal;">XP required for level 1</label>
+                    <input type="number" id="terminalAdminBpXpPerLevel" step="1" min="1">
+                    <label for="terminalAdminBpXpGrowthPct" style="font-weight:normal;">XP scaling: % more XP per level (0 = flat)</label>
+                    <input type="number" id="terminalAdminBpXpGrowthPct" step="1" min="0">
+                    <label for="terminalAdminBpRewardBase" style="font-weight:normal;">Level-up bonus: base points</label>
+                    <input type="number" id="terminalAdminBpRewardBase" step="1">
+                    <label for="terminalAdminBpRewardPerLevel" style="font-weight:normal;">Level-up bonus: extra points per level</label>
+                    <input type="number" id="terminalAdminBpRewardPerLevel" step="1">
+                    <div class="admin-inline-fields" style="margin-top:8px;">
+                        <button type="button" onclick="saveTerminalBpConfigFromForm()" class="btn-success">Save Battle Pass Settings</button>
+                        <button type="button" onclick="resetTerminalBpConfigToDefault()">Reset Settings to Default</button>
+                    </div>
+
+                    <label for="terminalAdminBpTitles" style="font-weight:normal; margin-top:10px;">Tiers (one per
+                        line, awarded in order)</label>
+                    <div class="markdown-hint" style="margin-top:0;">
+                        Each line is a tier name. Add <code>:N</code> to make a tier span N levels, shown as
+                        "Recruit 1", "Recruit 2" ... "Recruit N" before moving to the next tier &mdash; e.g.
+                        <code>Recruit:3</code> gives 3 Recruit levels. Leave off <code>:N</code> for a single-level
+                        tier. Edit the number to change how many levels any tier lasts.
+                    </div>
+                    <textarea id="terminalAdminBpTitles" rows="6" placeholder="Recruit:3&#10;Initiate:3&#10;Operative:3&#10;..."></textarea>
+                    <div class="admin-inline-fields" style="margin-top:8px;">
+                        <button type="button" onclick="saveTerminalBpTitlesFromForm()" class="btn-success">Save Titles</button>
+                        <button type="button" onclick="resetTerminalBpTitlesToDefault()">Reset Titles to Default</button>
                     </div>
 
                     <h4>Ranks</h4>
@@ -3478,6 +3786,8 @@
         const TERMINAL_SCORING_KEY = "localizedTerminalScoring"; // global (device-wide, admin-managed) point values
         const TERMINAL_SHOP_KEY = "localizedTerminalShopConfig"; // global (device-wide, admin-managed) shop prices/effects
         const TERMINAL_RANKS_KEY = "localizedTerminalRanks"; // global (device-wide, admin-managed) rank tiers + promotion thresholds
+        const TERMINAL_BP_CONFIG_KEY = "localizedTerminalBpConfig"; // global (device-wide, admin-managed) Battle Pass XP-per-level + reward formula
+        const TERMINAL_BP_TITLES_KEY = "localizedTerminalBpTitles"; // global (device-wide, admin-managed) Battle Pass level titles, in order
         const WORKSPACES_KEY = "localizedWorkspaces"; // global (device-wide) registry of shared/collaborative databases + their membership
         let deletingWorkspaceInProgress = false; // guards deleteCurrentDatabase() so deleteCurrentWorkspace() can re-enter it
 
@@ -6188,14 +6498,134 @@
             loadCustomFieldDefs().forEach(name => addCustomFieldRow(name, ""));
         }
 
+        // ---------- Private Notes (truly private, per-account) ----------
+        //
+        // Earlier versions stored `privateNotes` directly on the record object
+        // in the "records" IndexedDB store. That's fine for an ordinary private
+        // database, but a database can be turned into a shared Workspace (see
+        // "Workspaces" below), where every member reads/writes the exact same
+        // underlying records -- so anything stored ON the record, including a
+        // field literally called "private", was visible and editable by every
+        // other member too. Not private at all.
+        //
+        // Real privacy for something scoped to one account has to live outside
+        // that shared record entirely. So private notes are kept in localStorage,
+        // namespaced by the current account (getCurrentAuthUserId()) -- which is
+        // never shared between accounts even when the underlying database is --
+        // and keyed by which database + record they belong to. Only the account
+        // that wrote a given note can ever load it back.
+
+        function getPrivateNotesStorageKey(userId = getCurrentAuthUserId()) {
+            return getUserScopedStorageKey("localizedPrivateNotes", userId);
+        }
+
+        function loadPrivateNotesMap() {
+            try {
+                const raw = localStorage.getItem(getPrivateNotesStorageKey());
+                const parsed = raw ? JSON.parse(raw) : {};
+                return (parsed && typeof parsed === "object" && !Array.isArray(parsed)) ? parsed : {};
+            } catch (e) {
+                console.error("Failed to load private notes:", e);
+                return {};
+            }
+        }
+
+        function savePrivateNotesMap(map) {
+            localStorage.setItem(getPrivateNotesStorageKey(), JSON.stringify(map));
+        }
+
+        // Accepts anything with a `uuid` and/or `id` -- a full record, or just
+        // `{ uuid }` / `{ id }` for a not-yet-saved new record.
+        function privateNoteKeyFor(recordLike) {
+            const entry = getCurrentDbEntry();
+            const dbName = entry ? entry.dbName : "unknown";
+            const recordKey = (recordLike && (recordLike.uuid || recordLike.id)) || "";
+            return `${dbName}::${recordKey}`;
+        }
+
+        function getPrivateNoteForRecord(recordLike) {
+            if (!recordLike) return "";
+            return loadPrivateNotesMap()[privateNoteKeyFor(recordLike)] || "";
+        }
+
+        function setPrivateNoteForRecord(recordLike, text) {
+            if (!recordLike) return;
+            const map = loadPrivateNotesMap();
+            const key = privateNoteKeyFor(recordLike);
+            if (text && text.trim()) {
+                map[key] = text;
+            } else {
+                delete map[key];
+            }
+            savePrivateNotesMap(map);
+        }
+
+        function deletePrivateNoteForRecord(recordLike) {
+            if (!recordLike) return;
+            const map = loadPrivateNotesMap();
+            delete map[privateNoteKeyFor(recordLike)];
+            savePrivateNotesMap(map);
+        }
+
+        // Used by "Delete All Records" -- clears every private note this account
+        // holds for the current database (keys are prefixed `${dbName}::`).
+        function clearPrivateNotesForCurrentDatabase() {
+            const entry = getCurrentDbEntry();
+            const prefix = `${entry ? entry.dbName : "unknown"}::`;
+            const map = loadPrivateNotesMap();
+            let changed = false;
+            Object.keys(map).forEach(key => {
+                if (key.startsWith(prefix)) {
+                    delete map[key];
+                    changed = true;
+                }
+            });
+            if (changed) savePrivateNotesMap(map);
+        }
+
+        // One-time upgrade path for records saved by the old, not-actually-private
+        // implementation: pulls any leftover `privateNotes` field on a record into
+        // the current account's private store (so nothing is lost), then strips it
+        // off the shared record so it stops being visible to other Workspace
+        // members from this point on.
+        function migrateLegacyPrivateNotesIfNeeded() {
+            if (!db) return;
+            const legacyRecords = allRecords.filter(r => r && r.privateNotes);
+            if (legacyRecords.length === 0) return;
+
+            const map = loadPrivateNotesMap();
+            let changed = false;
+            legacyRecords.forEach(r => {
+                const key = privateNoteKeyFor(r);
+                if (!(key in map)) {
+                    map[key] = r.privateNotes;
+                    changed = true;
+                }
+            });
+            if (changed) savePrivateNotesMap(map);
+
+            try {
+                const tx = db.transaction("records", "readwrite");
+                const store = tx.objectStore("records");
+                legacyRecords.forEach(r => {
+                    const { privateNotes, ...rest } = r;
+                    store.put(rest);
+                    delete r.privateNotes;
+                });
+            } catch (e) {
+                console.error("Failed to strip legacy private notes from records:", e);
+            }
+        }
+
         form.onsubmit = (e) => {
             e.preventDefault();
+
+            const privateNotesValue = document.getElementById("privateNotes").value.trim();
 
             const data = {
                 name: document.getElementById("name").value.trim(),
                 characterSheet: document.getElementById("characterSheet").value.trim(),
                 message: getMessageHtml(),
-                privateNotes: document.getElementById("privateNotes").value.trim(),
                 customFields: getCustomFieldsFromForm(),
                 isPublic: document.getElementById("isPublicRecord").checked
             };
@@ -6203,11 +6633,13 @@
             rememberCustomFieldDefs(Object.keys(data.customFields));
 
             if (editingId !== null) {
+                setPrivateNoteForRecord({ id: editingId }, privateNotesValue);
                 updateRecord(editingId, data);
             } else {
                 data.uuid = generateUUID();
                 data.createdAt = getCurrentTimestamp();
                 data.updatedAt = data.createdAt;
+                setPrivateNoteForRecord({ uuid: data.uuid }, privateNotesValue);
                 addRecord(data);
             }
 
@@ -6227,7 +6659,7 @@
             editingId = record.id;
             document.getElementById("name").value = record.name;
             document.getElementById("characterSheet").value = record.characterSheet || "";
-            document.getElementById("privateNotes").value = record.privateNotes || "";
+            document.getElementById("privateNotes").value = getPrivateNoteForRecord(record);
             document.getElementById("isPublicRecord").checked = !!record.isPublic;
             setMessageHtml(record.message);
 
@@ -6269,6 +6701,7 @@
                     cursor.continue();
                 } else {
                     allRecords = results;
+                    migrateLegacyPrivateNotesIfNeeded();
                     renderRecords();
                 }
             };
@@ -6353,7 +6786,8 @@
                 const updatedAtFormatted = r.updatedAt ? formatTimestamp(r.updatedAt) : createdAtFormatted;
 
                 const charSheetHtml = r.characterSheet ? `<div class="char-sheet-box"><b>Character Sheet:</b>\n${escapeHtml(r.characterSheet)}</div>` : "";
-                const privateNotesHtml = r.privateNotes ? `<div class="private-notes-box">&#128274; <b>Private Notes:</b>\n${escapeHtml(r.privateNotes)}</div>` : "";
+                const privateNote = getPrivateNoteForRecord(r);
+                const privateNotesHtml = privateNote ? `<div class="private-notes-box">&#128274; <b>Private Notes (only visible to you):</b>\n${escapeHtml(privateNote)}</div>` : "";
 
                 div.innerHTML = `
         <b>Name: ${escapeHtml(r.name)}</b> ${r.isPublic ? '<span class="public-badge">&#127760; Public</span>' : ""}<br>
@@ -6814,9 +7248,11 @@
         });
 
         function deleteRecord(id) {
+            const recordBeingDeleted = allRecords.find(r => r.id === id);
             const tx = db.transaction("records", "readwrite");
             tx.objectStore("records").delete(id);
             tx.oncomplete = () => {
+                deletePrivateNoteForRecord(recordBeingDeleted || { id });
                 if (id === editingId) {
                     exitEditMode();
                     form.reset();
@@ -7036,6 +7472,28 @@
 
         const DEFAULT_SHEET_ROWS = 30;
         const DEFAULT_SHEET_COLS = 12;
+        const DEFAULT_COL_WIDTH = 90;
+        const DEFAULT_ROW_HEIGHT = 27;
+        const MIN_COL_WIDTH = 32;
+        const MIN_ROW_HEIGHT = 18;
+
+        // Selection range (for multi-cell formatting/autofill). selectionRange is
+        // null for a plain single-cell selection (selectedCellRef alone); otherwise
+        // {start, end} cell refs describing the two opposite corners of the range.
+        let selectionRange = null;
+        let mouseIsDown = false;
+        let rangeDragStartRef = null;
+
+        // Older sheets (or freshly imported ones) may not have these fields yet --
+        // this fills in sane defaults in place so every other function can assume
+        // they exist.
+        function ensureSheetShape(sheet) {
+            if (!sheet) return sheet;
+            if (!sheet.cellFormats) sheet.cellFormats = {};
+            if (!sheet.colWidths) sheet.colWidths = {};
+            if (!sheet.rowHeights) sheet.rowHeights = {};
+            return sheet;
+        }
 
         function colIndexToLetter(index) {
             let n = index + 1;
@@ -7109,12 +7567,14 @@
 
             if (currentSpreadsheet && currentSpreadsheet.id !== id) flushSpreadsheetSave();
 
-            currentSpreadsheet = found;
+            currentSpreadsheet = ensureSheetShape(found);
             selectedCellRef = "A1";
+            selectionRange = null;
             document.getElementById("spreadsheetNameInput").value = currentSpreadsheet.name;
             renderSpreadsheetSelect();
             renderSpreadsheetGrid();
             updateFormulaBar();
+            updateFormatToolbarState();
         }
 
         function switchSpreadsheet(idStr) {
@@ -7143,6 +7603,9 @@
                 rows: DEFAULT_SHEET_ROWS,
                 cols: DEFAULT_SHEET_COLS,
                 cells: {},
+                cellFormats: {},
+                colWidths: {},
+                rowHeights: {},
                 createdAt: now,
                 updatedAt: now
             };
@@ -7182,6 +7645,9 @@
                 rows: currentSpreadsheet.rows,
                 cols: currentSpreadsheet.cols,
                 cells: { ...currentSpreadsheet.cells },
+                cellFormats: JSON.parse(JSON.stringify(currentSpreadsheet.cellFormats || {})),
+                colWidths: { ...(currentSpreadsheet.colWidths || {}) },
+                rowHeights: { ...(currentSpreadsheet.rowHeights || {}) },
                 createdAt: now,
                 updatedAt: now
             };
@@ -7277,9 +7743,40 @@
             if (!currentSpreadsheet) return;
             if (!confirm("Clear every cell in this sheet? This cannot be undone.")) return;
             currentSpreadsheet.cells = {};
+            currentSpreadsheet.cellFormats = {};
             saveCurrentSpreadsheet();
             renderSpreadsheetGrid();
             updateFormulaBar();
+        }
+
+        // Shared by row/column deletion: re-keys a sparse ref-keyed map (like
+        // cellFormats) the same way cells are re-keyed, dropping entries in the
+        // removed row/column and shifting everything after it.
+        function reindexRefMapAfterRemoval(map, removedIndex, isRow) {
+            const newMap = {};
+            Object.keys(map || {}).forEach(ref => {
+                const pos = parseCellRef(ref);
+                if (!pos) return;
+                const idx = isRow ? pos.row : pos.col;
+                if (idx === removedIndex) return; // dropped
+                const newRow = isRow ? (pos.row > removedIndex ? pos.row - 1 : pos.row) : pos.row;
+                const newCol = isRow ? pos.col : (pos.col > removedIndex ? pos.col - 1 : pos.col);
+                newMap[cellRefAt(newRow, newCol)] = map[ref];
+            });
+            return newMap;
+        }
+
+        // Shared by row/column deletion: re-keys a sparse index-keyed map (like
+        // colWidths/rowHeights) after a row or column is removed.
+        function reindexIndexMapAfterRemoval(map, removedIndex) {
+            const newMap = {};
+            Object.keys(map || {}).forEach(key => {
+                const idx = parseInt(key, 10);
+                if (idx === removedIndex) return;
+                const newIdx = idx > removedIndex ? idx - 1 : idx;
+                newMap[newIdx] = map[key];
+            });
+            return newMap;
         }
 
         function addSpreadsheetRows(count) {
@@ -7323,6 +7820,8 @@
                 newCells[cellRefAt(newRow, pos.col)] = currentSpreadsheet.cells[ref];
             });
             currentSpreadsheet.cells = newCells;
+            currentSpreadsheet.cellFormats = reindexRefMapAfterRemoval(currentSpreadsheet.cellFormats, rowIndex, true);
+            currentSpreadsheet.rowHeights = reindexIndexMapAfterRemoval(currentSpreadsheet.rowHeights, rowIndex);
             currentSpreadsheet.rows -= 1;
 
             const sel = parseCellRef(selectedCellRef);
@@ -7330,6 +7829,7 @@
                 const newSelRow = Math.min(sel.row > rowIndex ? sel.row - 1 : sel.row, currentSpreadsheet.rows - 1);
                 selectedCellRef = cellRefAt(Math.max(0, newSelRow), sel.col);
             }
+            selectionRange = null;
 
             saveCurrentSpreadsheet();
             renderSpreadsheetGrid();
@@ -7358,6 +7858,8 @@
                 newCells[cellRefAt(pos.row, newCol)] = currentSpreadsheet.cells[ref];
             });
             currentSpreadsheet.cells = newCells;
+            currentSpreadsheet.cellFormats = reindexRefMapAfterRemoval(currentSpreadsheet.cellFormats, colIndex, false);
+            currentSpreadsheet.colWidths = reindexIndexMapAfterRemoval(currentSpreadsheet.colWidths, colIndex);
             currentSpreadsheet.cols -= 1;
 
             const sel = parseCellRef(selectedCellRef);
@@ -7365,6 +7867,7 @@
                 const newSelCol = Math.min(sel.col > colIndex ? sel.col - 1 : sel.col, currentSpreadsheet.cols - 1);
                 selectedCellRef = cellRefAt(sel.row, Math.max(0, newSelCol));
             }
+            selectionRange = null;
 
             saveCurrentSpreadsheet();
             renderSpreadsheetGrid();
@@ -8006,36 +8509,81 @@
 
         // ---- Grid rendering + interaction ----
 
+        // With table-layout:fixed but no explicit width on the <table> itself,
+        // browsers treat <col> widths as ratios rather than a hard total and will
+        // proportionally rescale every other column to keep the table's overall
+        // width matching its container -- so widening one column visually shrinks
+        // its neighbors. Explicitly pinning the table's width to the sum of its
+        // column widths (row-header column included) stops that redistribution.
+        function totalSpreadsheetTableWidth() {
+            if (!currentSpreadsheet) return 0;
+            let total = 54;
+            for (let c = 0; c < currentSpreadsheet.cols; c++) {
+                total += currentSpreadsheet.colWidths[c] || DEFAULT_COL_WIDTH;
+            }
+            return total;
+        }
+
+        function updateSpreadsheetTableWidth() {
+            const table = document.getElementById("spreadsheetGrid");
+            if (!table) return;
+            const px = totalSpreadsheetTableWidth() + "px";
+            table.style.width = px;
+            table.style.minWidth = px;
+        }
+
         function renderSpreadsheetGrid() {
             if (!currentSpreadsheet) return;
             const table = document.getElementById("spreadsheetGrid");
             const rows = currentSpreadsheet.rows;
             const cols = currentSpreadsheet.cols;
 
-            let html = "<thead><tr><th class=\"corner-head\"></th>";
+            let colgroup = `<colgroup><col style="width:54px">`;
             for (let c = 0; c < cols; c++) {
-                html += `<th><span class="grid-head-inner"><span class="grid-head-label">${colIndexToLetter(c)}</span><button type="button" class="grid-del-btn" onclick="removeSpreadsheetColumn(${c})" title="Delete column ${colIndexToLetter(c)}">&times;</button></span></th>`;
+                const w = currentSpreadsheet.colWidths[c] || DEFAULT_COL_WIDTH;
+                colgroup += `<col style="width:${w}px">`;
+            }
+            colgroup += "</colgroup>";
+
+            let html = colgroup + "<thead><tr><th class=\"corner-head\"></th>";
+            for (let c = 0; c < cols; c++) {
+                html += `<th><span class="grid-head-inner"><span class="grid-head-label">${colIndexToLetter(c)}</span><button type="button" class="grid-del-btn" onclick="removeSpreadsheetColumn(${c})" title="Delete column ${colIndexToLetter(c)}">&times;</button></span><div class="col-resize-handle" data-col="${c}" title="Drag to resize column"></div></th>`;
             }
             html += "</tr></thead><tbody>";
 
             for (let r = 0; r < rows; r++) {
-                html += `<tr><td class="row-head"><span class="grid-head-inner"><span class="grid-head-label">${r + 1}</span><button type="button" class="grid-del-btn" onclick="removeSpreadsheetRow(${r})" title="Delete row ${r + 1}">&times;</button></span></td>`;
+                const rh = currentSpreadsheet.rowHeights[r];
+                const rowStyle = rh ? ` style="height:${rh}px"` : "";
+                html += `<tr${rowStyle}><td class="row-head"><span class="grid-head-inner"><span class="grid-head-label">${r + 1}</span><button type="button" class="grid-del-btn" onclick="removeSpreadsheetRow(${r})" title="Delete row ${r + 1}">&times;</button></span><div class="row-resize-handle" data-row="${r}" title="Drag to resize row"></div></td>`;
                 for (let c = 0; c < cols; c++) {
                     const ref = cellRefAt(r, c);
-                    const display = escapeHtml(String(getCellDisplayValue(ref)));
-                    html += `<td class="cell-wrap"><input type="text" class="cell-input" data-ref="${ref}" value="${display}"></td>`;
+                    const display = escapeHtml(String(getCellFormattedDisplayValue(ref)));
+                    const styleAttr = cellFormatStyleAttr(ref);
+                    html += `<td class="cell-wrap"><input type="text" class="cell-input" data-ref="${ref}"${styleAttr} value="${display}"></td>`;
                 }
                 html += "</tr>";
             }
             html += "</tbody>";
 
             table.innerHTML = html;
+            updateSpreadsheetTableWidth();
             document.getElementById("spreadsheetSizeLabel").textContent = `${rows} rows x ${cols} columns`;
 
             table.querySelectorAll("input.cell-input").forEach(input => {
                 input.addEventListener("focus", onCellFocus);
                 input.addEventListener("blur", onCellBlur);
                 input.addEventListener("keydown", onCellKeydown);
+                input.addEventListener("mousedown", onCellMouseDown);
+                input.addEventListener("mouseenter", onCellMouseEnter);
+            });
+
+            table.querySelectorAll(".col-resize-handle").forEach(handle => {
+                handle.addEventListener("mousedown", startColResize);
+                handle.addEventListener("touchstart", startColResize, { passive: false });
+            });
+            table.querySelectorAll(".row-resize-handle").forEach(handle => {
+                handle.addEventListener("mousedown", startRowResize);
+                handle.addEventListener("touchstart", startRowResize, { passive: false });
             });
 
             highlightSelectedCell();
@@ -8044,9 +8592,11 @@
         function onCellFocus(e) {
             const ref = e.target.dataset.ref;
             selectedCellRef = ref;
+            selectionRange = null;
             e.target.value = getCellRaw(ref);
             updateFormulaBar();
             highlightSelectedCell();
+            updateFormatToolbarState();
         }
 
         function onCellBlur(e) {
@@ -8075,7 +8625,7 @@
 
             document.querySelectorAll("#spreadsheetGrid input.cell-input").forEach(input => {
                 if (input.dataset.ref === activeRef) return; // leave the cell being edited alone
-                input.value = String(getCellDisplayValue(input.dataset.ref));
+                input.value = String(getCellFormattedDisplayValue(input.dataset.ref));
             });
         }
 
@@ -8089,6 +8639,7 @@
                 if (row >= currentSpreadsheet.rows) addSpreadsheetRows(1);
                 if (col >= currentSpreadsheet.cols) addSpreadsheetColumns(1);
                 commitCell(ref, e.target.value);
+                selectionRange = null;
                 focusCell(cellRefAt(row, col));
             };
 
@@ -8112,15 +8663,529 @@
             }
         }
 
+        // ---- Range selection (click-and-drag or shift+click across cells) ----
+        // Needed so formatting and autofill can act on more than one cell at a
+        // time. selectionRange is null for an ordinary single-cell selection.
+
+        document.addEventListener("mousedown", () => { mouseIsDown = true; });
+        document.addEventListener("mouseup", () => { mouseIsDown = false; rangeDragStartRef = null; });
+
+        function onCellMouseDown(e) {
+            const ref = e.target.dataset.ref;
+            if (e.shiftKey) {
+                e.preventDefault();
+                selectionRange = { start: selectedCellRef, end: ref };
+                if (document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("cell-input")) {
+                    document.activeElement.blur();
+                }
+                highlightSelectedCell();
+                updateFormatToolbarState();
+                updateFormulaBar();
+                return;
+            }
+            rangeDragStartRef = ref;
+        }
+
+        function onCellMouseEnter(e) {
+            if (!mouseIsDown || !rangeDragStartRef) return;
+            const ref = e.target.dataset.ref;
+            if (ref === rangeDragStartRef) {
+                selectionRange = null;
+            } else {
+                selectionRange = { start: rangeDragStartRef, end: ref };
+                if (document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("cell-input")) {
+                    document.activeElement.blur();
+                }
+            }
+            selectedCellRef = rangeDragStartRef;
+            highlightSelectedCell();
+            updateFormatToolbarState();
+            updateFormulaBar();
+        }
+
+        function refsInRange(startRef, endRef) {
+            const p1 = parseCellRef(startRef), p2 = parseCellRef(endRef);
+            if (!p1 || !p2) return [startRef];
+            const rowMin = Math.min(p1.row, p2.row), rowMax = Math.max(p1.row, p2.row);
+            const colMin = Math.min(p1.col, p2.col), colMax = Math.max(p1.col, p2.col);
+            const refs = [];
+            for (let r = rowMin; r <= rowMax; r++) {
+                for (let c = colMin; c <= colMax; c++) refs.push(cellRefAt(r, c));
+            }
+            return refs;
+        }
+
+        function currentSelectionRefs() {
+            if (selectionRange) return refsInRange(selectionRange.start, selectionRange.end);
+            return [selectedCellRef];
+        }
+
+        function getActiveSelectionRefs() {
+            return currentSelectionRefs();
+        }
+
+        function boundsOfRefs(refs) {
+            const positions = refs.map(parseCellRef).filter(Boolean);
+            if (!positions.length) return null;
+            return {
+                rowMin: Math.min(...positions.map(p => p.row)),
+                rowMax: Math.max(...positions.map(p => p.row)),
+                colMin: Math.min(...positions.map(p => p.col)),
+                colMax: Math.max(...positions.map(p => p.col)),
+            };
+        }
+
         function highlightSelectedCell() {
+            const refs = currentSelectionRefs();
+            const refSet = new Set(refs);
             document.querySelectorAll("#spreadsheetGrid input.cell-input").forEach(i => {
                 i.classList.toggle("selected", i.dataset.ref === selectedCellRef);
             });
+            document.querySelectorAll("#spreadsheetGrid td.cell-wrap").forEach(td => {
+                const input = td.querySelector("input.cell-input");
+                const ref = input ? input.dataset.ref : null;
+                td.classList.toggle("range-selected", !!ref && refSet.has(ref) && refs.length > 1);
+                td.classList.remove("fill-preview");
+            });
+            placeFillHandle();
+        }
+
+        function placeFillHandle() {
+            document.querySelectorAll("#spreadsheetGrid .fill-handle").forEach(el => el.remove());
+            if (!currentSpreadsheet) return;
+            const bounds = boundsOfRefs(currentSelectionRefs());
+            if (!bounds) return;
+            const cornerRef = cellRefAt(bounds.rowMax, bounds.colMax);
+            const cornerInput = document.querySelector(`#spreadsheetGrid input[data-ref="${cornerRef}"]`);
+            const td = cornerInput ? cornerInput.closest("td") : null;
+            if (!td) return;
+            const handle = document.createElement("div");
+            handle.className = "fill-handle";
+            handle.title = "Drag to autofill";
+            handle.addEventListener("mousedown", startFillDrag);
+            handle.addEventListener("touchstart", startFillDrag, { passive: false });
+            td.appendChild(handle);
         }
 
         function updateFormulaBar() {
-            document.getElementById("formulaBarRef").textContent = selectedCellRef;
+            const refText = selectionRange ? `${selectionRange.start}:${selectionRange.end}` : selectedCellRef;
+            document.getElementById("formulaBarRef").textContent = refText;
             document.getElementById("formulaBarInput").value = currentSpreadsheet ? getCellRaw(selectedCellRef) : "";
+        }
+
+        // ---- Cell formatting (bold/italic/underline, align, colors, number format) ----
+
+        function cellFormatStyleAttr(ref) {
+            if (!currentSpreadsheet || !currentSpreadsheet.cellFormats) return "";
+            const f = currentSpreadsheet.cellFormats[ref];
+            if (!f) return "";
+            const parts = [];
+            if (f.bold) parts.push("font-weight:bold");
+            if (f.italic) parts.push("font-style:italic");
+            if (f.underline) parts.push("text-decoration:underline");
+            if (f.align) parts.push(`text-align:${f.align}`);
+            if (f.color) parts.push(`color:${f.color}`);
+            if (f.bg) parts.push(`background-color:${f.bg}`);
+            return parts.length ? ` style="${parts.join(";")}"` : "";
+        }
+
+        function applyNumberFormat(raw, fmt) {
+            if (!fmt || fmt === "general") return raw;
+            const num = typeof raw === "number" ? raw : parseFloat(raw);
+            if (raw === "" || raw === null || raw === undefined || isNaN(num)) return raw;
+            switch (fmt) {
+                case "int": return String(Math.round(num));
+                case "dec2": return num.toFixed(2);
+                case "percent": return (num * 100).toFixed(2) + "%";
+                case "currency": return "$" + num.toFixed(2);
+                default: return raw;
+            }
+        }
+
+        function getCellFormattedDisplayValue(ref) {
+            const raw = getCellDisplayValue(ref);
+            const fmt = currentSpreadsheet.cellFormats && currentSpreadsheet.cellFormats[ref] && currentSpreadsheet.cellFormats[ref].numFmt;
+            return applyNumberFormat(raw, fmt);
+        }
+
+        function ensureCellFormat(ref) {
+            if (!currentSpreadsheet.cellFormats) currentSpreadsheet.cellFormats = {};
+            if (!currentSpreadsheet.cellFormats[ref]) currentSpreadsheet.cellFormats[ref] = {};
+            return currentSpreadsheet.cellFormats[ref];
+        }
+
+        function pruneEmptyCellFormat(ref) {
+            const f = currentSpreadsheet.cellFormats && currentSpreadsheet.cellFormats[ref];
+            if (f && Object.keys(f).length === 0) delete currentSpreadsheet.cellFormats[ref];
+        }
+
+        function toggleCellFormat(prop) {
+            if (!currentSpreadsheet) return;
+            const refs = getActiveSelectionRefs();
+            const firstFormat = (currentSpreadsheet.cellFormats && currentSpreadsheet.cellFormats[refs[0]]) || {};
+            const newVal = !firstFormat[prop];
+            refs.forEach(ref => { ensureCellFormat(ref)[prop] = newVal; });
+            saveCurrentSpreadsheet();
+            renderSpreadsheetGrid();
+            updateFormatToolbarState();
+        }
+
+        function setCellAlign(align) {
+            if (!currentSpreadsheet) return;
+            const refs = getActiveSelectionRefs();
+            refs.forEach(ref => { ensureCellFormat(ref).align = align; });
+            saveCurrentSpreadsheet();
+            renderSpreadsheetGrid();
+            updateFormatToolbarState();
+        }
+
+        function setCellTextColor(color) {
+            if (!currentSpreadsheet) return;
+            const refs = getActiveSelectionRefs();
+            refs.forEach(ref => { ensureCellFormat(ref).color = color; });
+            saveCurrentSpreadsheet();
+            renderSpreadsheetGrid();
+        }
+
+        function setCellBgColor(color) {
+            if (!currentSpreadsheet) return;
+            const refs = getActiveSelectionRefs();
+            refs.forEach(ref => { ensureCellFormat(ref).bg = color; });
+            saveCurrentSpreadsheet();
+            renderSpreadsheetGrid();
+        }
+
+        function setCellNumberFormat(fmt) {
+            if (!currentSpreadsheet) return;
+            const refs = getActiveSelectionRefs();
+            refs.forEach(ref => {
+                if (fmt === "general") {
+                    const f = currentSpreadsheet.cellFormats && currentSpreadsheet.cellFormats[ref];
+                    if (f) { delete f.numFmt; pruneEmptyCellFormat(ref); }
+                } else {
+                    ensureCellFormat(ref).numFmt = fmt;
+                }
+            });
+            saveCurrentSpreadsheet();
+            renderSpreadsheetGrid();
+        }
+
+        function clearCellFormatting() {
+            if (!currentSpreadsheet) return;
+            const refs = getActiveSelectionRefs();
+            refs.forEach(ref => {
+                if (currentSpreadsheet.cellFormats) delete currentSpreadsheet.cellFormats[ref];
+            });
+            saveCurrentSpreadsheet();
+            renderSpreadsheetGrid();
+            updateFormatToolbarState();
+        }
+
+        function updateFormatToolbarState() {
+            if (!currentSpreadsheet) return;
+            const refs = currentSelectionRefs();
+            const anchor = refs[0] || selectedCellRef;
+            const f = (currentSpreadsheet.cellFormats && currentSpreadsheet.cellFormats[anchor]) || {};
+            document.getElementById("fmtBoldBtn").classList.toggle("active", !!f.bold);
+            document.getElementById("fmtItalicBtn").classList.toggle("active", !!f.italic);
+            document.getElementById("fmtUnderlineBtn").classList.toggle("active", !!f.underline);
+            document.getElementById("fmtAlignLeftBtn").classList.toggle("active", f.align === "left");
+            document.getElementById("fmtAlignCenterBtn").classList.toggle("active", f.align === "center");
+            document.getElementById("fmtAlignRightBtn").classList.toggle("active", f.align === "right");
+            document.getElementById("fmtTextColor").value = f.color || "#1a1a1a";
+            document.getElementById("fmtBgColor").value = f.bg || "#ffffff";
+            document.getElementById("fmtNumberFormat").value = f.numFmt || "general";
+        }
+
+        // ---- Column/row resizing ----
+
+        // Mouse and touch events expose coordinates differently (clientX/Y directly
+        // vs. inside touches[0]/changedTouches[0]) -- this lets the drag handlers
+        // below work with either without duplicating logic.
+        function clientXYFromEvent(e) {
+            if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        function startColResize(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const handle = e.currentTarget;
+            const colIndex = parseInt(handle.dataset.col, 10);
+            const startX = clientXYFromEvent(e).x;
+            const startWidth = currentSpreadsheet.colWidths[colIndex] || DEFAULT_COL_WIDTH;
+            handle.classList.add("resizing");
+            const colEl = document.querySelectorAll("#spreadsheetGrid colgroup col")[colIndex + 1];
+
+            function onMove(ev) {
+                if (ev.cancelable) ev.preventDefault();
+                const newWidth = Math.max(MIN_COL_WIDTH, startWidth + (clientXYFromEvent(ev).x - startX));
+                if (colEl) colEl.style.width = newWidth + "px";
+                currentSpreadsheet.colWidths[colIndex] = newWidth;
+                updateSpreadsheetTableWidth();
+            }
+            function onUp(ev) {
+                document.removeEventListener("mousemove", onMove);
+                document.removeEventListener("mouseup", onUp);
+                document.removeEventListener("touchmove", onMove);
+                document.removeEventListener("touchend", onUp);
+                document.removeEventListener("touchcancel", onUp);
+                handle.classList.remove("resizing");
+                const newWidth = Math.max(MIN_COL_WIDTH, startWidth + (clientXYFromEvent(ev).x - startX));
+                currentSpreadsheet.colWidths[colIndex] = newWidth;
+                updateSpreadsheetTableWidth();
+                saveCurrentSpreadsheet();
+            }
+            document.addEventListener("mousemove", onMove);
+            document.addEventListener("mouseup", onUp);
+            document.addEventListener("touchmove", onMove, { passive: false });
+            document.addEventListener("touchend", onUp);
+            document.addEventListener("touchcancel", onUp);
+        }
+
+        function startRowResize(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const handle = e.currentTarget;
+            const rowIndex = parseInt(handle.dataset.row, 10);
+            const startY = clientXYFromEvent(e).y;
+            const tr = handle.closest("tr");
+            const startHeight = currentSpreadsheet.rowHeights[rowIndex] || (tr ? tr.getBoundingClientRect().height : DEFAULT_ROW_HEIGHT);
+            handle.classList.add("resizing");
+
+            function onMove(ev) {
+                if (ev.cancelable) ev.preventDefault();
+                const newHeight = Math.max(MIN_ROW_HEIGHT, startHeight + (clientXYFromEvent(ev).y - startY));
+                if (tr) tr.style.height = newHeight + "px";
+            }
+            function onUp(ev) {
+                document.removeEventListener("mousemove", onMove);
+                document.removeEventListener("mouseup", onUp);
+                document.removeEventListener("touchmove", onMove);
+                document.removeEventListener("touchend", onUp);
+                document.removeEventListener("touchcancel", onUp);
+                handle.classList.remove("resizing");
+                const newHeight = Math.max(MIN_ROW_HEIGHT, startHeight + (clientXYFromEvent(ev).y - startY));
+                currentSpreadsheet.rowHeights[rowIndex] = newHeight;
+                saveCurrentSpreadsheet();
+            }
+            document.addEventListener("mousemove", onMove);
+            document.addEventListener("mouseup", onUp);
+            document.addEventListener("touchmove", onMove, { passive: false });
+            document.addEventListener("touchend", onUp);
+            document.addEventListener("touchcancel", onUp);
+        }
+
+        // ---- Autofill (drag the fill handle to continue a pattern) ----
+        // Numeric sequences extrapolate (constant-difference series, or +1 per
+        // step from a single number); formulas keep their relative references
+        // shifted by the same offset Excel would use; anything else repeats the
+        // source pattern cyclically.
+
+        let fillDragActive = false;
+        let fillSourceRefs = [];
+        let fillPreviewRefs = [];
+        let fillDirection = null; // {axis: 'row'|'col', dir: 1|-1}
+
+        function startFillDrag(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            fillDragActive = true;
+            fillSourceRefs = currentSelectionRefs();
+            fillPreviewRefs = [];
+            fillDirection = null;
+            document.addEventListener("mousemove", onFillDragMove);
+            document.addEventListener("mouseup", onFillDragEnd);
+            document.addEventListener("touchmove", onFillDragMove, { passive: false });
+            document.addEventListener("touchend", onFillDragEnd);
+            document.addEventListener("touchcancel", onFillDragEnd);
+        }
+
+        function onFillDragMove(e) {
+            if (!fillDragActive) return;
+            if (e.cancelable) e.preventDefault();
+            const pos = clientXYFromEvent(e);
+            const el = document.elementFromPoint(pos.x, pos.y);
+            const input = el && el.closest ? el.closest("input.cell-input") : null;
+            if (!input) return;
+            computeFillPreview(input.dataset.ref);
+            renderFillPreviewHighlight();
+        }
+
+        function onFillDragEnd() {
+            if (!fillDragActive) return;
+            fillDragActive = false;
+            document.removeEventListener("mousemove", onFillDragMove);
+            document.removeEventListener("mouseup", onFillDragEnd);
+            document.removeEventListener("touchmove", onFillDragMove);
+            document.removeEventListener("touchend", onFillDragEnd);
+            document.removeEventListener("touchcancel", onFillDragEnd);
+            if (fillDirection && fillPreviewRefs.length) {
+                applyAutofill();
+            }
+            fillPreviewRefs = [];
+            fillDirection = null;
+            renderSpreadsheetGrid();
+            updateFormulaBar();
+            updateFormatToolbarState();
+        }
+
+        function computeFillPreview(targetRef) {
+            const t = parseCellRef(targetRef);
+            if (!t) return;
+            const bounds = boundsOfRefs(fillSourceRefs);
+            if (!bounds) return;
+            const { rowMin, rowMax, colMin, colMax } = bounds;
+
+            const vertExtent = Math.max(rowMin - t.row, t.row - rowMax, 0);
+            const horizExtent = Math.max(colMin - t.col, t.col - colMax, 0);
+
+            fillPreviewRefs = [];
+            fillDirection = null;
+            if (vertExtent === 0 && horizExtent === 0) return;
+
+            if (vertExtent >= horizExtent) {
+                if (t.row > rowMax) {
+                    fillDirection = { axis: "row", dir: 1 };
+                    for (let r = rowMax + 1; r <= t.row; r++) {
+                        for (let c = colMin; c <= colMax; c++) fillPreviewRefs.push(cellRefAt(r, c));
+                    }
+                } else if (t.row < rowMin) {
+                    fillDirection = { axis: "row", dir: -1 };
+                    for (let r = t.row; r < rowMin; r++) {
+                        for (let c = colMin; c <= colMax; c++) fillPreviewRefs.push(cellRefAt(r, c));
+                    }
+                }
+            } else {
+                if (t.col > colMax) {
+                    fillDirection = { axis: "col", dir: 1 };
+                    for (let c = colMax + 1; c <= t.col; c++) {
+                        for (let r = rowMin; r <= rowMax; r++) fillPreviewRefs.push(cellRefAt(r, c));
+                    }
+                } else if (t.col < colMin) {
+                    fillDirection = { axis: "col", dir: -1 };
+                    for (let c = t.col; c < colMin; c++) {
+                        for (let r = rowMin; r <= rowMax; r++) fillPreviewRefs.push(cellRefAt(r, c));
+                    }
+                }
+            }
+        }
+
+        function renderFillPreviewHighlight() {
+            const previewSet = new Set(fillPreviewRefs);
+            document.querySelectorAll("#spreadsheetGrid td.cell-wrap").forEach(td => {
+                const input = td.querySelector("input.cell-input");
+                const ref = input ? input.dataset.ref : null;
+                td.classList.toggle("fill-preview", !!ref && previewSet.has(ref));
+            });
+        }
+
+        // Shifts every cell reference found in a formula by a row/col offset --
+        // this is what makes autofilled formulas behave like Excel's relative
+        // references (e.g. dragging "=A1" down one row becomes "=A2").
+        function adjustFormulaOffset(raw, rowOffset, colOffset) {
+            if (rowOffset === 0 && colOffset === 0) return raw;
+            return raw.replace(/\b([A-Za-z]{1,3})(\d+)\b/g, (match, colLetters, rowDigits) => {
+                const colIdx = colLetterToIndex(colLetters.toUpperCase());
+                const rowIdx = parseInt(rowDigits, 10) - 1;
+                const newCol = colIdx + colOffset;
+                const newRow = rowIdx + rowOffset;
+                if (newCol < 0 || newRow < 0) return match;
+                return cellRefAt(newRow, newCol);
+            });
+        }
+
+        // Computes the autofilled value for one cell along a single fill line
+        // (the cells of one column when filling vertically, or one row when
+        // filling horizontally). generalIndex counts position along that axis
+        // from the first source cell (0-based) -- source cells occupy indices
+        // 0..n-1 and anything outside that range is a fill target.
+        function computeAutofillValueForLine(sourceRefsOrdered, generalIndex, axisIsRow) {
+            const n = sourceRefsOrdered.length;
+            const sourceIndex = ((generalIndex % n) + n) % n;
+            const sourceRef = sourceRefsOrdered[sourceIndex];
+            const raw = getCellRaw(sourceRef);
+            const trimmed = raw.trim();
+
+            if (trimmed.startsWith("=")) {
+                const offset = generalIndex - sourceIndex;
+                return adjustFormulaOffset(raw, axisIsRow ? offset : 0, axisIsRow ? 0 : offset);
+            }
+
+            if (generalIndex < 0 || generalIndex >= n) {
+                const nums = sourceRefsOrdered.map(ref => {
+                    const v = getCellRaw(ref).trim();
+                    const num = parseFloat(v);
+                    return (v !== "" && !isNaN(num) && String(num) === v) ? num : null;
+                });
+                if (nums.every(v => v !== null)) {
+                    let step = 1;
+                    if (n >= 2) {
+                        const diffs = [];
+                        for (let i = 1; i < n; i++) diffs.push(nums[i] - nums[i - 1]);
+                        const consistent = diffs.every(d => Math.abs(d - diffs[0]) < 1e-9);
+                        step = consistent ? diffs[0] : null;
+                    }
+                    if (step !== null) {
+                        const val = nums[0] + step * generalIndex;
+                        return String(Math.round(val * 1e6) / 1e6);
+                    }
+                }
+            }
+
+            return raw;
+        }
+
+        function applyAutofill() {
+            if (!currentSpreadsheet || !fillDirection || !fillPreviewRefs.length) return;
+            const bounds = boundsOfRefs(fillSourceRefs);
+            if (!bounds) return;
+            const { rowMin, rowMax, colMin, colMax } = bounds;
+
+            if (fillDirection.axis === "row") {
+                for (let c = colMin; c <= colMax; c++) {
+                    const lineSource = [];
+                    for (let r = rowMin; r <= rowMax; r++) lineSource.push(cellRefAt(r, c));
+                    const targetRows = fillPreviewRefs
+                        .map(parseCellRef)
+                        .filter(p => p && p.col === c)
+                        .map(p => p.row);
+                    targetRows.forEach(r => {
+                        const generalIndex = r - rowMin;
+                        const value = computeAutofillValueForLine(lineSource, generalIndex, true);
+                        commitAutofillCell(cellRefAt(r, c), value);
+                    });
+                }
+            } else {
+                for (let r = rowMin; r <= rowMax; r++) {
+                    const lineSource = [];
+                    for (let c = colMin; c <= colMax; c++) lineSource.push(cellRefAt(r, c));
+                    const targetCols = fillPreviewRefs
+                        .map(parseCellRef)
+                        .filter(p => p && p.row === r)
+                        .map(p => p.col);
+                    targetCols.forEach(c => {
+                        const generalIndex = c - colMin;
+                        const value = computeAutofillValueForLine(lineSource, generalIndex, false);
+                        commitAutofillCell(cellRefAt(r, c), value);
+                    });
+                }
+            }
+
+            saveCurrentSpreadsheet();
+
+            const lastFilled = fillPreviewRefs[fillPreviewRefs.length - 1];
+            selectionRange = { start: fillSourceRefs[0], end: lastFilled || fillSourceRefs[fillSourceRefs.length - 1] };
+            selectedCellRef = fillSourceRefs[0];
+        }
+
+        function commitAutofillCell(ref, value) {
+            if (value === "" || value === null || value === undefined) {
+                delete currentSpreadsheet.cells[ref];
+            } else {
+                currentSpreadsheet.cells[ref] = value;
+            }
         }
 
         document.getElementById("formulaBarInput").addEventListener("keydown", (e) => {
@@ -8615,6 +9680,7 @@
         let kanbanSaveTimer = null;    // debounce handle for autosave
         let kanbanDragCardId = null;   // id of the card currently being dragged
         let kanbanDragFromColumnId = null;
+        let kanbanEditingDescCardId = null; // id of the card whose description editor is currently open
 
         function kanbanGenId() {
             return "k" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -8900,6 +9966,7 @@
     `;
 
             wrap.innerHTML = columnsHtml + addColumnHtml;
+            attachKanbanTouchHandlers();
         }
 
         function renderKanbanCardHtml(card, columnId) {
@@ -8907,17 +9974,29 @@
                 .map(c => `<option value="${c.id}" ${c.id === columnId ? "selected" : ""}>${escapeHtml(c.name)}</option>`)
                 .join("");
 
+            const descEditorOpen = kanbanEditingDescCardId === card.id;
+            const descHtml = descEditorOpen
+                ? `<div class="kanban-card-desc-editor">
+                    <textarea id="kanbanDescEdit_${card.id}" rows="3" placeholder="Description...">${escapeHtml(card.desc || "")}</textarea>
+                    <div class="kanban-card-desc-editor-actions">
+                        <button type="button" class="btn-success" onclick="saveKanbanCardDesc('${card.id}', '${columnId}')">Save</button>
+                        <button type="button" onclick="cancelKanbanCardDescEdit()">Cancel</button>
+                    </div>
+                </div>`
+                : (card.desc ? `<div class="kanban-card-desc">${escapeHtml(card.desc)}</div>` : "");
+
             return `
-        <div class="kanban-card" draggable="true" data-card-id="${card.id}"
+        <div class="kanban-card" draggable="true" data-card-id="${card.id}" data-column-id="${columnId}"
             ondragstart="kanbanCardDragStart(event, '${card.id}', '${columnId}')"
             ondragend="kanbanCardDragEnd(event)">
             <div class="kanban-card-title">${escapeHtml(card.title)}</div>
-            ${card.desc ? `<div class="kanban-card-desc">${escapeHtml(card.desc)}</div>` : ""}
+            ${descHtml}
             <div class="kanban-card-actions">
                 <select onchange="moveKanbanCardToColumn('${card.id}', '${columnId}', this.value)" aria-label="Move to column">
                     ${moveOptions}
                 </select>
                 <button type="button" onclick="editKanbanCard('${card.id}', '${columnId}')">Edit</button>
+                <button type="button" onclick="toggleKanbanCardDescEditor('${card.id}', '${columnId}')">${card.desc ? "Edit Desc" : "Add Desc"}</button>
                 <button type="button" onclick="deleteKanbanCard('${card.id}', '${columnId}')" class="btn-danger">Delete</button>
             </div>
         </div>
@@ -9008,13 +10087,42 @@
                 alert("Card title can't be empty.");
                 return;
             }
-            const newDesc = prompt("Card description (optional):", card.desc || "");
-            if (newDesc === null) return;
 
             card.title = trimmedTitle;
-            card.desc = newDesc.trim();
             card.updatedAt = getCurrentTimestamp();
             saveCurrentKanbanBoard();
+            renderKanbanBoard();
+        }
+
+        function toggleKanbanCardDescEditor(cardId, columnId) {
+            kanbanEditingDescCardId = (kanbanEditingDescCardId === cardId) ? null : cardId;
+            renderKanbanBoard();
+            if (kanbanEditingDescCardId === cardId) {
+                const ta = document.getElementById(`kanbanDescEdit_${cardId}`);
+                if (ta) {
+                    ta.focus();
+                    ta.setSelectionRange(ta.value.length, ta.value.length);
+                }
+            }
+        }
+
+        function saveKanbanCardDesc(cardId, columnId) {
+            const col = findKanbanColumn(columnId);
+            if (!col) return;
+            const card = col.cards.find(c => c.id === cardId);
+            if (!card) return;
+            const ta = document.getElementById(`kanbanDescEdit_${cardId}`);
+            if (!ta) return;
+
+            card.desc = ta.value.trim();
+            card.updatedAt = getCurrentTimestamp();
+            kanbanEditingDescCardId = null;
+            saveCurrentKanbanBoard();
+            renderKanbanBoard();
+        }
+
+        function cancelKanbanCardDescEdit() {
+            kanbanEditingDescCardId = null;
             renderKanbanBoard();
         }
 
@@ -9084,6 +10192,147 @@
             moveKanbanCardToColumn(kanbanDragCardId, kanbanDragFromColumnId, toColumnId);
             kanbanDragCardId = null;
             kanbanDragFromColumnId = null;
+        }
+
+        // ---- Touch drag and drop (HTML5 DnD above doesn't fire on touch devices) ----
+        // A short hold-and-move gesture lifts the card into a fixed-position "ghost"
+        // that follows the finger; releasing over a column drops the card there.
+        // Until the hold triggers, touches pass through untouched so the page and
+        // the horizontally-scrolling board still scroll normally.
+
+        let kanbanTouchState = null;
+
+        function attachKanbanTouchHandlers() {
+            document.querySelectorAll(".kanban-card").forEach(card => {
+                card.addEventListener("touchstart", kanbanCardTouchStart, { passive: false });
+            });
+        }
+
+        function kanbanCardTouchStart(e) {
+            if (e.target.closest(".kanban-card-actions") || e.target.closest(".kanban-card-desc-editor")) return; // let Edit/Delete/select/desc editing work normally
+            if (e.touches.length !== 1) return;
+            kanbanCardTouchTeardown(); // safety: clear any stale state from a previous gesture
+
+            const card = e.currentTarget;
+            const touch = e.touches[0];
+            const rect = card.getBoundingClientRect();
+
+            const st = {
+                card,
+                cardId: card.dataset.cardId,
+                fromColumnId: card.dataset.columnId,
+                startX: touch.clientX,
+                startY: touch.clientY,
+                offsetX: touch.clientX - rect.left,
+                offsetY: touch.clientY - rect.top,
+                width: rect.width,
+                height: rect.height,
+                dragging: false,
+                hoverColumnId: null,
+                placeholder: null,
+                longPressTimer: null
+            };
+            kanbanTouchState = st;
+
+            st.longPressTimer = setTimeout(() => kanbanCardTouchActivate(), 180);
+
+            card.addEventListener("touchmove", kanbanCardTouchMove, { passive: false });
+            card.addEventListener("touchend", kanbanCardTouchEnd, { passive: false });
+            card.addEventListener("touchcancel", kanbanCardTouchEnd, { passive: false });
+        }
+
+        function kanbanCardTouchActivate() {
+            const st = kanbanTouchState;
+            if (!st) return;
+            st.dragging = true;
+
+            const rect = st.card.getBoundingClientRect();
+            const placeholder = document.createElement("div");
+            placeholder.className = "kanban-card-placeholder";
+            placeholder.style.height = rect.height + "px";
+            st.card.parentNode.insertBefore(placeholder, st.card.nextSibling);
+            st.placeholder = placeholder;
+
+            st.card.style.position = "fixed";
+            st.card.style.left = rect.left + "px";
+            st.card.style.top = rect.top + "px";
+            st.card.style.width = rect.width + "px";
+            st.card.style.zIndex = "1000";
+            st.card.style.pointerEvents = "none";
+            st.card.classList.add("kanban-touch-dragging");
+
+            if (navigator.vibrate) { try { navigator.vibrate(10); } catch (err) { } }
+        }
+
+        function kanbanCardTouchMove(e) {
+            const st = kanbanTouchState;
+            if (!st) return;
+            const touch = e.touches[0];
+
+            if (!st.dragging) {
+                // Moved more than a tap's worth before the hold fired -- that's a scroll
+                // gesture, not a drag. Let the browser handle it.
+                const dx = touch.clientX - st.startX;
+                const dy = touch.clientY - st.startY;
+                if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                    kanbanCardTouchTeardown();
+                }
+                return;
+            }
+
+            e.preventDefault(); // dragging is active -- stop the page from scrolling under the finger
+            st.card.style.left = (touch.clientX - st.offsetX) + "px";
+            st.card.style.top = (touch.clientY - st.offsetY) + "px";
+
+            st.card.style.display = "none";
+            const elBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            st.card.style.display = "";
+
+            const col = elBelow && elBelow.closest(".kanban-column");
+            const newColumnId = col ? col.dataset.columnId : null;
+            if (newColumnId !== st.hoverColumnId) {
+                document.querySelectorAll(".kanban-column.drag-over").forEach(c => c.classList.remove("drag-over"));
+                if (col) col.classList.add("drag-over");
+                st.hoverColumnId = newColumnId;
+            }
+        }
+
+        function kanbanCardTouchEnd(e) {
+            const st = kanbanTouchState;
+            if (!st) return;
+            clearTimeout(st.longPressTimer);
+
+            const wasDragging = st.dragging;
+            const toColumnId = st.hoverColumnId;
+            const cardId = st.cardId;
+            const fromColumnId = st.fromColumnId;
+
+            kanbanCardTouchTeardown();
+
+            if (wasDragging && toColumnId && toColumnId !== fromColumnId) {
+                moveKanbanCardToColumn(cardId, fromColumnId, toColumnId);
+            }
+        }
+
+        function kanbanCardTouchTeardown() {
+            const st = kanbanTouchState;
+            if (!st) return;
+            clearTimeout(st.longPressTimer);
+            st.card.removeEventListener("touchmove", kanbanCardTouchMove);
+            st.card.removeEventListener("touchend", kanbanCardTouchEnd);
+            st.card.removeEventListener("touchcancel", kanbanCardTouchEnd);
+
+            st.card.style.position = "";
+            st.card.style.left = "";
+            st.card.style.top = "";
+            st.card.style.width = "";
+            st.card.style.zIndex = "";
+            st.card.style.pointerEvents = "";
+            st.card.classList.remove("kanban-touch-dragging");
+            if (st.placeholder && st.placeholder.parentNode) st.placeholder.parentNode.removeChild(st.placeholder);
+
+            document.querySelectorAll(".kanban-column.drag-over").forEach(c => c.classList.remove("drag-over"));
+            kanbanTouchState = null;
         }
 
         // ---------- Folders ----------
@@ -10571,6 +11820,7 @@ ${recordsHtml}
             const clearRequest = store.clear();
 
             clearRequest.onsuccess = () => {
+                clearPrivateNotesForCurrentDatabase();
                 exitEditMode();
                 form.reset();
                 setMessageHtml("");
@@ -10715,6 +11965,31 @@ ${recordsHtml}
                 .replace(/'/g, "&#39;");
         }
 
+        // Compact "money-style" formatting for score/points/XP numbers shown to
+        // players (k/m/b/t suffixes: 1,000 -> "1k", 2,500,000 -> "2.5m", etc).
+        // Keeps up to 2 decimal places and trims trailing zeros, always shows
+        // the sign for negatives, and falls back to a plain integer below 1,000
+        // so small numbers stay exact and easy to read.
+        function formatCompactNumber(num) {
+            const n = Number(num) || 0;
+            const sign = n < 0 ? "-" : "";
+            const abs = Math.abs(n);
+            const tiers = [
+                { value: 1e12, suffix: "t" },
+                { value: 1e9, suffix: "b" },
+                { value: 1e6, suffix: "m" },
+                { value: 1e3, suffix: "k" }
+            ];
+            for (const tier of tiers) {
+                if (abs >= tier.value) {
+                    const scaled = Math.floor((abs / tier.value) * 100) / 100;
+                    const str = scaled.toFixed(2).replace(/\.?0+$/, "");
+                    return `${sign}${str}${tier.suffix}`;
+                }
+            }
+            return `${sign}${Math.round(abs)}`;
+        }
+
         // ---------- Math Question Generator ----------
         //
         // Everything here runs locally in the browser: question data and
@@ -10851,9 +12126,138 @@ ${recordsHtml}
                 }
                 case "alg":
                     return mathGenerateAlgebra(range, algOptions);
+                case "mean": {
+                    const data = mathRandomDataset(range, mathRandInt(5, 8));
+                    const mean = data.reduce((a, b) => a + b, 0) / data.length;
+                    const answer = mathRoundedStat(mean);
+                    const expr = `Find the mean of: ${data.join(", ")}`;
+                    return { expr, answer, text: expr };
+                }
+                case "median": {
+                    const data = mathRandomDataset(range, mathRandInt(5, 9));
+                    const median = mathMedianOf(data);
+                    const answer = mathRoundedStat(median);
+                    const expr = `Find the median of: ${data.join(", ")}`;
+                    return { expr, answer, text: expr };
+                }
+                case "mode": {
+                    const data = mathRandomModeDataset(range);
+                    const modes = mathModesOf(data);
+                    const expr = `Find the mode of: ${data.join(", ")}`;
+                    return { expr, answer: modes.join(", "), text: expr };
+                }
+                case "statrange": {
+                    const data = mathRandomDataset(range, mathRandInt(5, 9));
+                    const statRange = Math.max(...data) - Math.min(...data);
+                    const expr = `Find the range of: ${data.join(", ")}`;
+                    return { expr, answer: String(statRange), text: expr };
+                }
+                case "quartile": {
+                    const data = mathRandomDataset(range, mathRandInt(7, 11));
+                    const sorted = [...data].sort((a, b) => a - b);
+                    const which = [1, 3][mathRandInt(0, 1)];
+                    const val = mathQuartileOf(sorted, which);
+                    const answer = mathRoundedStat(val);
+                    const label = which === 1 ? "Q1 (first quartile)" : "Q3 (third quartile)";
+                    const expr = `Find ${label} of: ${data.join(", ")}`;
+                    return { expr, answer, text: expr };
+                }
+                case "decile": {
+                    const data = mathRandomDataset(range, mathRandInt(8, 12));
+                    const sorted = [...data].sort((a, b) => a - b);
+                    const d = mathRandInt(1, 9);
+                    const val = mathNearestRankValue(sorted, d * 10);
+                    const expr = `Find the ${d}${mathOrdinalSuffix(d)} decile (D${d}) of: ${data.join(", ")}`;
+                    return { expr, answer: String(val), text: expr };
+                }
+                case "percentile": {
+                    const data = mathRandomDataset(range, mathRandInt(8, 12));
+                    const sorted = [...data].sort((a, b) => a - b);
+                    const percentiles = [10, 20, 25, 30, 40, 60, 70, 75, 80, 90];
+                    const p = percentiles[mathRandInt(0, percentiles.length - 1)];
+                    const val = mathNearestRankValue(sorted, p);
+                    const expr = `Find the ${p}${mathOrdinalSuffix(p)} percentile (P${p}) of: ${data.join(", ")}`;
+                    return { expr, answer: String(val), text: expr };
+                }
                 default:
                     return null;
             }
+        }
+
+        // ---------- Statistics: mean, median, mode, range, quartile, decile, percentile ----------
+
+        // Builds a random dataset of integers within the current difficulty range.
+        function mathRandomDataset(range, size) {
+            const { min, max } = range;
+            const data = [];
+            for (let i = 0; i < size; i++) data.push(mathRandInt(min, max));
+            return data;
+        }
+
+        // Like mathRandomDataset, but deliberately duplicates one value so the
+        // dataset always has a clear, well-defined mode to solve for.
+        function mathRandomModeDataset(range) {
+            const size = mathRandInt(6, 9);
+            const data = mathRandomDataset(range, size);
+            const modeVal = data[mathRandInt(0, data.length - 1)];
+            data.push(modeVal, modeVal);
+            for (let i = data.length - 1; i > 0; i--) {
+                const j = mathRandInt(0, i);
+                [data[i], data[j]] = [data[j], data[i]];
+            }
+            return data;
+        }
+
+        function mathModesOf(data) {
+            const freq = {};
+            data.forEach(v => { freq[v] = (freq[v] || 0) + 1; });
+            const maxFreq = Math.max(...Object.values(freq));
+            return Object.keys(freq)
+                .filter(k => freq[k] === maxFreq)
+                .map(Number)
+                .sort((a, b) => a - b)
+                .map(String);
+        }
+
+        function mathMedianOf(data) {
+            const sorted = [...data].sort((a, b) => a - b);
+            const n = sorted.length;
+            if (n === 0) return NaN;
+            return n % 2 === 1 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+        }
+
+        // Q1/Q3 via the median-of-halves method (the common classroom approach for
+        // box-and-whisker plots): split the sorted data at the median (excluding
+        // the middle value for an odd-length dataset) and take the median of each
+        // half. Q2 is just the overall median.
+        function mathQuartileOf(sortedData, which) {
+            if (which === 2) return mathMedianOf(sortedData);
+            const n = sortedData.length;
+            const mid = Math.floor(n / 2);
+            const lower = sortedData.slice(0, mid);
+            const upper = n % 2 === 0 ? sortedData.slice(mid) : sortedData.slice(mid + 1);
+            return which === 1 ? mathMedianOf(lower) : mathMedianOf(upper);
+        }
+
+        // Percentile/decile via the nearest-rank method: rank = ceil(p/100 * n).
+        function mathNearestRankValue(sortedData, percent) {
+            const n = sortedData.length;
+            const rank = Math.min(n, Math.max(1, Math.ceil((percent / 100) * n)));
+            return sortedData[rank - 1];
+        }
+
+        function mathOrdinalSuffix(n) {
+            const j = n % 10, k = n % 100;
+            if (j === 1 && k !== 11) return "st";
+            if (j === 2 && k !== 12) return "nd";
+            if (j === 3 && k !== 13) return "rd";
+            return "th";
+        }
+
+        // Whole numbers show as-is; anything else rounds to one decimal place so
+        // averages/medians of even-length datasets read cleanly (e.g. "4.5").
+        function mathRoundedStat(value) {
+            return Number.isInteger(value) ? String(value) : (Math.round(value * 10) / 10).toFixed(1);
         }
 
         // ---------- Simple Equations: variables + complex-equation options ----------
@@ -11128,7 +12532,9 @@ ${recordsHtml}
                 multiplierBaseCost: 200, multiplierPct: 10,     // +10% all points earned, per level
                 lootBaseCost: 150, lootCount: 1, lootPoints: 40, // +1 bonus loot file per round per level, worth this many points
                 mapsBaseCost: 250, mapsOuterPerLevel: 1, mapsVaultPerLevel: 1, // bigger generated worlds per level
-                luckBaseCost: 180, luckPctPerLevel: 5, luckBonusMin: 20, luckBonusMax: 60 // encounter chance per level
+                luckBaseCost: 180, luckPctPerLevel: 5, luckBonusMin: 20, luckBonusMax: 60, // encounter chance per level
+                bountyBaseCost: 220, bountyPerLevel: 25,   // flat bonus points per flag captured, per level
+                rushBaseCost: 160, rushPct: 10             // +% extra Battle Pass XP on every point earned, per level
             };
         }
 
@@ -11165,7 +12571,7 @@ ${recordsHtml}
                 },
                 {
                     key: "loot", label: "Bonus Loot Files", baseCost: cfg.lootBaseCost,
-                    desc: (lvl) => `${lvl * cfg.lootCount} extra bonus file(s) scattered into each new round, worth ${cfg.lootPoints} pts apiece.`
+                    desc: (lvl) => `${lvl * cfg.lootCount} extra bonus file(s) scattered into each new round, worth ${formatCompactNumber(cfg.lootPoints)} pts apiece.`
                 },
                 {
                     key: "maps", label: "Bigger Maps", baseCost: cfg.mapsBaseCost,
@@ -11173,7 +12579,15 @@ ${recordsHtml}
                 },
                 {
                     key: "luck", label: "Lucky Break", baseCost: cfg.luckBaseCost,
-                    desc: (lvl) => `${Math.min(lvl * cfg.luckPctPerLevel, 60)}% chance per file read to stumble on a bonus cache worth ${cfg.luckBonusMin}-${cfg.luckBonusMax} pts.`
+                    desc: (lvl) => `${Math.min(lvl * cfg.luckPctPerLevel, 60)}% chance per file read to stumble on a bonus cache worth ${formatCompactNumber(cfg.luckBonusMin)}-${formatCompactNumber(cfg.luckBonusMax)} pts.`
+                },
+                {
+                    key: "bounty", label: "Flag Bounty", baseCost: cfg.bountyBaseCost,
+                    desc: (lvl) => `+${formatCompactNumber(lvl * cfg.bountyPerLevel)} flat bonus pts every time you capture a flag (next level adds another +${formatCompactNumber(cfg.bountyPerLevel)}).`
+                },
+                {
+                    key: "rush", label: "XP Rush", baseCost: cfg.rushBaseCost,
+                    desc: (lvl) => `+${lvl * cfg.rushPct}% extra Battle Pass XP on every point you earn (next level adds another +${cfg.rushPct}%).`
                 }
             ];
         }
@@ -11249,8 +12663,10 @@ ${recordsHtml}
                 totalFlags: 0,           // cumulative flags collected, all-time
                 score: 0,                // spendable score -- goes up when earned, down when spent in the shop
                 careerScore: 0,          // total points ever earned, all-time -- never decreases; this is what rank is based on
+                bpXp: 0,                 // Battle Pass XP -- never decreases; every point earned adds this much
+                bpClaimedLevels: [],     // Battle Pass levels whose one-time bonus has already been paid out
                 world: null,             // null while on round 1 (uses the shared admin world); a generated world for round 2+
-                shop: { multiplier: 0, loot: 0, maps: 0, luck: 0 } // purchased upgrade levels
+                shop: { multiplier: 0, loot: 0, maps: 0, luck: 0, bounty: 0, rush: 0 } // purchased upgrade levels
             };
         }
 
@@ -11274,6 +12690,12 @@ ${recordsHtml}
                     // spendable score (a floor, since anything already spent isn't reflected --
                     // it will only grow correctly for points earned from here on).
                     const careerScore = Number.isFinite(parsed.careerScore) ? parsed.careerScore : (score != null ? score : 0);
+                    // Players saved before the Battle Pass existed: best guess is their
+                    // current career score (a floor, since it can only be exact for
+                    // points earned from here on -- this avoids retroactively granting
+                    // huge level jumps or leaving veteran players at level 1).
+                    const bpXp = Number.isFinite(parsed.bpXp) ? parsed.bpXp : careerScore;
+                    const bpClaimedLevels = Array.isArray(parsed.bpClaimedLevels) ? parsed.bpClaimedLevels : [];
                     return {
                         readFiles,
                         unlockedDirs,
@@ -11282,12 +12704,16 @@ ${recordsHtml}
                         totalFlags: totalFlags != null ? totalFlags : 0,
                         score: score != null ? score : 0,
                         careerScore,
+                        bpXp,
+                        bpClaimedLevels,
                         world: parsed.world && typeof parsed.world === "object" && parsed.world.root ? parsed.world : null,
                         shop: {
                             multiplier: (parsed.shop && Number.isFinite(parsed.shop.multiplier)) ? parsed.shop.multiplier : 0,
                             loot: (parsed.shop && Number.isFinite(parsed.shop.loot)) ? parsed.shop.loot : 0,
                             maps: (parsed.shop && Number.isFinite(parsed.shop.maps)) ? parsed.shop.maps : 0,
-                            luck: (parsed.shop && Number.isFinite(parsed.shop.luck)) ? parsed.shop.luck : 0
+                            luck: (parsed.shop && Number.isFinite(parsed.shop.luck)) ? parsed.shop.luck : 0,
+                            bounty: (parsed.shop && Number.isFinite(parsed.shop.bounty)) ? parsed.shop.bounty : 0,
+                            rush: (parsed.shop && Number.isFinite(parsed.shop.rush)) ? parsed.shop.rush : 0
                         }
                     };
                 }
@@ -11311,6 +12737,223 @@ ${recordsHtml}
             return progress.careerScore || 0;
         }
 
+        // ---- Battle Pass (every point earned also earns that much XP) ----
+        // A separate, endless progression track layered on top of score/rank:
+        // every point awarded anywhere in the game also adds that many Battle
+        // Pass XP. Levels cost a flat amount of XP each (admin-configurable), so
+        // progress is easy to read at a glance, and each level pays out a
+        // one-time bonus of spendable score (also admin-configurable) plus a
+        // title (admin-editable list). Titles cycle once the list runs out,
+        // appending a roman-numeral tier (e.g. "Legend II") so it never caps.
+
+        function defaultTerminalBpConfig() {
+            return { xpPerLevel: 200, xpGrowthPct: 0, rewardBase: 20, rewardPerLevel: 5 };
+        }
+
+        function loadTerminalBpConfig() {
+            const d = defaultTerminalBpConfig();
+            try {
+                const raw = localStorage.getItem(TERMINAL_BP_CONFIG_KEY);
+                if (!raw) return d;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== "object") return d;
+                return {
+                    xpPerLevel: (Number.isFinite(parsed.xpPerLevel) && parsed.xpPerLevel > 0) ? parsed.xpPerLevel : d.xpPerLevel,
+                    // % more XP each level costs than the one before (0 = flat/original
+                    // behavior, matching every save from before this setting existed).
+                    // Clamped so a level can never cost less than the one before it.
+                    xpGrowthPct: (Number.isFinite(parsed.xpGrowthPct) && parsed.xpGrowthPct >= 0) ? parsed.xpGrowthPct : d.xpGrowthPct,
+                    rewardBase: Number.isFinite(parsed.rewardBase) ? parsed.rewardBase : d.rewardBase,
+                    rewardPerLevel: Number.isFinite(parsed.rewardPerLevel) ? parsed.rewardPerLevel : d.rewardPerLevel
+                };
+            } catch (e) {
+                console.error("Failed to load Battle Pass config, using defaults:", e);
+                return d;
+            }
+        }
+
+        function saveTerminalBpConfig(cfg) {
+            localStorage.setItem(TERMINAL_BP_CONFIG_KEY, JSON.stringify(cfg));
+        }
+
+        function defaultTerminalBpTitles() {
+            return [
+                "Recruit:3", "Initiate:3", "Operative:3", "Analyst:4", "Infiltrator:4", "Specialist:4",
+                "Phantom:5", "Vanguard:5", "Elite:5", "Veteran:6", "Master:6", "Grandmaster:7", "Legend:8", "Mythic:10"
+            ];
+        }
+
+        function loadTerminalBpTitles() {
+            const d = defaultTerminalBpTitles();
+            try {
+                const raw = localStorage.getItem(TERMINAL_BP_TITLES_KEY);
+                if (!raw) return d;
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) return d;
+                const cleaned = parsed.map(t => String(t).trim()).filter(Boolean);
+                return cleaned.length ? cleaned : d;
+            } catch (e) {
+                console.error("Failed to load Battle Pass titles, using defaults:", e);
+                return d;
+            }
+        }
+
+        function saveTerminalBpTitles(titles) {
+            localStorage.setItem(TERMINAL_BP_TITLES_KEY, JSON.stringify(titles));
+        }
+
+        // Each Battle Pass title line doubles as a "tier": the admin can suffix a
+        // line with ":N" (e.g. "Recruit:3") to say that tier spans N consecutive
+        // levels, shown as "Recruit 1", "Recruit 2", "Recruit 3" before moving on
+        // to the next tier. Omitting ":N" defaults that tier to a single level, so
+        // plain title lists from before this feature keep behaving the same way.
+        function parseTerminalBpTierLine(line) {
+            const raw = String(line == null ? "" : line).trim();
+            if (!raw) return null;
+            const idx = raw.lastIndexOf(":");
+            if (idx > -1) {
+                const countPart = raw.slice(idx + 1).trim();
+                if (/^\d+$/.test(countPart)) {
+                    const name = raw.slice(0, idx).trim();
+                    const levels = Math.max(1, parseInt(countPart, 10));
+                    if (name) return { name, levels };
+                }
+            }
+            return { name: raw, levels: 1 };
+        }
+
+        function loadTerminalBpTiers() {
+            const parsed = loadTerminalBpTitles().map(parseTerminalBpTierLine).filter(Boolean);
+            if (parsed.length) return parsed;
+            return defaultTerminalBpTitles().map(parseTerminalBpTierLine).filter(Boolean);
+        }
+
+        // Locates which tier a given Battle Pass level falls into, and how far
+        // into that tier it is (levelInTier is 1-indexed). Once a player has
+        // worked through every tier once, the whole tier list repeats with a
+        // roman-numeral suffix on the tier name (e.g. "Recruit II 1") so
+        // progress never caps out.
+        function terminalBpTierInfoForLevel(level) {
+            const tiers = loadTerminalBpTiers();
+            const totalLevels = tiers.reduce((sum, t) => sum + t.levels, 0) || 1;
+            const zeroLevel = Math.max(0, (level || 1) - 1);
+            const cycle = Math.floor(zeroLevel / totalLevels) + 1;
+            let pos = zeroLevel % totalLevels;
+            for (const t of tiers) {
+                if (pos < t.levels) {
+                    return { name: t.name, levelInTier: pos + 1, tierLevels: t.levels, cycle };
+                }
+                pos -= t.levels;
+            }
+            const last = tiers[tiers.length - 1];
+            return { name: last.name, levelInTier: last.levels, tierLevels: last.levels, cycle };
+        }
+
+        // XP cost to advance out of a given level (1-indexed). With xpGrowthPct
+        // at 0 this is just the flat xpPerLevel value (original behavior); a
+        // positive growth % compounds that cost by that percentage every level,
+        // so e.g. 200 XP + 10% growth costs 200, 220, 242, 266... to climb.
+        function terminalBpXpCostForLevel(level, cfg) {
+            const c = cfg || loadTerminalBpConfig();
+            const growth = 1 + (Number.isFinite(c.xpGrowthPct) ? c.xpGrowthPct : 0) / 100;
+            const raw = c.xpPerLevel * Math.pow(Math.max(growth, 1), Math.max(0, (level || 1) - 1));
+            return Math.max(1, Math.round(raw));
+        }
+
+        // Safety cap on how many levels we'll walk through when converting total
+        // XP into a level -- guards against a pathological config (e.g. a huge
+        // growth %) turning this into a near-infinite loop.
+        const TERMINAL_BP_MAX_LEVEL_STEPS = 100000;
+
+        // Walks the (possibly scaling) XP curve to find which level a given
+        // amount of total XP lands on, how far into that level the player is,
+        // and how much XP that level costs in total.
+        function terminalBpLevelInfoForXp(xp) {
+            const cfg = loadTerminalBpConfig();
+            let remaining = Math.max(0, xp || 0);
+            let level = 1;
+            let costForLevel = terminalBpXpCostForLevel(level, cfg);
+            while (remaining >= costForLevel && level < TERMINAL_BP_MAX_LEVEL_STEPS) {
+                remaining -= costForLevel;
+                level++;
+                costForLevel = terminalBpXpCostForLevel(level, cfg);
+            }
+            return { level, xpIntoLevel: remaining, xpForLevel: costForLevel };
+        }
+
+        function terminalBpLevelForXp(xp) {
+            return terminalBpLevelInfoForXp(xp).level;
+        }
+
+        // Small roman-numeral helper for repeat-cycle Battle Pass titles once the
+        // title list has been used once all the way through (I, II, III, ...).
+        function terminalRomanNumeral(num) {
+            const table = [[1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"],
+            [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
+            let n = num, out = "";
+            for (const [val, sym] of table) {
+                while (n >= val) { out += sym; n -= val; }
+            }
+            return out || String(num);
+        }
+
+        function terminalBpTitleForLevel(level) {
+            const info = terminalBpTierInfoForLevel(level);
+            const base = info.cycle > 1 ? `${info.name} ${terminalRomanNumeral(info.cycle)}` : info.name;
+            return `${base} ${info.levelInTier}`;
+        }
+
+        // One-time bonus of spendable score paid out the moment a level is
+        // reached -- scales with level (both numbers admin-configurable) so
+        // higher tiers stay meaningful.
+        function terminalBpRewardForLevel(level) {
+            const cfg = loadTerminalBpConfig();
+            return cfg.rewardBase + level * cfg.rewardPerLevel;
+        }
+
+        function terminalBpProgress(progress) {
+            const xp = (progress && progress.bpXp) || 0;
+            const info = terminalBpLevelInfoForXp(xp);
+            return {
+                xp,
+                level: info.level,
+                title: terminalBpTitleForLevel(info.level),
+                xpIntoLevel: info.xpIntoLevel,
+                xpForLevel: info.xpForLevel,
+                pct: Math.min(100, Math.round((info.xpIntoLevel / info.xpForLevel) * 100))
+            };
+        }
+
+        // Grants XP 1-for-1 with points earned, then pays out and announces any
+        // level-up(s) that XP crosses (a single big award, like a round-clear
+        // bonus, can cross more than one level at once).
+        function terminalAwardBattlepassXp(amount) {
+            if (!terminalProgress || !amount || amount <= 0) return;
+            if (!Number.isFinite(terminalProgress.bpXp)) terminalProgress.bpXp = 0;
+            if (!Array.isArray(terminalProgress.bpClaimedLevels)) terminalProgress.bpClaimedLevels = [];
+
+            const beforeLevel = terminalBpLevelForXp(terminalProgress.bpXp);
+            terminalProgress.bpXp += amount;
+            const afterLevel = terminalBpLevelForXp(terminalProgress.bpXp);
+
+            if (afterLevel > beforeLevel) {
+                let totalBonus = 0;
+                for (let lvl = beforeLevel + 1; lvl <= afterLevel; lvl++) {
+                    if (terminalProgress.bpClaimedLevels.includes(lvl)) continue;
+                    totalBonus += terminalBpRewardForLevel(lvl);
+                    terminalProgress.bpClaimedLevels.push(lvl);
+                }
+                if (totalBonus > 0) {
+                    // Added directly (not via terminalAwardPoints) so the bonus itself
+                    // doesn't loop back into more Battle Pass XP.
+                    terminalProgress.score = (terminalProgress.score || 0) + totalBonus;
+                    terminalProgress.careerScore = (terminalProgress.careerScore || 0) + totalBonus;
+                    const title = terminalBpTitleForLevel(afterLevel);
+                    terminalPrint(`*** BATTLE PASS LEVEL UP! Now level ${afterLevel} -- ${title} (+${formatCompactNumber(totalBonus)} bonus pts) ***`, "term-line-flag");
+                }
+            }
+        }
+
         function terminalAwardPoints(basePoints) {
             const shop = (terminalProgress && terminalProgress.shop) || { multiplier: 0 };
             const shopCfg = loadTerminalShopConfig();
@@ -11323,6 +12966,8 @@ ${recordsHtml}
             if (after.index > before.index) {
                 terminalPrint(`*** PROMOTED: ${before.rank.name} -> ${after.rank.name}! ***`, "term-line-flag");
             }
+            const rushMult = 1 + ((shop.rush || 0) * (shopCfg.rushPct / 100));
+            terminalAwardBattlepassXp(Math.round(amount * rushMult)); // every point earned also earns Battle Pass XP, boosted by XP Rush
             return amount;
         }
 
@@ -11380,14 +13025,61 @@ ${recordsHtml}
             const shopCfg = loadTerminalShopConfig();
             const vaultCount = Math.min(1 + Math.floor(round / 2) + (shop.maps * shopCfg.mapsVaultPerLevel), 8);
             const numOuter = Math.min(2 + Math.floor(round / 3) + (shop.maps * shopCfg.mapsOuterPerLevel), 10);
-            const dirPool = terminalShuffle(["srv", "opt", "etc", "data", "archive", "backups", "staging", "ops", "research", "annex", "substation", "depot", "relay", "cache", "outpost"]);
-            const vaultPool = terminalShuffle(["vault", "strongroom", "reactor", "core", "silo", "bunker", "keep", "citadel", "reliquary", "sanctum"]);
+            const dirPool = terminalShuffle([
+                "srv", "opt", "etc", "data", "archive", "backups", "staging", "ops", "research", "annex",
+                "substation", "depot", "relay", "cache", "outpost", "logs", "tmp", "var", "usr", "shared",
+                "private", "public", "restricted", "classified", "sandbox", "testbed", "prototype", "legacy",
+                "deprecated", "quarantine", "isolation", "containment", "maintenance", "utilities",
+                "infrastructure", "network", "telemetry", "monitoring", "security", "surveillance",
+                "personnel", "finance", "accounting", "logistics", "procurement", "engineering", "fabrication",
+                "assembly", "warehouse", "shipping", "receiving", "control_room", "command", "comms",
+                "signals", "records", "registry", "ledger", "power_grid", "hydro_plant", "reactor_wing",
+                "east_wing", "west_wing", "north_annex", "south_annex", "basement", "subbasement", "rooftop",
+                "hangar", "dockyard", "terminal_bay", "workshop", "laboratory", "greenhouse", "kennels",
+                "motorpool", "armory_supply", "medbay", "cafeteria", "breakroom", "server_farm", "cold_storage"
+            ]);
+            const vaultPool = terminalShuffle([
+                "vault", "strongroom", "reactor", "core", "silo", "bunker", "keep", "citadel", "reliquary",
+                "sanctum", "stronghold", "chamber", "crypt", "cellblock", "safehouse", "armory", "treasury",
+                "repository", "catacomb", "warren", "lockbox", "fortress", "redoubt", "enclave", "bastion",
+                "sepulcher", "mausoleum", "hive", "nest", "den", "lair", "sanctuary", "shelter", "hideout",
+                "black_site", "panic_room", "server_core", "mainframe_core", "data_crypt", "inner_keep",
+                "deep_bunker"
+            ]);
             const flavorFilePool = [
                 "readme.txt", "notes.txt", "memo.txt", "log.txt", "sticky.txt", "handoff.txt", "shift-notes.txt",
                 "todo.txt", "changelog.txt", "config.txt", "notice.txt", "warning.txt", "draft.txt", "old_notes.txt",
                 "misc.txt", "junk.txt", "backup_notes.txt", "incident.txt", "report.txt", "scratch.txt",
-                "errors.txt", "cleanup.txt", "onboarding.txt", "meeting_notes.txt", "inventory.txt"
+                "errors.txt", "cleanup.txt", "onboarding.txt", "meeting_notes.txt", "inventory.txt",
+                "faq.txt", "install.txt", "uninstall.txt", "release_notes.txt", "known_issues.txt", "hotfix.txt",
+                "patch_notes.txt", "postmortem.txt", "runbook.txt", "playbook.txt", "checklist.txt",
+                "audit_log.txt", "access_log.txt", "error_log.txt", "debug.txt", "trace.txt", "stacktrace.txt",
+                "core_dump.txt", "session.txt", "history.txt", "credentials_old.txt", "expired_certs.txt",
+                "license.txt", "disclaimer.txt", "terms.txt", "contacts.txt", "roster.txt", "schedule.txt",
+                "shift_swap.txt", "vacation_request.txt", "expense_report.txt", "budget_notes.txt",
+                "vendor_list.txt", "invoice.txt", "receipt.txt", "purchase_order.txt", "shipping_manifest.txt",
+                "delivery_notes.txt", "maintenance_log.txt", "inspection_report.txt", "safety_notice.txt",
+                "evacuation_plan.txt", "floor_plan.txt", "network_map.txt", "ip_list.txt", "server_list.txt",
+                "hostnames.txt", "old_passwords.txt", "recovery_codes.txt", "backup_schedule.txt",
+                "cron_output.txt", "test_results.txt", "benchmark.txt", "profiling.txt", "coffee_orders.txt",
+                "lunch_menu.txt", "birthday_list.txt", "office_rules.txt", "parking_assignments.txt"
             ];
+            // Flag files don't have to literally be named "flag.txt" -- picking from a
+            // pool (one per vault, no repeats within a round) makes each vault feel
+            // like it's hiding something different.
+            const flagFilePool = terminalShuffle([
+                "flag.txt", "prize.txt", "trophy.txt", "reward.txt", "secret.flag", "classified.txt",
+                "payload.txt", "artifact.txt", "evidence.txt", "keycard.txt", "credentials.txt", "dossier.txt",
+                "black_box.txt", "final_report.txt", "access_token.txt", "manifest.txt", "black_ledger.txt",
+                "confession.txt", "findings.txt", "case_closed.txt", "capture.txt", "proof.txt",
+                "smoking_gun.txt", "the_truth.txt", "endgame.txt"
+            ]);
+            // Base names for bonus loot files (purchased via the Lucky Break/Bonus
+            // Loot shop upgrades), also picked from a pool instead of always "cache".
+            const lootNamePool = terminalShuffle([
+                "cache", "stash", "loot_bundle", "payload", "hidden_stash", "data_drop", "backup_cache",
+                "spoils", "treasure", "black_market_drop", "bounty", "windfall", "jackpot"
+            ]);
             const flavorLines = [
                 "Someone left admin notes here, mostly typos.",
                 "This directory smells like old backups.",
@@ -11435,7 +13127,13 @@ ${recordsHtml}
 
             // Scatter nested subdirectories (sometimes two levels deep) with their own random
             // .txt files, so exploring isn't just flat top-level directories.
-            const nestedDirPool = terminalShuffle(["inner", "misc", "old", "temp", "sub", "drafts", "leftover", "extra", "spare", "unsorted"]);
+            const nestedDirPool = terminalShuffle([
+                "inner", "misc", "old", "temp", "sub", "drafts", "leftover", "extra", "spare", "unsorted",
+                "hidden", "buried", "forgotten", "overflow", "junk_drawer", "loose_ends", "odds_and_ends",
+                "scrap", "remnants", "residue", "offcuts", "castoffs", "discards", "stray", "orphaned",
+                "unlabeled", "mislabeled", "mystery", "unknown", "catchall", "backlog", "queue", "pending",
+                "wip", "staging_area", "holding", "transit", "in_progress", "review", "pending_review"
+            ]);
             let nestedIdx = 0;
             outerDirs.forEach(dir => {
                 if (Math.random() < 0.55) {
@@ -11474,8 +13172,9 @@ ${recordsHtml}
             for (let i = 0; i < lootToPlace; i++) {
                 const dir = outerDirs[i % outerDirs.length];
                 if (dir) {
+                    const lootBase = lootNamePool[i % lootNamePool.length] + (i >= lootNamePool.length ? `_${i}` : "");
                     dir.children.push({
-                        name: `cache_${i + 1}.dat`,
+                        name: `${lootBase}_${i + 1}.dat`,
                         type: "file",
                         bonus: true,
                         content: "Encrypted data cache. Decrypting... done. Nothing sensitive, just a bonus payout."
@@ -11486,10 +13185,11 @@ ${recordsHtml}
             const vaults = [];
             for (let i = 0; i < vaultCount; i++) {
                 const vaultName = vaultPool[i % vaultPool.length] + (i >= vaultPool.length ? `_${i}` : "");
-                const vaultUsed = new Set(["flag.txt"]);
+                const flagFileName = flagFilePool[i % flagFilePool.length];
+                const vaultUsed = new Set([flagFileName]);
                 const vaultChildren = [
                     {
-                        name: "flag.txt",
+                        name: flagFileName,
                         type: "file",
                         flag: true,
                         content: `Round ${round} flag #${i + 1} secured.\nFLAG{round${round}_${vaultName}_${Math.floor(1000 + Math.random() * 9000)}}`
@@ -11564,9 +13264,37 @@ ${recordsHtml}
             const scoreEl = document.getElementById("terminalScoreDisplay");
             if (scoreEl && terminalProgress) {
                 const rankInfo = terminalRankForScore(terminalCareerScoreFromProgress(terminalProgress));
-                scoreEl.textContent = `Score: ${terminalScoreFromProgress(terminalProgress)} | Rank: ${rankInfo.rank.name} | Round ${terminalProgress.round} | Total flags: ${terminalProgress.totalFlags}`;
+                const bp = terminalBpProgress(terminalProgress);
+                scoreEl.textContent = `Score: ${formatCompactNumber(terminalScoreFromProgress(terminalProgress))} | Rank: ${rankInfo.rank.name} | BP Lvl ${bp.level} (${bp.title}) | Round ${terminalProgress.round} | Total flags: ${terminalProgress.totalFlags}`;
             }
             renderTerminalShop();
+            renderTerminalBattlepass();
+        }
+
+        // ---- Battle Pass UI: XP bar + a short preview of upcoming levels ----
+
+        function renderTerminalBattlepass() {
+            const summaryBox = document.getElementById("terminalBpSummary");
+            const upcomingBox = document.getElementById("terminalBpUpcoming");
+            if (!summaryBox || !terminalProgress) return;
+
+            const bp = terminalBpProgress(terminalProgress);
+            summaryBox.innerHTML = `
+                <div class="terminal-bp-header">
+                    <span><b>Level ${bp.level}</b> &mdash; ${escapeHtml(bp.title)}</span>
+                    <span style="color:var(--text-muted);">${formatCompactNumber(bp.xpIntoLevel)} / ${formatCompactNumber(bp.xpForLevel)} XP (${formatCompactNumber(bp.xp)} total)</span>
+                </div>
+                <div class="terminal-bp-bar-track"><div class="terminal-bp-bar-fill" style="width:${bp.pct}%;"></div></div>
+            `;
+
+            if (upcomingBox) {
+                const rows = [];
+                for (let i = 1; i <= 3; i++) {
+                    const lvl = bp.level + i;
+                    rows.push(`<div class="terminal-bp-upcoming-row"><span>Level ${lvl} &mdash; ${escapeHtml(terminalBpTitleForLevel(lvl))}</span><span>+${formatCompactNumber(terminalBpRewardForLevel(lvl))} pts</span></div>`);
+                }
+                upcomingBox.innerHTML = `<div style="font-weight:bold; font-size:0.85em; margin-bottom:2px;">Coming up</div>${rows.join("")}`;
+            }
         }
 
         // ---- Shop: spend accumulated score as currency on permanent upgrades ----
@@ -11583,7 +13311,7 @@ ${recordsHtml}
                     <div><b>${escapeHtml(def.label)}</b> <span style="color:var(--text-muted); font-size:0.85em;">Level ${level}</span></div>
                     <div style="font-size:0.88em; color:var(--text-muted);">${escapeHtml(def.desc(level))}</div>
                     <div class="admin-user-actions">
-                        <button type="button" onclick="terminalBuyShopItem('${def.key}')" ${affordable ? "" : "disabled"}>${affordable ? `Buy &mdash; ${cost} pts` : `Need ${cost} pts`}</button>
+                        <button type="button" onclick="terminalBuyShopItem('${def.key}')" ${affordable ? "" : "disabled"}>${affordable ? `Buy &mdash; ${formatCompactNumber(cost)} pts` : `Need ${formatCompactNumber(cost)} pts`}</button>
                     </div>
                 </div>`;
             }).join("");
@@ -11591,19 +13319,19 @@ ${recordsHtml}
 
         function terminalBuyShopItem(key) {
             if (!terminalProgress) return;
-            if (!terminalProgress.shop) terminalProgress.shop = { multiplier: 0, loot: 0, maps: 0, luck: 0 };
+            if (!terminalProgress.shop) terminalProgress.shop = { multiplier: 0, loot: 0, maps: 0, luck: 0, bounty: 0, rush: 0 };
             const def = terminalShopItemDefs().find(d => d.key === key);
             if (!def) return;
             const level = terminalProgress.shop[key] || 0;
             const cost = terminalShopCost(def.baseCost, level);
             if (terminalScoreFromProgress(terminalProgress) < cost) {
-                terminalPrint(`Not enough score for ${def.label} (need ${cost}).`, "term-line-error");
+                terminalPrint(`Not enough score for ${def.label} (need ${formatCompactNumber(cost)}).`, "term-line-error");
                 return;
             }
             terminalProgress.score -= cost;
             terminalProgress.shop[key] = level + 1;
             saveTerminalProgress(terminalProgress);
-            terminalPrint(`Purchased "${def.label}" -- now level ${level + 1} (spent ${cost} pts).`, "term-line-flag");
+            terminalPrint(`Purchased "${def.label}" -- now level ${level + 1} (spent ${formatCompactNumber(cost)} pts).`, "term-line-flag");
             terminalUpdatePrompt();
         }
 
@@ -11621,18 +13349,23 @@ ${recordsHtml}
         function terminalHelpText() {
             const lines = [
                 "Available commands:",
-                "  help              show this help",
-                "  ls                list the current directory",
-                "  cd <dir>          move into a directory (.. to go up, / for root)",
-                "  cat <file>        read a file",
-                "  unlock <password> unlock a locked directory (run from its parent dir)",
-                "  pwd               print the current path",
-                "  whoami            show the logged-in user",
-                "  score             show your score, round, and total flags collected",
-                "  rank              show your current rank and progress to the next one",
-                "  clear             clear the screen",
-                "  reset             wipe your own progress and start over",
-                "  nextround         skip to the next round early (needs at least 1 flag captured)",
+                "  help                show this help",
+                "  ls / dir            list the current directory",
+                "  cd <dir>            move into a directory (.. or cd.. to go up, / or \\ for root)",
+                "  cd                  print the current directory",
+                "  cat / type <file>   read a file",
+                "  unlock <password>   unlock a locked directory (run from its parent dir)",
+                "  pwd                 print the current path",
+                "  whoami              show the logged-in user",
+                "  cls / clear         clear the screen",
+                "  echo <text>         print text back",
+                "  ver                 show the terminal version",
+                "  date / time         show the current date and time",
+                "  score               show your score, round, and total flags collected",
+                "  rank                show your current rank and progress to the next one",
+                "  battlepass          show your Battle Pass level, title, and XP progress (alias: bp)",
+                "  reset               wipe your own progress and start over",
+                "  nextround           skip to the next round early (needs at least 1 flag captured)",
                 "",
                 "Clear every flag in a round and the mainframe regenerates a brand new,",
                 "harder layout just for you -- the game never ends."
@@ -11641,20 +13374,20 @@ ${recordsHtml}
                 lines.push(
                     "",
                     "Admin -- jump to any round instantly (your own game, for testing):",
-                    "  newround [n]                generate round n (or the next one) right now",
+                    "  newround [n]                  generate round n (or the next one) right now",
                     "",
                     "Admin -- edit the shared round 1 filesystem live, right here:",
-                    "  editfs                     enter edit mode on the round 1 template",
-                    "  mkdir <name>                create a directory in the current dir",
-                    "  touch <name> [flag]         create an empty file (optionally a flag file)",
-                    "  write <name> <text...>      set a file's content (use \\n for newlines)",
-                    "  rm <name>                   delete a file or directory here",
-                    "  flag <name> on|off          mark/unmark a file as a flag",
-                    "  lockdir <name> <password>   lock a directory behind a password",
-                    "  unlockdir <name>            remove a directory's lock",
-                    "  motd <text...>              set the round 1 boot message",
-                    "  savefs                      publish the edited tree as round 1",
-                    "  stopedit                    leave edit mode, back to your own game"
+                    "  editfs                        enter edit mode on the round 1 template",
+                    "  mkdir / md <name>             create a directory in the current dir",
+                    "  touch <name> [flag]           create an empty file (optionally a flag file)",
+                    "  write <name> <text...>        set a file's content (use \\n for newlines)",
+                    "  rm / del / rd <name>          delete a file or directory here",
+                    "  flag <name> on|off            mark/unmark a file as a flag",
+                    "  lockdir <name> <password>     lock a directory behind a password",
+                    "  unlockdir <name>              remove a directory's lock",
+                    "  motd <text...>                set the round 1 boot message",
+                    "  savefs                        publish the edited tree as round 1",
+                    "  stopedit                      leave edit mode, back to your own game"
                 );
             }
             return lines.join("\n");
@@ -11669,8 +13402,14 @@ ${recordsHtml}
             terminalHistoryIdx = terminalHistory.length;
 
             const parts = trimmed.split(/\s+/);
-            const cmd = parts[0].toLowerCase();
-            const args = parts.slice(1);
+            let cmd = parts[0].toLowerCase();
+            let args = parts.slice(1);
+
+            // Windows lets you type "cd.." or "cd\" with no space -- support that too.
+            if (cmd.length > 2 && cmd.startsWith("cd") && cmd !== "cd") {
+                args = [cmd.slice(2), ...args];
+                cmd = "cd";
+            }
 
             switch (cmd) {
                 case "help":
@@ -11690,28 +13429,43 @@ ${recordsHtml}
                 case "score": {
                     const flagsInRound = terminalCountFlags(terminalWorld.root);
                     const rankInfo = terminalRankForScore(terminalCareerScoreFromProgress(terminalProgress));
-                    terminalPrint(`Score: ${terminalScoreFromProgress(terminalProgress)} | Career score: ${terminalCareerScoreFromProgress(terminalProgress)} | Rank: ${rankInfo.rank.name} | Round: ${terminalProgress.round} | Total flags collected (all-time): ${terminalProgress.totalFlags} | This round's flags: ${terminalProgress.flagsFoundThisRound.length}/${flagsInRound} | Files read: ${terminalProgress.readFiles.length} | Dirs unlocked: ${terminalProgress.unlockedDirs.length}`, "term-line-info");
+                    terminalPrint(`Score: ${formatCompactNumber(terminalScoreFromProgress(terminalProgress))} | Career score: ${formatCompactNumber(terminalCareerScoreFromProgress(terminalProgress))} | Rank: ${rankInfo.rank.name} | Round: ${terminalProgress.round} | Total flags collected (all-time): ${terminalProgress.totalFlags} | This round's flags: ${terminalProgress.flagsFoundThisRound.length}/${flagsInRound} | Files read: ${terminalProgress.readFiles.length} | Dirs unlocked: ${terminalProgress.unlockedDirs.length}`, "term-line-info");
                     break;
                 }
 
                 case "rank": {
                     const careerScore = terminalCareerScoreFromProgress(terminalProgress);
                     const rankInfo = terminalRankForScore(careerScore);
-                    terminalPrint(`Current rank: ${rankInfo.rank.name} (career score ${careerScore})`, "term-line-info");
+                    terminalPrint(`Current rank: ${rankInfo.rank.name} (career score ${formatCompactNumber(careerScore)})`, "term-line-info");
                     if (rankInfo.next) {
-                        terminalPrint(`Next rank: ${rankInfo.next.name} at ${rankInfo.next.threshold} pts (${rankInfo.pointsToNext} pts to go).`, "term-line-info");
+                        terminalPrint(`Next rank: ${rankInfo.next.name} at ${formatCompactNumber(rankInfo.next.threshold)} pts (${formatCompactNumber(rankInfo.pointsToNext)} pts to go).`, "term-line-info");
                     } else {
                         terminalPrint("You've reached the highest rank.", "term-line-info");
                     }
                     terminalPrint("All ranks:");
                     rankInfo.ranks.forEach((r, i) => {
                         const marker = i === rankInfo.index ? " <-- you" : "";
-                        terminalPrint(`  ${r.threshold.toString().padStart(6, " ")} pts  ${r.name}${marker}`);
+                        terminalPrint(`  ${formatCompactNumber(r.threshold).padStart(6, " ")} pts  ${r.name}${marker}`);
                     });
                     break;
                 }
 
+                case "battlepass":
+                case "bp": {
+                    const bp = terminalBpProgress(terminalProgress);
+                    terminalPrint(`Battle Pass Level ${bp.level} -- ${bp.title}`, "term-line-flag");
+                    terminalPrint(`XP: ${formatCompactNumber(bp.xpIntoLevel)} / ${formatCompactNumber(bp.xpForLevel)} into this level (${formatCompactNumber(bp.xp)} total XP earned, ${bp.pct}%).`, "term-line-info");
+                    terminalPrint("Every point earned anywhere in the game also earns that much Battle Pass XP.", "term-line-info");
+                    terminalPrint("Upcoming levels:");
+                    for (let i = 1; i <= 5; i++) {
+                        const lvl = bp.level + i;
+                        terminalPrint(`  Level ${lvl}  ${terminalBpTitleForLevel(lvl)}  -- +${formatCompactNumber(terminalBpRewardForLevel(lvl))} pts`);
+                    }
+                    break;
+                }
+
                 case "clear":
+                case "cls":
                     document.getElementById("terminalOutput").innerHTML = "";
                     break;
 
@@ -11725,13 +13479,56 @@ ${recordsHtml}
                     break;
                 }
 
+                case "dir": {
+                    const node = terminalResolveNode(terminalCwdPath);
+                    terminalPrint(` Directory of ${terminalPathString()}`);
+                    terminalPrint("");
+                    const children = (node && node.children) || [];
+                    if (children.length === 0) {
+                        terminalPrint("File Not Found");
+                    } else {
+                        let dirCount = 0, fileCount = 0;
+                        children.forEach(c => {
+                            if (c.type === "dir") {
+                                dirCount++;
+                                const lockedHere = c.locked && !terminalIsUnlocked(c, [...terminalCwdPath, c.name]);
+                                terminalPrint(`${"<DIR>".padEnd(14)}${c.name}${lockedHere ? "  [locked]" : ""}`);
+                            } else {
+                                fileCount++;
+                                terminalPrint(`${"".padEnd(14)}${c.name}`);
+                            }
+                        });
+                        terminalPrint("");
+                        terminalPrint(`${fileCount.toString().padStart(8, " ")} File(s)`);
+                        terminalPrint(`${dirCount.toString().padStart(8, " ")} Dir(s)`);
+                    }
+                    break;
+                }
+
+                case "echo":
+                    terminalPrint(args.join(" "));
+                    break;
+
+                case "ver":
+                    terminalPrint("Mainframe Terminal [Version 1.0]");
+                    break;
+
+                case "date":
+                case "time":
+                    terminalPrint(new Date().toString());
+                    break;
+
+                case "exit":
+                    terminalPrint("This session can't be closed from here -- just switch tabs.", "term-line-info");
+                    break;
+
                 case "cd": {
                     if (args.length === 0) {
-                        terminalPrint("Usage: cd <directory>", "term-line-error");
+                        terminalPrint(terminalPathString());
                         break;
                     }
                     const target = args[0];
-                    if (target === "/") {
+                    if (target === "/" || target === "\\") {
                         terminalCwdPath = [];
                         terminalUpdatePrompt();
                         break;
@@ -11791,15 +13588,16 @@ ${recordsHtml}
                     break;
                 }
 
+                case "type":
                 case "cat": {
                     if (args.length === 0) {
-                        terminalPrint("Usage: cat <file>", "term-line-error");
+                        terminalPrint(`Usage: ${cmd} <file>`, "term-line-error");
                         break;
                     }
                     const node = terminalResolveNode(terminalCwdPath);
                     const file = node.children && node.children.find(c => c.name === args[0]);
                     if (!file || file.type !== "file") {
-                        terminalPrint(`cat: no such file: ${args[0]}`, "term-line-error");
+                        terminalPrint(`${cmd}: no such file: ${args[0]}`, "term-line-error");
                         break;
                     }
                     terminalPrint(file.content || "(empty file)");
@@ -11828,6 +13626,11 @@ ${recordsHtml}
                             terminalProgress.flagsFoundThisRound.push(fileKey);
                             terminalProgress.totalFlags += 1;
                             terminalAwardPoints(scoring.perFlag);
+                            const bountyLevel = (terminalProgress.shop && terminalProgress.shop.bounty) || 0;
+                            if (bountyLevel > 0) {
+                                const bountyAwarded = terminalAwardPoints(bountyLevel * shopCfg.bountyPerLevel);
+                                terminalPrint(`Flag Bounty payout: +${bountyAwarded} bonus points.`, "term-line-flag");
+                            }
                             terminalPrint(`*** FLAG CAPTURED! Total flags collected: ${terminalProgress.totalFlags}. ***`, "term-line-flag");
 
                             const flagsInRound = terminalCountFlags(terminalWorld.root);
@@ -11908,10 +13711,11 @@ ${recordsHtml}
                     break;
                 }
 
+                case "md":
                 case "mkdir": {
                     if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
                     if (!terminalAdminEditMode) { terminalPrint("Not in edit mode. Run \"editfs\" first.", "term-line-error"); break; }
-                    if (args.length === 0) { terminalPrint("Usage: mkdir <name>", "term-line-error"); break; }
+                    if (args.length === 0) { terminalPrint(`Usage: ${cmd} <name>`, "term-line-error"); break; }
                     const node = terminalResolveNode(terminalCwdPath);
                     if (!node.children) node.children = [];
                     if (node.children.some(c => c.name === args[0])) { terminalPrint(`mkdir: "${args[0]}" already exists here.`, "term-line-error"); break; }
@@ -11946,13 +13750,17 @@ ${recordsHtml}
                     break;
                 }
 
+                case "del":
+                case "erase":
+                case "rd":
+                case "rmdir":
                 case "rm": {
                     if (!isCurrentUserAdmin()) { terminalPrint(`Unknown command: ${cmd} (type "help")`, "term-line-error"); break; }
                     if (!terminalAdminEditMode) { terminalPrint("Not in edit mode. Run \"editfs\" first.", "term-line-error"); break; }
-                    if (args.length === 0) { terminalPrint("Usage: rm <name>", "term-line-error"); break; }
+                    if (args.length === 0) { terminalPrint(`Usage: ${cmd} <name>`, "term-line-error"); break; }
                     const node = terminalResolveNode(terminalCwdPath);
                     const idx = node.children ? node.children.findIndex(c => c.name === args[0]) : -1;
-                    if (idx === -1) { terminalPrint(`rm: no such file or directory: ${args[0]}`, "term-line-error"); break; }
+                    if (idx === -1) { terminalPrint(`${cmd}: no such file or directory: ${args[0]}`, "term-line-error"); break; }
                     node.children.splice(idx, 1);
                     terminalPrint(`Removed "${args[0]}".`, "term-line-flag");
                     break;
@@ -12119,12 +13927,29 @@ ${recordsHtml}
                 terminalAdminShopLuckCost: shopCfg.luckBaseCost,
                 terminalAdminShopLuckPct: shopCfg.luckPctPerLevel,
                 terminalAdminShopLuckMin: shopCfg.luckBonusMin,
-                terminalAdminShopLuckMax: shopCfg.luckBonusMax
+                terminalAdminShopLuckMax: shopCfg.luckBonusMax,
+                terminalAdminShopBountyCost: shopCfg.bountyBaseCost,
+                terminalAdminShopBountyPerLevel: shopCfg.bountyPerLevel,
+                terminalAdminShopRushCost: shopCfg.rushBaseCost,
+                terminalAdminShopRushPct: shopCfg.rushPct
             };
             Object.keys(shopFieldMap).forEach(id => {
                 const el = document.getElementById(id);
                 if (el && document.activeElement !== el) el.value = shopFieldMap[id];
             });
+
+            const bpCfg = loadTerminalBpConfig();
+            const bpXpEl = document.getElementById("terminalAdminBpXpPerLevel");
+            const bpGrowthEl = document.getElementById("terminalAdminBpXpGrowthPct");
+            const bpBaseEl = document.getElementById("terminalAdminBpRewardBase");
+            const bpPerLvlEl = document.getElementById("terminalAdminBpRewardPerLevel");
+            if (bpXpEl && document.activeElement !== bpXpEl) bpXpEl.value = bpCfg.xpPerLevel;
+            if (bpGrowthEl && document.activeElement !== bpGrowthEl) bpGrowthEl.value = bpCfg.xpGrowthPct;
+            if (bpBaseEl && document.activeElement !== bpBaseEl) bpBaseEl.value = bpCfg.rewardBase;
+            if (bpPerLvlEl && document.activeElement !== bpPerLvlEl) bpPerLvlEl.value = bpCfg.rewardPerLevel;
+
+            const bpTitlesEl = document.getElementById("terminalAdminBpTitles");
+            if (bpTitlesEl && document.activeElement !== bpTitlesEl) bpTitlesEl.value = loadTerminalBpTitles().join("\n");
 
             renderTerminalRanksList();
 
@@ -12139,18 +13964,26 @@ ${recordsHtml}
                         const score = terminalScoreFromProgress(progress);
                         const careerScore = terminalCareerScoreFromProgress(progress);
                         const rankInfo = terminalRankForScore(careerScore);
-                        const shop = progress.shop || { multiplier: 0, loot: 0, maps: 0, luck: 0 };
+                        const shop = progress.shop || { multiplier: 0, loot: 0, maps: 0, luck: 0, bounty: 0, rush: 0 };
+                        const bp = terminalBpProgress(progress);
                         return `<div class="admin-user-card">
                             <div><b>${escapeHtml(user.username || "User")}</b></div>
                             <div style="font-size:0.9em; color:var(--text-muted);">
-                                Score: ${score} &bull; Career score: ${careerScore} &bull; Rank: ${escapeHtml(rankInfo.rank.name)} &bull; Round: ${progress.round} &bull;
+                                Score: ${formatCompactNumber(score)} &bull; Career score: ${formatCompactNumber(careerScore)} &bull; Rank: ${escapeHtml(rankInfo.rank.name)} &bull; Round: ${progress.round} &bull;
                                 Total flags collected: ${progress.totalFlags} &bull;
                                 Files read this round: ${progress.readFiles.length} &bull;
                                 Dirs unlocked this round: ${progress.unlockedDirs.length}
                             </div>
                             <div style="font-size:0.9em; color:var(--text-muted);">
                                 Shop levels &mdash; Multiplier: ${shop.multiplier} &bull; Loot: ${shop.loot} &bull;
-                                Maps: ${shop.maps} &bull; Luck: ${shop.luck}
+                                Maps: ${shop.maps} &bull; Luck: ${shop.luck} &bull; Bounty: ${shop.bounty || 0} &bull; Rush: ${shop.rush || 0}
+                            </div>
+                            <div style="font-size:0.9em; color:var(--text-muted);">
+                                Battle Pass: Level ${bp.level} (${escapeHtml(bp.title)}) &bull; ${formatCompactNumber(bp.xpIntoLevel)}/${formatCompactNumber(bp.xpForLevel)} XP into level &bull; ${formatCompactNumber(bp.xp)} total XP
+                            </div>
+                            <div class="admin-inline-fields" style="margin-top:4px;">
+                                <input type="number" id="terminalBpGrantInput_${user.id}" placeholder="XP amount (+/-)" style="max-width:140px;">
+                                <button type="button" onclick="grantTerminalBattlepassXp('${user.id}')">Grant XP</button>
                             </div>
                             <div class="admin-user-actions">
                                 <button type="button" onclick="resetTerminalProgressForUser('${user.id}')" class="btn-danger">Reset progress</button>
@@ -12175,7 +14008,7 @@ ${recordsHtml}
 
             list.innerHTML = ranks.map(r => `
                 <div class="badge-def-row">
-                    <span><b>${escapeHtml(r.name)}</b> <span style="color:var(--text-muted); font-size:0.85em;">&mdash; ${r.threshold} pts</span></span>
+                    <span><b>${escapeHtml(r.name)}</b> <span style="color:var(--text-muted); font-size:0.85em;">&mdash; ${formatCompactNumber(r.threshold)} pts</span></span>
                     <div class="badge-def-actions">
                         <button type="button" onclick="editTerminalRank('${r.id}')">Edit</button>
                         <button type="button" onclick="deleteTerminalRank('${r.id}')" class="btn-danger">Delete</button>
@@ -12318,11 +14151,122 @@ ${recordsHtml}
                 luckBaseCost: parseField("terminalAdminShopLuckCost", d.luckBaseCost),
                 luckPctPerLevel: parseField("terminalAdminShopLuckPct", d.luckPctPerLevel),
                 luckBonusMin: parseField("terminalAdminShopLuckMin", d.luckBonusMin),
-                luckBonusMax: parseField("terminalAdminShopLuckMax", d.luckBonusMax)
+                luckBonusMax: parseField("terminalAdminShopLuckMax", d.luckBonusMax),
+                bountyBaseCost: parseField("terminalAdminShopBountyCost", d.bountyBaseCost),
+                bountyPerLevel: parseField("terminalAdminShopBountyPerLevel", d.bountyPerLevel),
+                rushBaseCost: parseField("terminalAdminShopRushCost", d.rushBaseCost),
+                rushPct: parseField("terminalAdminShopRushPct", d.rushPct)
             };
             saveTerminalShopConfig(cfg);
             renderTerminalShop();
             showTerminalAdminMessage("Shop pricing saved. Takes effect immediately.", "success");
+        }
+
+        // ---- Battle Pass admin: XP curve, reward formula, titles, per-player XP grants ----
+
+        function saveTerminalBpConfigFromForm() {
+            if (!isCurrentUserAdmin()) return;
+            const parseField = (id, fallback) => {
+                const raw = Number(document.getElementById(id).value);
+                return Number.isFinite(raw) ? raw : fallback;
+            };
+            const d = defaultTerminalBpConfig();
+            const xpPerLevel = Math.max(1, Math.round(parseField("terminalAdminBpXpPerLevel", d.xpPerLevel)));
+            const xpGrowthPct = Math.max(0, parseField("terminalAdminBpXpGrowthPct", d.xpGrowthPct));
+            const cfg = {
+                xpPerLevel,
+                xpGrowthPct,
+                rewardBase: Math.round(parseField("terminalAdminBpRewardBase", d.rewardBase)),
+                rewardPerLevel: Math.round(parseField("terminalAdminBpRewardPerLevel", d.rewardPerLevel))
+            };
+            saveTerminalBpConfig(cfg);
+            terminalUpdatePrompt();
+            renderTerminalAdminBox();
+            showTerminalAdminMessage("Battle Pass settings saved. Takes effect immediately.", "success");
+        }
+
+        function resetTerminalBpConfigToDefault() {
+            if (!isCurrentUserAdmin()) return;
+            if (!confirm("Reset Battle Pass XP-per-level and reward settings to default? This does not erase anyone's XP.")) return;
+            saveTerminalBpConfig(defaultTerminalBpConfig());
+            terminalUpdatePrompt();
+            renderTerminalAdminBox();
+            showTerminalAdminMessage("Battle Pass settings reset to default.", "success");
+        }
+
+        function saveTerminalBpTitlesFromForm() {
+            if (!isCurrentUserAdmin()) return;
+            const raw = document.getElementById("terminalAdminBpTitles").value;
+            const titles = raw.split("\n").map(t => t.trim()).filter(Boolean);
+            if (titles.length === 0) {
+                showTerminalAdminMessage("Enter at least one tier.", "error");
+                return;
+            }
+            saveTerminalBpTitles(titles);
+            terminalUpdatePrompt();
+            renderTerminalAdminBox();
+            showTerminalAdminMessage("Battle Pass tiers saved.", "success");
+        }
+
+        function resetTerminalBpTitlesToDefault() {
+            if (!isCurrentUserAdmin()) return;
+            if (!confirm("Reset Battle Pass tiers to the built-in default list?")) return;
+            saveTerminalBpTitles(defaultTerminalBpTitles());
+            terminalUpdatePrompt();
+            renderTerminalAdminBox();
+            showTerminalAdminMessage("Battle Pass tiers reset to default.", "success");
+        }
+
+        // Manually grants (or, with a negative amount, removes) Battle Pass XP for
+        // a specific player, paying out and announcing any level-ups the same way
+        // XP earned through normal play would. Useful for correcting mistakes or
+        // rewarding something that happened outside the game.
+        function grantTerminalBattlepassXp(userId) {
+            if (!isCurrentUserAdmin()) return;
+            const input = document.getElementById(`terminalBpGrantInput_${userId}`);
+            const amount = Math.round(Number(input ? input.value : NaN));
+            if (!Number.isFinite(amount) || amount === 0) {
+                showTerminalAdminMessage("Enter a non-zero XP amount to grant.", "error");
+                return;
+            }
+
+            const progress = loadTerminalProgress(userId);
+            if (!Number.isFinite(progress.bpXp)) progress.bpXp = 0;
+            if (!Array.isArray(progress.bpClaimedLevels)) progress.bpClaimedLevels = [];
+
+            const beforeLevel = terminalBpLevelForXp(progress.bpXp);
+            progress.bpXp = Math.max(0, progress.bpXp + amount);
+            const afterLevel = terminalBpLevelForXp(progress.bpXp);
+
+            let bonus = 0;
+            if (afterLevel > beforeLevel) {
+                for (let lvl = beforeLevel + 1; lvl <= afterLevel; lvl++) {
+                    if (progress.bpClaimedLevels.includes(lvl)) continue;
+                    bonus += terminalBpRewardForLevel(lvl);
+                    progress.bpClaimedLevels.push(lvl);
+                }
+                if (bonus > 0) {
+                    progress.score = (progress.score || 0) + bonus;
+                    progress.careerScore = (progress.careerScore || 0) + bonus;
+                }
+            }
+
+            saveTerminalProgress(progress, userId);
+
+            // Keep the live in-memory game state in sync if the admin just edited
+            // their own account (otherwise the change wouldn't show up until the
+            // next page load, since terminalProgress is a separate in-memory copy).
+            if (terminalProgress && userId === getCurrentAuthUserId()) {
+                terminalProgress = progress;
+                terminalUpdatePrompt();
+            }
+
+            if (input) input.value = "";
+            renderTerminalAdminBox();
+            const users = loadAuthUsers();
+            const target = users.find(u => u.id === userId);
+            const who = target ? target.username : "player";
+            showTerminalAdminMessage(`Granted ${formatCompactNumber(amount)} Battle Pass XP to "${who}"${bonus > 0 ? ` (+${formatCompactNumber(bonus)} bonus pts from leveling up)` : ""}.`, "success");
         }
 
         function resetTerminalAdminConfigToDefault() {
