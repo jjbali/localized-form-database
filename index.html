@@ -1075,6 +1075,93 @@
             color: var(--text-muted);
         }
 
+        .match3-obj-diff-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent-dark);
+            font-weight: bold;
+        }
+
+        .match3-obj-level-grid {
+            margin: 8px 0;
+        }
+
+        .match3-obj-active {
+            border: 1px solid var(--field-btn-border);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 8px;
+            background: var(--field-btn-bg);
+        }
+
+        .match3-obj-targets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 8px 0;
+        }
+
+        .match3-obj-target {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 64px;
+            padding: 6px 8px;
+            border: 1px solid var(--field-btn-border);
+            border-radius: 8px;
+            background: var(--card-bg);
+        }
+
+        .match3-obj-target.met {
+            border-color: var(--success-border);
+            background: var(--success-bg);
+        }
+
+        .match3-obj-target .match3-obj-target-icon {
+            font-size: 1.4em;
+            line-height: 1.2;
+        }
+
+        .match3-obj-target .match3-obj-target-count {
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        .match3-obj-progress-track {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .match3-obj-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.2s ease;
+        }
+
+        .match3-obj-banner {
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        .match3-obj-banner.win {
+            background: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-border);
+        }
+
+        .match3-obj-banner.lose {
+            background: var(--danger-bg);
+            border: 1px solid var(--danger-border);
+            color: var(--danger-border);
+        }
+
         /* ---- Find It minigame (Progressbar95-style "spot the frequent string") ---- */
 
         .findit-grid {
@@ -3881,6 +3968,26 @@
                 alongside whatever is already on this device, so nothing existing is ever overwritten.
             </div>
 
+            <h4>Games Data (Encrypted)</h4>
+            <div class="toolbar" id="gamesDataBackupToolbar">
+                <button type="button" onclick="exportAllGamesDataEncrypted()" class="btn-success">Export Games
+                    Data (Encrypted)</button>
+                <button type="button" onclick="triggerGamesDataImport()" class="btn-info">Import Games Data
+                    (Encrypted)</button>
+                <input type="file" id="gamesDataImportInput" class="hidden-file-input" accept="application/json,.json"
+                    onchange="if (this.files && this.files[0]) importAllGamesDataEncrypted(this.files[0]); this.value = '';">
+            </div>
+            <div class="markdown-hint">
+                Backs up progress for every mini-game &mdash; Terminal, Minesweeper, Crack-a-Code, Match 3, Yahtzee,
+                Find It, Typing, and the RNG gacha &mdash; covering stats, achievements, leaderboards, Battle Pass
+                progress, and admin-tuned settings, for every user on this device. Unlike the database backup above,
+                this file is encrypted with a password you set (via your browser's built-in Web Crypto API, not just
+                obfuscated) before it's downloaded, so it's safe to store or share the file itself &mdash; only
+                someone with the exact password can read or restore it. There's no password recovery: if you lose it,
+                the backup is unrecoverable. Importing overwrites any existing games data on this device with the
+                same keys; it does not touch your database records, dictionary, or user accounts.
+            </div>
+
             <h4>About</h4>
             <div class="markdown-hint">
                 The data is stored locally, meaning there is no server involved or someone that will mess with your
@@ -5059,6 +5166,21 @@
                     <button type="button" onclick="match3NewGame()">New Game</button>
                 </div>
 
+                <details class="record" style="margin:14px 0 0;" open>
+                    <summary style="cursor:pointer; font-weight:bold;">Objectives</summary>
+                    <div class="markdown-hint" style="margin-top:6px;">
+                        An endless run of procedurally-generated levels &mdash; each one asks you to collect
+                        specific fruits within a limited number of moves, and levels keep getting tougher the
+                        higher you climb, with no final level. Pick a difficulty &mdash; it scales the targets
+                        and move limit up or down &mdash; and your progress is tracked separately per difficulty.
+                        Playing a level uses the same board above; it doesn't affect your endless score/leaderboard
+                        run.
+                    </div>
+                    <div id="match3ObjDifficultyRow" class="toolbar" style="margin-top:8px;"></div>
+                    <div id="match3ObjLevelPicker" class="match3-obj-level-grid"></div>
+                    <div id="match3ObjActive"></div>
+                </details>
+
                 <div id="match3Status" class="markdown-hint" style="min-height:1.2em;"></div>
 
                 <div id="match3Board" class="match3-board"></div>
@@ -5124,6 +5246,26 @@
                     <div class="admin-inline-fields" style="margin-top:8px;">
                         <button type="button" onclick="saveMatch3BpTitlesFromForm()" class="btn-success">Save Titles</button>
                         <button type="button" onclick="resetMatch3BpTitlesToDefault()">Reset Titles to Default</button>
+                    </div>
+
+                    <h4>Objectives</h4>
+                    <div class="markdown-hint">
+                        Control how many different fruit types a level can ask players to collect at once. Raising
+                        the cap adds more simultaneous objectives to later levels; the "bonus moves" field adds
+                        moves back per extra objective so those levels stay winnable instead of just harder.
+                    </div>
+                    <label for="m3AdminObjMaxTargets" style="font-weight:normal;">Max simultaneous fruit
+                        targets per level (1&ndash;${MATCH3_TYPES.length})</label>
+                    <input type="number" id="m3AdminObjMaxTargets" step="1" min="1" max="${MATCH3_TYPES.length}">
+                    <label for="m3AdminObjLevelsPerTarget" style="font-weight:normal;">Levels between each new
+                        target unlocking</label>
+                    <input type="number" id="m3AdminObjLevelsPerTarget" step="1" min="1">
+                    <label for="m3AdminObjMovesPerExtra" style="font-weight:normal;">Bonus base moves per extra
+                        target (keeps multi-objective levels balanced)</label>
+                    <input type="number" id="m3AdminObjMovesPerExtra" step="1" min="0">
+                    <div class="admin-inline-fields" style="margin-top:8px;">
+                        <button type="button" onclick="saveMatch3ObjConfigFromForm()" class="btn-success">Save Objectives Settings</button>
+                        <button type="button" onclick="resetMatch3ObjConfigToDefault()">Reset Settings to Default</button>
                     </div>
 
                     <h4>Player Progress</h4>
@@ -5843,6 +5985,8 @@
         const MATCH3_STATS_KEY = "localizedMatch3Stats"; // per-user lifetime stats + unlocked achievements for Match 3
         const MATCH3_BP_CONFIG_KEY = "localizedMatch3BpConfig"; // global (device-wide, admin-managed) Match 3 Battle Pass XP curve + reward formula -- separate from Terminal/Minesweeper/Find It's
         const MATCH3_BP_TITLES_KEY = "localizedMatch3BpTitles"; // global (device-wide, admin-managed) Match 3 Battle Pass tier titles -- separate from Terminal/Minesweeper/Find It's
+        const MATCH3_OBJECTIVES_KEY = "localizedMatch3Objectives"; // per-user unlocked/completed level progress per difficulty for Match 3's Objectives mode
+        const MATCH3_OBJ_CONFIG_KEY = "localizedMatch3ObjConfig"; // global (device-wide, admin-managed) tuning for how many simultaneous fruit targets a level can have and how moves scale to stay balanced as more targets are added
 
         const YAHTZEE_STATS_KEY = "localizedYahtzeeStats"; // per-user lifetime stats (games/best score/points) + Battle Pass XP -- own system
         const YAHTZEE_LEADERBOARD_KEY = "localizedYahtzeeLeaderboard"; // shared (device-wide) all-time leaderboard of best game scores
@@ -5853,6 +5997,17 @@
         let deletingWorkspaceInProgress = false; // guards deleteCurrentDatabase() so deleteCurrentWorkspace() can re-enter it
 
         const DARK_MODE_KEY = "localizedDarkMode";
+
+        // Every game's localStorage keys (static config keys above, plus dynamic
+        // per-user keys like getTerminalProgressKey()) share one of these name
+        // prefixes. Used by the encrypted Games Data backup below to find
+        // everything belonging to a game without having to hand-maintain a key
+        // list that'd go stale the moment a new key is added.
+        const GAMES_DATA_KEY_PREFIXES = [
+            "localizedTerminal", "localizedMatch3", "localizedMinesweeper",
+            "localizedCrackcode", "localizedYahtzee", "localizedTyping",
+            "localizedFindit", "localizedRng"
+        ];
 
         function isDarkModeEnabled() {
             return localStorage.getItem(DARK_MODE_KEY) === "1";
@@ -7711,6 +7866,151 @@
             a.download = filename;
             a.click();
             URL.revokeObjectURL(a.href);
+        }
+
+        // ---------- Encrypted Games Data backup / restore ----------
+        //
+        // Separate from the (unencrypted) literal database export above: this
+        // backs up progress/stats/leaderboards/Battle Pass/admin-tuned settings
+        // for every mini-game (Terminal, Minesweeper, Crack-a-Code, Match 3,
+        // Yahtzee, Find It, Typing, RNG) -- for every user on this device --
+        // as a single file encrypted with a password via the browser's native
+        // Web Crypto API (PBKDF2 key derivation + AES-GCM). The password is
+        // never stored anywhere; without it the file can't be decrypted.
+
+        function collectGamesDataKeys() {
+            const keys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (GAMES_DATA_KEY_PREFIXES.some(prefix => k.startsWith(prefix))) keys.push(k);
+            }
+            return keys;
+        }
+
+        function gamesDataBufToBase64(buf) {
+            let binary = "";
+            const bytes = new Uint8Array(buf);
+            for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+            return btoa(binary);
+        }
+
+        function gamesDataBase64ToBuf(b64) {
+            const binary = atob(b64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes.buffer;
+        }
+
+        async function deriveGamesDataKey(password, saltBytes, iterations) {
+            const keyMaterial = await crypto.subtle.importKey(
+                "raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]
+            );
+            return crypto.subtle.deriveKey(
+                { name: "PBKDF2", salt: saltBytes, iterations: iterations || 150000, hash: "SHA-256" },
+                keyMaterial,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["encrypt", "decrypt"]
+            );
+        }
+
+        async function exportAllGamesDataEncrypted() {
+            if (!window.crypto || !window.crypto.subtle) {
+                alert("Encrypted export needs a secure browser context (crypto.subtle isn't available here).");
+                return;
+            }
+            const keys = collectGamesDataKeys();
+            if (keys.length === 0) {
+                alert("There's no games data on this device yet to export.");
+                return;
+            }
+            const password = prompt("Set a password to encrypt this games-data backup.\n\nYou'll need this exact password to import it later -- write it down, it can't be recovered.");
+            if (!password) return;
+
+            const data = {};
+            keys.forEach(k => { data[k] = localStorage.getItem(k); });
+            const payload = {
+                app: "localized-database-form",
+                exportFormat: "games-data-export",
+                schemaVersion: 1,
+                exportedAt: getCurrentTimestamp(),
+                keyCount: keys.length,
+                data
+            };
+
+            try {
+                const salt = crypto.getRandomValues(new Uint8Array(16));
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const iterations = 150000;
+                const key = await deriveGamesDataKey(password, salt, iterations);
+                const plaintext = new TextEncoder().encode(JSON.stringify(payload));
+                const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext);
+
+                downloadJson({
+                    app: "localized-database-form",
+                    format: "games-data-export-encrypted",
+                    version: 1,
+                    kdf: "PBKDF2-SHA256",
+                    iterations,
+                    salt: gamesDataBufToBase64(salt),
+                    iv: gamesDataBufToBase64(iv),
+                    ciphertext: gamesDataBufToBase64(ciphertext)
+                }, `games-data-backup.${new Date().toISOString().slice(0, 10)}.encrypted.json`);
+
+                alert(`Exported an encrypted backup covering ${keys.length} games-data key(s) (Terminal, Minesweeper, Crack-a-Code, Match 3, Yahtzee, Find It, Typing, and RNG -- all users). Keep the password safe.`);
+            } catch (err) {
+                console.error("Failed to export encrypted games data:", err);
+                alert("Failed to export games data: " + err.message);
+            }
+        }
+
+        function triggerGamesDataImport() {
+            document.getElementById("gamesDataImportInput").click();
+        }
+
+        async function importAllGamesDataEncrypted(file) {
+            if (!file) return;
+            if (!window.crypto || !window.crypto.subtle) {
+                alert("Encrypted import needs a secure browser context (crypto.subtle isn't available here).");
+                return;
+            }
+            try {
+                const fileObj = JSON.parse(await file.text());
+                if (!fileObj || fileObj.format !== "games-data-export-encrypted" || !fileObj.salt || !fileObj.iv || !fileObj.ciphertext) {
+                    alert("This doesn't look like an encrypted games-data backup file.");
+                    return;
+                }
+                const password = prompt("Enter the password used to encrypt this games-data backup:");
+                if (!password) return;
+
+                const salt = new Uint8Array(gamesDataBase64ToBuf(fileObj.salt));
+                const iv = new Uint8Array(gamesDataBase64ToBuf(fileObj.iv));
+                const key = await deriveGamesDataKey(password, salt, fileObj.iterations || 150000);
+
+                let plaintextBuf;
+                try {
+                    plaintextBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, gamesDataBase64ToBuf(fileObj.ciphertext));
+                } catch (decErr) {
+                    alert("Couldn't decrypt this backup -- wrong password, or the file is corrupted.");
+                    return;
+                }
+
+                const payload = JSON.parse(new TextDecoder().decode(plaintextBuf));
+                if (!payload || payload.exportFormat !== "games-data-export" || !payload.data) {
+                    alert("Decryption succeeded, but the file's contents aren't a recognized games-data backup.");
+                    return;
+                }
+
+                const keyNames = Object.keys(payload.data);
+                if (!confirm(`This backup has ${keyNames.length} games-data key(s), exported ${payload.exportedAt || "at an unknown time"}. Importing OVERWRITES any matching data already on this device (all users). Continue?`)) return;
+
+                keyNames.forEach(k => localStorage.setItem(k, payload.data[k]));
+                alert(`Imported ${keyNames.length} games-data key(s). Reloading to apply it.`);
+                location.reload();
+            } catch (err) {
+                console.error("Failed to import games data:", err);
+                alert("Failed to import that file: " + err.message);
+            }
         }
 
         function recordToPortable(r) {
@@ -17102,11 +17402,115 @@ ${recordsHtml}
             { id: "games_10", icon: "\u{1F3AE}", name: "Regular Player", desc: "Bank 10 runs.", check: s => s.gamesPlayed >= 10 }
         ];
 
-        let match3State = null; // { board: number[][], selected: {r,c}|null, score: number, busy: boolean }
+        // ---- Objectives: endless, procedurally-generated levels, scaled by
+        // difficulty ----
+        // There's no fixed level list -- match3ObjGenerateLevel(levelIndex)
+        // deterministically builds a level from its (0-based) index: which
+        // fruit "type(s)" to collect (indices into MATCH3_TYPES), how many of
+        // each, and a base move limit. The same level index always generates
+        // the same target types (so level 7 looks the same every time you
+        // reach it), but counts/moves scale up with the level number so play
+        // gets harder the further you go, with no ceiling. The chosen
+        // difficulty then further scales both up or down. Progress (highest
+        // level unlocked/completed, and the last difficulty picked) is
+        // tracked per player, separately for each difficulty -- entirely
+        // independent of the endless score/leaderboard/Battle Pass systems
+        // above (which "endless" already refers to; this is a *second*,
+        // level-based endless mode layered on the same board).
+        const MATCH3_OBJECTIVE_DIFFICULTIES = {
+            easy: { label: "Easy", moveMult: 1.35, targetMult: 0.7 },
+            medium: { label: "Medium", moveMult: 1.0, targetMult: 1.0 },
+            hard: { label: "Hard", moveMult: 0.7, targetMult: 1.4 }
+        };
+        const MATCH3_OBJECTIVE_DIFFICULTY_KEYS = ["easy", "medium", "hard"];
+
+        // Revive Gems: a small currency earned only by winning Objectives
+        // levels (+2 per win), spendable to revive a just-failed level (out
+        // of moves) with a handful of bonus moves instead of losing your
+        // progress on that level's targets. Stored on the same per-user
+        // Match 3 stats object as everything else (stats.reviveGems) --
+        // shared across difficulties, since it's a single currency.
+        const MATCH3_REVIVE_GEMS_PER_WIN = 2;
+        const MATCH3_REVIVE_COST = 5;
+        const MATCH3_REVIVE_BONUS_MOVES = 8;
+
+        // Small deterministic PRNG (mulberry32) so a given level index always
+        // reproduces the same target types regardless of when/how often it's
+        // generated.
+        function match3ObjSeededRandom(seed) {
+            return function () {
+                seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+                let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+                t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            };
+        }
+
+        // How many distinct fruit target types a level can ask for, and how
+        // moves scale to compensate, are admin-tunable (see
+        // defaultMatch3ObjConfig / loadMatch3ObjConfig below) rather than
+        // hardcoded, so more objectives can be added to the mode without
+        // making levels unfairly hard.
+        function defaultMatch3ObjConfig() {
+            return {
+                maxTargetTypes: 4,       // upper bound on simultaneous fruit targets per level (capped to MATCH3_TYPES.length)
+                levelsPerTarget: 5,      // a new target type unlocks every this-many levels, up to maxTargetTypes
+                movesPerExtraTarget: 4   // bonus base moves added for each target type beyond the first, so more objectives stay winnable
+            };
+        }
+
+        function loadMatch3ObjConfig() {
+            const d = defaultMatch3ObjConfig();
+            try {
+                const raw = localStorage.getItem(MATCH3_OBJ_CONFIG_KEY);
+                if (!raw) return d;
+                const parsed = JSON.parse(raw);
+                return {
+                    maxTargetTypes: Math.min(MATCH3_TYPES.length, Math.max(1, Math.round(Number(parsed.maxTargetTypes) || d.maxTargetTypes))),
+                    levelsPerTarget: Math.max(1, Math.round(Number(parsed.levelsPerTarget) || d.levelsPerTarget)),
+                    movesPerExtraTarget: Math.max(0, Math.round(Number(parsed.movesPerExtraTarget) ?? d.movesPerExtraTarget))
+                };
+            } catch (e) {
+                console.error("Failed to load Match 3 objectives config, using default:", e);
+                return d;
+            }
+        }
+
+        function saveMatch3ObjConfig(cfg) {
+            localStorage.setItem(MATCH3_OBJ_CONFIG_KEY, JSON.stringify(cfg));
+        }
+
+        // Builds level N's base definition (before difficulty scaling): a
+        // growing number of distinct fruit targets (1 type up to
+        // levelsPerTarget, capped at maxTargetTypes -- both admin-tunable)
+        // and a growing total collect count, against a move limit that
+        // shrinks slowly as levels climb but gets extra moves added back in
+        // per additional simultaneous target so juggling more objectives at
+        // once stays balanced rather than just harder.
+        function match3ObjGenerateLevel(levelIndex) {
+            const levelNum = levelIndex + 1;
+            const rand = match3ObjSeededRandom(levelNum * 7919 + 13);
+            const objCfg = loadMatch3ObjConfig();
+            const numTargets = Math.min(objCfg.maxTargetTypes, 1 + Math.floor((levelNum - 1) / objCfg.levelsPerTarget));
+            const typePool = MATCH3_TYPES.map((_, i) => i);
+            const chosenTypes = [];
+            for (let i = 0; i < numTargets && typePool.length; i++) {
+                chosenTypes.push(typePool.splice(Math.floor(rand() * typePool.length), 1)[0]);
+            }
+            const totalCount = 10 + levelNum * 3;
+            const perTargetCount = Math.max(4, Math.round(totalCount / numTargets));
+            const baseMoves = Math.max(10, 26 - Math.floor(levelNum / 2)) + (numTargets - 1) * objCfg.movesPerExtraTarget;
+            return {
+                baseMoves,
+                targets: chosenTypes.map(type => ({ type, count: perTargetCount }))
+            };
+        }
+
+        let match3State = null; // { board: number[][], selected: {r,c}|null, score: number, busy: boolean, objective: object|null }
         let match3TileEls = null; // 2D array of persistent tile DOM elements, so CSS transitions can animate them across renders
 
         function match3DefaultStats() {
-            return { bestSingleRunScore: 0, lifetimeMatches: 0, bestCombo: 0, biggestGroup: 0, gamesPlayed: 0, unlocked: [], points: 0, bpXp: 0, bpClaimedLevels: [] };
+            return { bestSingleRunScore: 0, lifetimeMatches: 0, bestCombo: 0, biggestGroup: 0, gamesPlayed: 0, unlocked: [], points: 0, bpXp: 0, bpClaimedLevels: [], reviveGems: 0 };
         }
 
         function loadMatch3AllStats() {
@@ -17136,6 +17540,7 @@ ${recordsHtml}
             if (!Number.isFinite(s.points)) s.points = 0;
             if (!Number.isFinite(s.bpXp)) s.bpXp = 0;
             if (!Array.isArray(s.bpClaimedLevels)) s.bpClaimedLevels = [];
+            if (!Number.isFinite(s.reviveGems)) s.reviveGems = 0;
             return s;
         }
 
@@ -17143,6 +17548,52 @@ ${recordsHtml}
             const all = loadMatch3AllStats();
             all[match3CurrentUserId()] = stats;
             saveMatch3AllStats(all);
+        }
+
+        // ---- Objectives: per-user progress (highest level unlocked/completed
+        // per difficulty, plus last-picked difficulty) -- independent of the
+        // endless-mode stats above. ----
+
+        function match3ObjDefaultProgress() {
+            const progress = {};
+            MATCH3_OBJECTIVE_DIFFICULTY_KEYS.forEach(key => {
+                progress[key] = { unlocked: 1, highestCompleted: 0 };
+            });
+            return { selectedDifficulty: "medium", progress };
+        }
+
+        function loadMatch3ObjAllProgress() {
+            try {
+                return JSON.parse(localStorage.getItem(MATCH3_OBJECTIVES_KEY)) || {};
+            } catch (e) {
+                console.error("Failed to load Match 3 objectives progress, using empty list:", e);
+                return {};
+            }
+        }
+
+        function saveMatch3ObjAllProgress(all) {
+            localStorage.setItem(MATCH3_OBJECTIVES_KEY, JSON.stringify(all));
+        }
+
+        function getMyMatch3ObjProgress() {
+            const all = loadMatch3ObjAllProgress();
+            const uid = match3CurrentUserId();
+            if (!all[uid]) all[uid] = match3ObjDefaultProgress();
+            const p = all[uid];
+            if (!p.progress) p.progress = {};
+            MATCH3_OBJECTIVE_DIFFICULTY_KEYS.forEach(key => {
+                if (!p.progress[key]) p.progress[key] = { unlocked: 1, highestCompleted: 0 };
+                if (!Number.isFinite(p.progress[key].unlocked)) p.progress[key].unlocked = 1;
+                if (!Number.isFinite(p.progress[key].highestCompleted)) p.progress[key].highestCompleted = 0;
+            });
+            if (!MATCH3_OBJECTIVE_DIFFICULTY_KEYS.includes(p.selectedDifficulty)) p.selectedDifficulty = "medium";
+            return p;
+        }
+
+        function saveMyMatch3ObjProgress(progress) {
+            const all = loadMatch3ObjAllProgress();
+            all[match3CurrentUserId()] = progress;
+            saveMatch3ObjAllProgress(all);
         }
 
         function loadMatch3Leaderboard() {
@@ -17398,6 +17849,183 @@ ${recordsHtml}
                 <span class="typing-leaderboard-name">${escapeHtml(e.username || "unknown")}</span>
                 <span class="typing-leaderboard-stats">${e.score} pts &middot; ${new Date(e.date).toLocaleDateString()}</span>
             </div>`).join("");
+        }
+
+        // ---- Objectives: difficulty picker, level grid, and the active-level
+        // panel (targets/moves/win-lose banner). All three re-render together
+        // any time selection, progress, or the in-flight objective changes. ----
+
+        function renderMatch3ObjDifficultyRow() {
+            const row = document.getElementById("match3ObjDifficultyRow");
+            if (!row) return;
+            const progress = getMyMatch3ObjProgress();
+            row.innerHTML = MATCH3_OBJECTIVE_DIFFICULTY_KEYS.map(key => {
+                const diff = MATCH3_OBJECTIVE_DIFFICULTIES[key];
+                const active = progress.selectedDifficulty === key;
+                return `<button type="button" class="match3-obj-diff-btn${active ? " active" : ""}"
+                    onclick="match3ObjSelectDifficulty('${key}')">${escapeHtml(diff.label)}</button>`;
+            }).join("");
+        }
+
+        function renderMatch3ObjLevelPicker() {
+            const box = document.getElementById("match3ObjLevelPicker");
+            if (!box) return;
+            const progress = getMyMatch3ObjProgress();
+            const diffProgress = progress.progress[progress.selectedDifficulty];
+            const playing = !!(match3State && match3State.objective && match3State.objective.status === "playing");
+            const gems = getMyMatch3Stats().reviveGems || 0;
+            box.innerHTML = `
+                <div style="font-size:0.88em; color:var(--text-muted);">
+                    Highest level reached (${escapeHtml(MATCH3_OBJECTIVE_DIFFICULTIES[progress.selectedDifficulty].label)}):
+                    <strong>${diffProgress.highestCompleted}</strong> &middot; next up: <strong>${diffProgress.unlocked}</strong>
+                    &middot; \u{1F48E} Revive Gems: <strong>${gems}</strong>
+                </div>
+                <div class="admin-inline-fields" style="margin-top:6px; align-items:center;">
+                    <button type="button" ${playing ? "disabled" : ""} onclick="match3ObjStart(${diffProgress.unlocked - 1})">
+                        Play Level ${diffProgress.unlocked}</button>
+                    <label for="match3ObjJumpInput" style="font-weight:normal; margin:0;">Replay level</label>
+                    <input type="number" id="match3ObjJumpInput" min="1" max="${diffProgress.unlocked}"
+                        value="${Math.min(diffProgress.unlocked, Math.max(1, diffProgress.highestCompleted || 1))}"
+                        style="width:70px; margin:0;">
+                    <button type="button" ${playing ? "disabled" : ""} onclick="match3ObjStartFromInput()">Go</button>
+                </div>`;
+        }
+
+        function match3ObjStartFromInput() {
+            const input = document.getElementById("match3ObjJumpInput");
+            const n = Math.round(Number(input ? input.value : NaN));
+            if (!Number.isFinite(n) || n < 1) return;
+            match3ObjStart(n - 1);
+        }
+
+        function renderMatch3ObjActive() {
+            const box = document.getElementById("match3ObjActive");
+            if (!box) return;
+            const obj = match3State && match3State.objective;
+            if (!obj) {
+                box.innerHTML = `<div style="color:var(--text-muted); font-size:0.88em; margin-top:4px;">
+                    Pick a difficulty above, then play the next level or jump back to replay an earlier one.</div>`;
+                return;
+            }
+            const diff = MATCH3_OBJECTIVE_DIFFICULTIES[obj.difficulty];
+            const targetsHtml = obj.levelDef.targets.map(t => {
+                const progress = obj.targets[t.type];
+                const met = progress.have >= progress.need;
+                return `<div class="match3-obj-target${met ? " met" : ""}">
+                    <span class="match3-obj-target-icon">${MATCH3_TYPES[t.type]}</span>
+                    <span class="match3-obj-target-count">${progress.have}/${progress.need}</span>
+                </div>`;
+            }).join("");
+
+            let banner = "";
+            if (obj.status === "won") {
+                banner = `<div class="match3-obj-banner win">\u{1F389} Level ${obj.levelIndex + 1} complete! +${MATCH3_REVIVE_GEMS_PER_WIN}\u{1F48E}</div>
+                    <div class="admin-inline-fields" style="margin-top:8px;">
+                        <button type="button" onclick="match3ObjStart(${obj.levelIndex + 1})">Next Level</button>
+                        <button type="button" onclick="match3ObjStart(${obj.levelIndex})">Replay</button>
+                        <button type="button" onclick="match3ObjGiveUp()">Close</button>
+                    </div>`;
+            } else if (obj.status === "lost") {
+                const gems = getMyMatch3Stats().reviveGems || 0;
+                const canRevive = gems >= MATCH3_REVIVE_COST;
+                banner = `<div class="match3-obj-banner lose">Out of moves &mdash; give it another try.</div>
+                    <div class="admin-inline-fields" style="margin-top:8px;">
+                        <button type="button" ${canRevive ? "" : "disabled"} onclick="match3ObjRevive()"
+                            title="${canRevive ? "" : "Not enough Revive Gems"}">
+                            Revive (-${MATCH3_REVIVE_COST}\u{1F48E}, +${MATCH3_REVIVE_BONUS_MOVES} moves)</button>
+                        <button type="button" onclick="match3ObjStart(${obj.levelIndex})">Retry</button>
+                        <button type="button" onclick="match3ObjGiveUp()">Close</button>
+                    </div>`;
+            } else {
+                banner = `<div class="admin-inline-fields" style="margin-top:8px;">
+                        <button type="button" onclick="match3ObjGiveUp()">Give Up</button>
+                    </div>`;
+            }
+
+            box.innerHTML = `<div class="match3-obj-active">
+                <div><strong>Level ${obj.levelIndex + 1}</strong> &middot; ${escapeHtml(diff.label)} &middot;
+                    Moves left: <strong>${obj.movesLeft}</strong></div>
+                <div class="match3-obj-targets">${targetsHtml}</div>
+                ${banner}
+            </div>`;
+        }
+
+        function renderMatch3ObjectivePanel() {
+            renderMatch3ObjDifficultyRow();
+            renderMatch3ObjLevelPicker();
+            renderMatch3ObjActive();
+        }
+
+        function match3ObjSelectDifficulty(key) {
+            if (!MATCH3_OBJECTIVE_DIFFICULTY_KEYS.includes(key)) return;
+            const progress = getMyMatch3ObjProgress();
+            progress.selectedDifficulty = key;
+            saveMyMatch3ObjProgress(progress);
+            renderMatch3ObjectivePanel();
+        }
+
+        // Starts (or restarts/replays) a level at the currently-selected
+        // difficulty. Levels are generated on demand (endless -- there's no
+        // upper bound), locked only in that you can't jump past the highest
+        // level you've unlocked. Reuses the same board/state the endless mode
+        // plays on -- banking any in-progress endless score first, exactly
+        // like "New Game" does.
+        function match3ObjStart(levelIndex) {
+            if (!Number.isFinite(levelIndex) || levelIndex < 0) return;
+            const progress = getMyMatch3ObjProgress();
+            const diffProgress = progress.progress[progress.selectedDifficulty];
+            if (levelIndex + 1 > diffProgress.unlocked) return; // locked -- haven't reached it yet
+
+            if (match3State && match3State.score > 0) {
+                match3BankScore(match3State.score, true); // preserve leftover score, no BP XP here -- BP is earned on level win only
+            }
+
+            const levelDef = match3ObjGenerateLevel(levelIndex);
+            const diff = MATCH3_OBJECTIVE_DIFFICULTIES[progress.selectedDifficulty];
+            const targets = {};
+            levelDef.targets.forEach(t => {
+                targets[t.type] = { need: Math.max(1, Math.round(t.count * diff.targetMult)), have: 0 };
+            });
+
+            match3State = {
+                board: match3CreateBoardNoMatches(),
+                selected: null,
+                score: 0,
+                busy: false,
+                objective: {
+                    levelIndex,
+                    levelDef,
+                    difficulty: progress.selectedDifficulty,
+                    movesLeft: Math.max(1, Math.round(levelDef.baseMoves * diff.moveMult)),
+                    targets,
+                    status: "playing"
+                }
+            };
+            setMatch3Status("");
+            match3Render();
+            updateMatch3ScoreDisplay();
+            renderMatch3ObjectivePanel();
+        }
+
+        function match3ObjGiveUp() {
+            if (match3State) match3State.objective = null;
+            renderMatch3ObjectivePanel();
+        }
+
+        // Spends Revive Gems to bring a just-failed ("lost") level back to
+        // "playing" with a handful of bonus moves, keeping whatever target
+        // progress was already made -- an alternative to Retry (which starts
+        // the level over from scratch for free).
+        function match3ObjRevive() {
+            if (!match3State || !match3State.objective || match3State.objective.status !== "lost") return;
+            const stats = getMyMatch3Stats();
+            if ((stats.reviveGems || 0) < MATCH3_REVIVE_COST) return;
+            stats.reviveGems -= MATCH3_REVIVE_COST;
+            saveMyMatch3Stats(stats);
+            match3State.objective.status = "playing";
+            match3State.objective.movesLeft += MATCH3_REVIVE_BONUS_MOVES;
+            setMatch3Status(`Revived with +${MATCH3_REVIVE_BONUS_MOVES} moves!`);
+            renderMatch3ObjectivePanel();
         }
 
         function match3Swap(board, a, b) {
@@ -17687,6 +18315,11 @@ ${recordsHtml}
                     return;
                 }
 
+                if (match3State.objective && match3State.objective.status === "playing") {
+                    match3State.objective.movesLeft = Math.max(0, match3State.objective.movesLeft - 1);
+                    renderMatch3ObjectivePanel();
+                }
+
                 match3Render();
                 setMatch3Status("");
                 match3ResolveCascade();
@@ -17737,6 +18370,39 @@ ${recordsHtml}
                     if (newlyUnlocked.length) messages.push(`\u{1F3C6} Achievement unlocked: ${newlyUnlocked.map(a => a.name).join(", ")}`);
                     else if (comboSteps > 1) messages.push(`${comboSteps}x combo!`);
                     if (reshuffled) messages.push("No moves left -- board reshuffled.");
+
+                    if (match3State.objective && match3State.objective.status === "playing") {
+                        const obj = match3State.objective;
+                        const allMet = Object.values(obj.targets).every(t => t.have >= t.need);
+                        if (allMet) {
+                            obj.status = "won";
+                            const progress = getMyMatch3ObjProgress();
+                            const diffProgress = progress.progress[obj.difficulty];
+                            diffProgress.highestCompleted = Math.max(diffProgress.highestCompleted, obj.levelIndex + 1);
+                            diffProgress.unlocked = Math.max(diffProgress.unlocked, obj.levelIndex + 2);
+                            saveMyMatch3ObjProgress(progress);
+
+                            // Battle Pass XP and Revive Gems are both earned right
+                            // here -- on an actual level win -- and nowhere else in
+                            // Objectives mode (see the skipBattlePass banking in
+                            // match3ObjStart, which only preserves leftover score).
+                            const diff = MATCH3_OBJECTIVE_DIFFICULTIES[obj.difficulty];
+                            const xpAward = Math.round((50 + (obj.levelIndex + 1) * 10) * diff.targetMult);
+                            const levelUpMsg = match3AwardBattlepassXp(stats, xpAward);
+                            stats.reviveGems = (stats.reviveGems || 0) + MATCH3_REVIVE_GEMS_PER_WIN;
+                            saveMyMatch3Stats(stats);
+                            renderMatch3Battlepass();
+                            renderMatch3AdminBox();
+
+                            messages.push(`\u{1F389} Level ${obj.levelIndex + 1} complete! +${MATCH3_REVIVE_GEMS_PER_WIN}\u{1F48E}`);
+                            if (levelUpMsg) messages.push(levelUpMsg);
+                        } else if (obj.movesLeft <= 0) {
+                            obj.status = "lost";
+                            messages.push("Out of moves on this level \u2014 give it another try.");
+                        }
+                        renderMatch3ObjectivePanel();
+                    }
+
                     setMatch3Status(messages.join(" "));
                     return;
                 }
@@ -17751,6 +18417,15 @@ ${recordsHtml}
                     const [rr, cc] = key.split(",").map(Number);
                     match3TileEls[rr][cc].classList.add("match3-tile-matched");
                 });
+
+                if (match3State.objective && match3State.objective.status === "playing") {
+                    cellsSet.forEach(key => {
+                        const [rr, cc] = key.split(",").map(Number);
+                        const target = match3State.objective.targets[board[rr][cc]];
+                        if (target) target.have = Math.min(target.need, target.have + 1);
+                    });
+                    renderMatch3ObjectivePanel();
+                }
 
                 setTimeout(() => {
                     cellsSet.forEach(key => {
@@ -17768,7 +18443,7 @@ ${recordsHtml}
 
         // Saves the just-finished run's score to the leaderboard and updates
         // lifetime stats/achievements around it (games played, best score).
-        function match3BankScore(score) {
+        function match3BankScore(score, skipBattlePass) {
             const currentUser = getCurrentAuthUser();
             const username = currentUser ? currentUser.username : "guest";
             const userId = match3CurrentUserId();
@@ -17778,8 +18453,12 @@ ${recordsHtml}
             if (score > stats.bestSingleRunScore) stats.bestSingleRunScore = score;
             const newlyUnlocked = match3CheckAchievements(stats);
             // Battle Pass XP is earned 1:1 with the run's banked score, so
-            // bigger/combo-heavy runs naturally earn XP faster.
-            const levelUpMsg = match3AwardBattlepassXp(stats, score);
+            // bigger/combo-heavy runs naturally earn XP faster. Skipped when
+            // this bank is just preserving leftover score from an Objectives
+            // attempt (win/loss/give-up) -- that mode grants Battle Pass XP
+            // itself, only on an actual level win, so it isn't double-counted
+            // or leaked here.
+            const levelUpMsg = skipBattlePass ? null : match3AwardBattlepassXp(stats, score);
             saveMyMatch3Stats(stats);
 
             const entries = loadMatch3Leaderboard();
@@ -17811,10 +18490,11 @@ ${recordsHtml}
                 match3BankScore(match3State.score);
                 banked = true;
             }
-            match3State = { board: match3CreateBoardNoMatches(), selected: null, score: 0, busy: false };
+            match3State = { board: match3CreateBoardNoMatches(), selected: null, score: 0, busy: false, objective: null };
             if (!banked) setMatch3Status("");
             match3Render();
             updateMatch3ScoreDisplay();
+            renderMatch3ObjectivePanel();
         }
 
         function initMatch3Tab() {
@@ -17829,6 +18509,7 @@ ${recordsHtml}
                 match3Render();
                 updateMatch3ScoreDisplay();
             }
+            renderMatch3ObjectivePanel();
         }
 
         // ---- Admin: Battle Pass config/titles + per-player XP grants/resets ----
@@ -17858,6 +18539,14 @@ ${recordsHtml}
 
             const titlesEl = document.getElementById("m3AdminBpTitles");
             if (titlesEl && document.activeElement !== titlesEl) titlesEl.value = loadMatch3BpTitles().join("\n");
+
+            const objCfg = loadMatch3ObjConfig();
+            const objMaxEl = document.getElementById("m3AdminObjMaxTargets");
+            const objLevelsEl = document.getElementById("m3AdminObjLevelsPerTarget");
+            const objMovesEl = document.getElementById("m3AdminObjMovesPerExtra");
+            if (objMaxEl && document.activeElement !== objMaxEl) objMaxEl.value = objCfg.maxTargetTypes;
+            if (objLevelsEl && document.activeElement !== objLevelsEl) objLevelsEl.value = objCfg.levelsPerTarget;
+            if (objMovesEl && document.activeElement !== objMovesEl) objMovesEl.value = objCfg.movesPerExtraTarget;
 
             const users = loadAuthUsers();
             const list = document.getElementById("match3AdminProgressList");
@@ -17939,6 +18628,33 @@ ${recordsHtml}
             renderMatch3Battlepass();
             renderMatch3AdminBox();
             showMatch3AdminMessage("Battle Pass tiers reset to default.", "success");
+        }
+
+        function saveMatch3ObjConfigFromForm() {
+            if (!isCurrentUserAdmin()) return;
+            const d = defaultMatch3ObjConfig();
+            const parseField = (id, fallback) => {
+                const raw = Number(document.getElementById(id).value);
+                return Number.isFinite(raw) ? raw : fallback;
+            };
+            const cfg = {
+                maxTargetTypes: Math.min(MATCH3_TYPES.length, Math.max(1, Math.round(parseField("m3AdminObjMaxTargets", d.maxTargetTypes)))),
+                levelsPerTarget: Math.max(1, Math.round(parseField("m3AdminObjLevelsPerTarget", d.levelsPerTarget))),
+                movesPerExtraTarget: Math.max(0, Math.round(parseField("m3AdminObjMovesPerExtra", d.movesPerExtraTarget)))
+            };
+            saveMatch3ObjConfig(cfg);
+            renderMatch3ObjectivePanel();
+            renderMatch3AdminBox();
+            showMatch3AdminMessage("Objectives settings saved. Takes effect on the next level generated (existing in-progress levels are unaffected).", "success");
+        }
+
+        function resetMatch3ObjConfigToDefault() {
+            if (!isCurrentUserAdmin()) return;
+            if (!confirm("Reset Match 3 Objectives settings (max targets, levels per target, bonus moves) to default?")) return;
+            saveMatch3ObjConfig(defaultMatch3ObjConfig());
+            renderMatch3ObjectivePanel();
+            renderMatch3AdminBox();
+            showMatch3AdminMessage("Objectives settings reset to default.", "success");
         }
 
         function grantMatch3BattlepassXp(userId) {
