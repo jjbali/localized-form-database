@@ -1082,6 +1082,8 @@
             gap: 6px;
             margin: 10px 0;
             user-select: none;
+            max-width: 600px;
+            grid-template-columns: repeat(auto-fit, 2fr);
         }
 
         .findit-cell {
@@ -1155,6 +1157,7 @@
         .findit-timer-bar {
             height: 8px;
             border-radius: 4px;
+            max-width: 600px;
             background: var(--border);
             overflow: hidden;
             margin: 8px 0;
@@ -16627,7 +16630,7 @@ ${recordsHtml}
         let finditRunCounter = 0;
 
         function finditLetterPool() {
-            return ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+            return ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q"];
         }
 
         function finditLevelConfig(level) {
